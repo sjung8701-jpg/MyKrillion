@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Blowfish Bash</title>
+<style>
+:root{--bg:#07151f;--panel:#10303f;--row:#174357;--ink:#eaf7f4;--mut:#8db8c2;--sun:#ffd23f;--coral:#ff6b4a;--ok:#7be0a4}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:linear-gradient(#0d3a4f,var(--bg) 60%);color:var(--ink);font:16px/1.4 "Avenir Next","Trebuchet MS",system-ui,sans-serif;display:flex;justify-content:center}
+main{width:100%;max-width:480px;padding:16px 16px 40px}
+h1{text-align:center;font-size:34px;margin:10px 0 4px;letter-spacing:.5px}
+.sub{text-align:center;color:var(--mut);margin:0 0 14px}
+.card{background:var(--panel);border-radius:18px;padding:16px;margin:12px 0}
+input,button{font:inherit;border:0;border-radius:12px;padding:12px 14px;width:100%;margin:5px 0}
+input{background:#f4fffd;color:#06303a}
+input:focus-visible,button:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+button{background:var(--sun);color:#2a2000;font-weight:700;cursor:pointer}
+button.alt{background:var(--row);color:var(--ink)}
+button:disabled,input:disabled{opacity:.45;cursor:not-allowed}
+.code{font-size:54px;font-weight:800;letter-spacing:10px;text-align:center;color:var(--sun);padding-left:10px}
+.pl{display:flex;justify-content:space-between;gap:8px;padding:9px 12px;border-radius:12px;margin:5px 0;background:var(--row)}
+.pl.turn{outline:3px solid var(--sun)}
+.pl.dead{opacity:.4;text-decoration:line-through}
+#puff{font-size:120px;text-align:center;line-height:1.15;transform-origin:50% 60%;user-select:none}
+.bar{height:10px;background:var(--row);border-radius:8px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--coral),var(--sun))}
+.prompt{font-size:24px;font-weight:800;text-align:center;margin:12px 0 6px}
+.who{text-align:center;font-weight:700;min-height:24px;color:var(--sun)}
+.msg{text-align:center;min-height:24px;color:var(--mut);margin:4px 0}
+.shake{animation:sh .3s}
+@keyframes sh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.hid{display:none}
+@media (prefers-reduced-motion:reduce){.shake{animation:none}}
+</style></head>
+<body><main>
+<h1>🐡 Blowfish Bash</h1>
+<p class="sub">Answer before the puffer pops. Rarer answers score more.</p>
+
+<div id="home" class="card">
+ <input id="nm" maxlength="12" placeholder="Your name" autocomplete="off">
+ <button id="mk">Create room</button>
+ <input id="rc" maxlength="4" placeholder="Room code" autocomplete="off" style="text-transform:uppercase">
+ <button id="jn" class="alt">Join room</button>
+</div>
+
+<div id="lobby" class="card hid">
+ <div class="msg">Room code. Share it with your friends.</div>
+ <div class="code" id="rc2"></div>
+ <div id="pl1"></div>
+ <button id="st">Start game</button>
+ <div class="msg" id="wt"></div>
+</div>
+
+<div id="game" class="hid">
+ <div class="card">
+  <div class="who" id="who"></div>
+  <div id="puff">🐡</div>
+  <div class="bar"><i id="fuse"></i></div>
+  <div class="prompt" id="pr"></div>
+  <input id="ans" autocomplete="off" autocapitalize="off" placeholder="Type your answer">
+  <button id="go">Answer</button>
+  <div class="msg" id="mg"></div>
+ </div>
+ <div id="pl2"></div>
+</div>
+
+<div id="over" class="card hid">
+ <div class="prompt" id="win"></div>
+ <div id="pl3"></div>
+ <button id="again">Back to lobby</button>
+ <div class="msg" id="wt2"></div>
+</div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+// Each entry: [prompt, common (1pt), uncommon (2pt), rare (4pt)]
+const CATS=[
+["Name a fruit","apple,banana,orange,grape,strawberry,lemon,watermelon,pineapple,mango,peach,pear,cherry","kiwi,plum,lime,blueberry,raspberry,apricot,coconut,grapefruit,pomegranate,cantaloupe,blackberry,nectarine","lychee,guava,papaya,dragonfruit,persimmon,starfruit,fig,passionfruit,quince,durian,jackfruit,mulberry,kumquat,tamarind,rambutan"],
+["Name a country","usa,unitedstates,canada,mexico,france,germany,china,japan,india,brazil,australia,italy,spain,england,russia","peru,egypt,sweden,norway,greece,turkey,thailand,vietnam,argentina,poland,ireland,korea,chile,kenya,portugal,cuba","bhutan,malawi,uzbekistan,suriname,tuvalu,eritrea,moldova,laos,fiji,nauru,lesotho,gabon,benin,palau,togo,oman,brunei,djibouti"],
+["Name an animal","dog,cat,horse,cow,pig,lion,tiger,elephant,bear,monkey,rabbit,sheep,mouse,bird,fish,chicken","giraffe,zebra,wolf,fox,deer,kangaroo,dolphin,penguin,eagle,owl,snake,frog,turtle,koala,otter,hippo","axolotl,okapi,pangolin,quokka,narwhal,tapir,aardvark,capybara,platypus,binturong,fossa,ocelot,kakapo,numbat,saiga,manatee"],
+["Name a color","red,blue,green,yellow,orange,purple,pink,black,white,brown,gray,grey","teal,turquoise,maroon,navy,beige,gold,silver,cyan,magenta,lavender,indigo,violet,tan,peach,crimson","vermilion,chartreuse,cerulean,mauve,ochre,taupe,periwinkle,fuchsia,sienna,umber,viridian,puce,saffron,cobalt,aquamarine,ecru"],
+["Name a sport","soccer,football,basketball,baseball,tennis,golf,hockey,swimming,volleyball,boxing","rugby,cricket,badminton,gymnastics,wrestling,skiing,surfing,archery,fencing,rowing,cycling,lacrosse,skateboarding,snowboarding,karate","curling,biathlon,pickleball,squash,polo,handball,kabaddi,sepaktakraw,hurling,bobsled,luge,skeleton,netball,jaialai,orienteering"],
+["Name a pizza topping","pepperoni,cheese,mushroom,sausage,onion,olive,pepper,bacon,pineapple,ham","spinach,tomato,chicken,basil,garlic,jalapeno,anchovy,meatball,beef,corn,pesto","arugula,artichoke,prosciutto,egg,truffle,caper,ricotta,goatcheese,pear,potato,salami,fig,burrata"],
+["Name a musical instrument","piano,guitar,drum,violin,flute,trumpet,saxophone,bass","cello,clarinet,harp,trombone,ukulele,banjo,oboe,harmonica,accordion,tuba,xylophone,viola,bagpipe","theremin,sitar,didgeridoo,bassoon,glockenspiel,mandolin,kalimba,zither,lute,ocarina,sousaphone,erhu,oud,hurdygurdy,celesta"],
+["Name a vegetable","carrot,potato,tomato,onion,lettuce,broccoli,corn,cucumber,pepper,celery,spinach","cabbage,cauliflower,zucchini,pea,asparagus,beet,radish,eggplant,squash,garlic,kale,turnip","kohlrabi,fennel,rutabaga,parsnip,leek,okra,bokchoy,daikon,endive,chard,jicama,salsify,celeriac,romanesco,watercress"],
+["Name a car brand","toyota,honda,ford,chevrolet,bmw,mercedes,audi,tesla,nissan,volkswagen","hyundai,kia,subaru,mazda,jeep,dodge,lexus,volvo,porsche,ferrari,lamborghini,cadillac","bugatti,maserati,mclaren,lotus,alfaromeo,peugeot,renault,fiat,skoda,suzuki,pagani,koenigsegg,rivian,saab,lancia"],
+["Name a dog breed","labrador,poodle,bulldog,beagle,boxer,pug,husky,chihuahua","dachshund,corgi,dalmatian,rottweiler,greatdane,shihtzu,akita,collie,maltese,doberman","basenji,saluki,komondor,puli,otterhound,borzoi,vizsla,keeshond,briard,schipperke,whippet,xoloitzcuintli"]
+];
+const norm=s=>s.toLowerCase().replace(/[^a-z0-9]/g,'');
+const MAP=CATS.map(c=>{const m={};c.slice(1).forEach((s,t)=>s.split(',').forEach(w=>m[norm(w)]=[1,2,4][t]));return m});
+const TN={1:'common',2:'uncommon',4:'rare'};
+function look(ci,txt){const m=MAP[ci],k=norm(txt);for(const x of[k,k.replace(/(es|s)$/,''),k.replace(/s$/,'')])if(x&&m[x])return[x,m[x]];return null}
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let peer,conn,conns={},me,isHost=false,G,S,room,nm,timer,deadline=0,dl=0,tot=1;
+
+/* ---------- host (runs the game) ---------- */
+const mkCode=()=>Array.from({length:4},()=>"ABCDEFGHJKMNPQRSTUVWXYZ"[Math.random()*23|0]).join('');
+function host(){
+  nm=$('nm').value.trim()||'Player';room=mkCode();isHost=true;peer=new Peer('bbash-'+room);
+  peer.on('open',id=>{me=id;G={ph:'lobby',players:[{id,name:nm,lives:3,score:0,alive:true,nl:10}],turn:0,cat:-1,last:null,msg:'',used:{},n:0};push()});
+  peer.on('error',e=>{if(e.type==='unavailable-id'){peer.destroy();host()}else alert('Network error: '+e.type)});
+  peer.on('connection',c=>{c.on('data',d=>hostMsg(c,d));c.on('close',()=>drop(c.peer))});
+}
+function hostMsg(c,d){
+  if(d.t==='join'){
+    if(conns[c.peer])return;
+    if(G.ph!=='lobby'||G.players.length>=5){c.send({t:'full'});setTimeout(()=>c.close(),400);return}
+    conns[c.peer]=c;G.players.push({id:c.peer,name:String(d.n||'Player').slice(0,12),lives:3,score:0,alive:true,nl:10});push();
+  }else if(d.t==='ans')answer(c.peer,String(d.x||''));
+}
+function push(){
+  const s={ph:G.ph,players:G.players,turn:G.turn,cat:G.cat>=0?CATS[G.cat][0]:'',left:deadline?Math.max(0,deadline-Date.now()):0,tot:G.tot||1,msg:G.msg,pause:G.pause,win:G.win,room};
+  Object.values(conns).forEach(c=>c.open&&c.send({t:'s',s}));render(s);
+}
+const lim=()=>G.players.length>1?1:0;
+const ended=()=>G.players.filter(p=>p.alive).length<=lim();
+function nextAlive(){let i=G.turn;do{i=(i+1)%G.players.length}while(!G.players[i].alive);return i}
+function start(){
+  G.players.forEach(p=>{p.lives=3;p.score=0;p.alive=true;p.nl=10});
+  G.used={};G.n=0;G.ph='play';G.win=null;G.msg='';G.turn=Math.random()*G.players.length|0;turn();
+}
+function turn(){
+  if(G.ph!=='play')return;
+  if(ended())return end();
+  if(!G.players[G.turn].alive)G.turn=nextAlive();
+  G.pause=false;G.msg='';G.cat=Math.random()*CATS.length|0;
+  G.tot=Math.max(4000,11000-G.n*300);G.n++;
+  deadline=Date.now()+G.tot;clearTimeout(timer);timer=setTimeout(pop,G.tot);push();
+}
+function after(){
+  if(ended())return end();
+  G.turn=nextAlive();G.pause=true;deadline=0;push();setTimeout(turn,1200);
+}
+function end(){
+  clearTimeout(timer);deadline=0;G.ph='over';G.pause=false;
+  const a=G.players.find(p=>p.alive);G.win=a?a.name:null;push();
+}
+function pop(){
+  const p=G.players[G.turn];p.lives--;if(p.lives<=0)p.alive=false;
+  G.msg='💥 POP! '+p.name+' lost a life'+(p.alive?'':' and is out!');after();
+}
+function answer(id,x){
+  const p=G.players[G.turn];
+  if(G.ph!=='play'||G.pause||!p||p.id!==id)return;
+  const bad=m=>{if(id===me)flash(m);else if(conns[id])conns[id].send({t:'bad',m})};
+  const r=look(G.cat,x);
+  if(!r)return bad('Not on my list. Try another!');
+  const key=G.cat+'|'+r[0];
+  if(G.used[key])return bad('Already used this game!');
+  G.used[key]=1;clearTimeout(timer);deadline=0;p.score+=r[1];
+  let m=p.name+': '+x.trim().slice(0,30)+' (+'+r[1]+', '+TN[r[1]]+')';
+  while(p.score>=p.nl){p.nl+=12;if(p.lives<5){p.lives++;m+=' +1 life!'}}
+  G.msg=m;after();
+}
+function drop(id){
+  delete conns[id];if(!G)return;
+  const i=G.players.findIndex(p=>p.id===id);if(i<0)return;
+  if(G.ph==='lobby'){G.players.splice(i,1);push();return}
+  const p=G.players[i];p.alive=false;p.lives=0;
+  if(G.ph!=='play')return push();
+  if(i===G.turn&&!G.pause){clearTimeout(timer);after()}
+  else if(ended())end();else push();
+}
+
+/* ---------- client ---------- */
+function joinRoom(){
+  nm=$('nm').value.trim()||'Player';room=$('rc').value.trim().toUpperCase();
+  if(room.length!==4)return alert('Enter the 4-letter room code.');
+  peer=new Peer();
+  peer.on('open',id=>{
+    me=id;conn=peer.connect('bbash-'+room,{reliable:true});
+    conn.on('open',()=>conn.send({t:'join',n:nm}));
+    conn.on('data',d=>{
+      if(d.t==='s')render(d.s);
+      else if(d.t==='bad')flash(d.m);
+      else if(d.t==='full'){alert('That room is full or already started.');location.reload()}
+    });
+    conn.on('close',()=>{alert('Disconnected from the room.');location.reload()});
+  });
+  peer.on('error',e=>alert(e.type==='peer-unavailable'?'Room not found. Check the code.':'Network error: '+e.type));
+}
+function send(){
+  const x=$('ans').value.trim();if(!x)return;$('ans').value='';
+  if(isHost)answer(me,x);else conn.send({t:'ans',x});
+}
+
+/* ---------- display ---------- */
+function show(id){['home','lobby','game','over'].forEach(x=>$(x).classList.toggle('hid',x!==id))}
+function pl(id,s){
+  $(id).innerHTML=s.players.map((p,i)=>`<div class="pl${s.ph==='play'&&!s.pause&&i===s.turn?' turn':''}${p.alive?'':' dead'}"><span>${esc(p.name)}${p.id===me?' (you)':''}</span><span>${s.ph==='lobby'?'':'❤️'.repeat(Math.max(0,p.lives))+'  '+p.score}</span></div>`).join('');
+}
+function flash(m){
+  $('mg').textContent=m;$('mg').style.color='var(--coral)';
+  $('ans').classList.add('shake');setTimeout(()=>$('ans').classList.remove('shake'),300);
+}
+function render(s){
+  S=s;tot=s.tot;dl=s.left?Date.now()+s.left:0;
+  if(s.ph==='lobby'){
+    show('lobby');$('rc2').textContent=s.room;pl('pl1',s);
+    $('st').classList.toggle('hid',!isHost);$('wt').textContent=isHost?'Up to 5 players can join.':'Waiting for the host to start...';
+  }else if(s.ph==='play'){
+    show('game');pl('pl2',s);
+    const cur=s.players[s.turn],mine=cur&&cur.id===me&&cur.alive&&!s.pause;
+    $('who').textContent=s.pause?'':(mine?'Your turn!':cur.name+"'s turn");
+    $('pr').textContent=s.cat;
+    $('ans').disabled=$('go').disabled=!mine;
+    $('mg').textContent=s.msg;$('mg').style.color=s.msg.startsWith('💥')?'var(--coral)':'var(--ok)';
+    if(mine)$('ans').focus();
+  }else{
+    show('over');pl('pl3',{...s,players:[...s.players].sort((a,b)=>b.score-a.score)});
+    $('win').textContent=s.win?'🏆 '+s.win+' wins!':'Game over';
+    $('again').classList.toggle('hid',!isHost);$('wt2').textContent=isHost?'':'Waiting for the host...';
+  }
+}
+(function loop(){
+  if(S&&S.ph==='play'){
+    const el=$('puff');
+    if(S.pause){el.textContent=S.msg.startsWith('💥')?'💥':'🐡';el.style.transform='scale(1)';el.style.filter='none';$('fuse').style.width='0'}
+    else if(dl){
+      const f=Math.min(1,Math.max(0,(dl-Date.now())/tot));
+      el.textContent='🐡';el.style.transform='scale('+(1+(1-f)*.8)+')';
+      el.style.filter='hue-rotate('+(-(1-f)*50)+'deg) saturate('+(1+(1-f)*1.5)+')';
+      $('fuse').style.width=(f*100)+'%';
+    }
+  }
+  requestAnimationFrame(loop);
+})();
+$('mk').onclick=host;$('jn').onclick=joinRoom;
+$('st').onclick=start;$('again').onclick=()=>{G.ph='lobby';push()};
+$('go').onclick=send;$('ans').onkeydown=e=>{if(e.key==='Enter')send()};
+</script></body></html>
