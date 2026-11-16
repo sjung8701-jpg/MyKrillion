@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Blowfish Bash</title>
+<title>Puffer party</title>
 <style>
 :root{--bg:#07151f;--panel:#10303f;--row:#174357;--ink:#eaf7f4;--mut:#8db8c2;--sun:#ffd23f;--coral:#ff6b4a;--ok:#7be0a4}
 *{box-sizing:border-box}
@@ -130,7 +130,7 @@ body.play main{padding-top:6px;padding-bottom:104px}
 .dock .legend i{margin:0 4px 0 9px}
 .gain{animation:gain 1s steps(10) forwards}</style><style>.say.bad{--c:#ff5d6c}.say.bad span{text-decoration:line-through;text-decoration-thickness:3px;color:#ffc2c9}</style><style>.dock .inwrap{position:relative}#err{position:absolute;left:0;bottom:calc(100% + 6px);padding:2px 10px;background:#2a0b12;color:var(--coral);border:2px solid var(--coral);font-size:20px;line-height:1.1;white-space:nowrap;opacity:0;pointer-events:none;z-index:7}#err.on{opacity:1}.say.bad small{display:none}</style><style>.say.typ{--c:#8db8c2;animation:none}.say.typ span::after{content:"|";margin-left:2px;animation:blink .9s steps(2) infinite}@keyframes blink{50%{opacity:0}}@media (prefers-reduced-motion:reduce){.say.typ span::after{animation:none}}</style></head>
 <body><main>
-<h1>Blowfish Bash</h1>
+<h1>Puffer party</h1>
 <p class="sub">Answer before the puffer pops. Rarer answers score more.</p>
 
 <div id="home" class="card">
@@ -159,7 +159,7 @@ body.play main{padding-top:6px;padding-bottom:104px}
  <div class="msg" id="mg"></div>
  <div class="dock">
   <div class="lives" id="mylives"></div>
-  <div class="inwrap"><div id="err"></div><input id="ans" autocomplete="off" autocapitalize="off" placeholder="Type your answer"><div class="bar"><i id="fuse"></i></div><div class="legend"><i class="t1"></i>common<i class="t2"></i>uncommon<i class="t3"></i>rare<i class="t4"></i>epic<i class="t5"></i>legendary<i class="t6"></i>mythic</div></div>
+  <div class="inwrap"><div id="err"></div><input id="ans" autocomplete="off" autocapitalize="off" placeholder="Type your answer"><div class="bar"><i id="fuse"></i></div><div class="legend"><i class="t1"></i>plankton<i class="t2"></i>too clever<i class="t3"></i>schooler<i class="t4"></i>rare<i class="t5"></i>deep cut<i class="t6"></i>one in a krillion</div></div>
   <button id="go">Send</button>
  </div>
 </div>
@@ -173,7 +173,7 @@ body.play main{padding-top:6px;padding-bottom:104px}
 </main>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
-// Each entry: [prompt, common (1pt), uncommon (2pt), rare (4pt)]
+// Each entry: [prompt, plankton (1pt), too clever (2pt), schooler (4pt)]
 const CATS=[
 ["Name a fruit","apple,banana,orange,grape,strawberry,lemon,watermelon,pineapple,mango,peach,pear,cherry","kiwi,plum,lime,blueberry,raspberry,apricot,coconut,grapefruit,pomegranate,cantaloupe,blackberry,nectarine","lychee,guava,papaya,dragonfruit,persimmon,starfruit,fig,passionfruit,quince,durian,jackfruit,mulberry,kumquat,tamarind,rambutan"],
 ["Name a country","usa,unitedstates,canada,mexico,france,germany,china,japan,india,brazil,australia,italy,spain,russia","peru,egypt,sweden,norway,greece,turkey,thailand,vietnam,argentina,poland,ireland,korea,chile,kenya,portugal,cuba","bhutan,malawi,uzbekistan,suriname,tuvalu,eritrea,moldova,laos,fiji,nauru,lesotho,gabon,benin,palau,togo,oman,brunei,djibouti"],
@@ -186,7 +186,7 @@ const CATS=[
 ["Name a car brand","toyota,honda,ford,chevrolet,bmw,mercedes,audi,tesla,nissan,volkswagen","hyundai,kia,subaru,mazda,jeep,dodge,lexus,volvo,porsche,ferrari,lamborghini,cadillac","bugatti,maserati,mclaren,lotus,alfaromeo,peugeot,renault,fiat,skoda,suzuki,pagani,koenigsegg,rivian,saab,lancia"],
 ["Name a dog breed","labrador,poodle,bulldog,beagle,boxer,pug,husky,chihuahua","dachshund,corgi,dalmatian,rottweiler,greatdane,shihtzu,akita,collie,maltese,doberman","basenji,saluki,komondor,puli,otterhound,borzoi,vizsla,keeshond,briard,schipperke,whippet,xoloitzcuintli"]
 ];
-// extra answers for the first 10 prompts, same order: [common, uncommon, rare]
+// extra answers for the first 10 prompts, same order: [plankton, too clever, schooler]
 const MORE=[
 ["melon,tangerine,avocado","honeydew,cranberry,clementine,mandarin,date,elderberry,currant,gooseberry,boysenberry","soursop,longan,feijoa,loquat,salak,mangosteen,cherimoya,pomelo,yuzu,bilberry,lingonberry,physalis"],
 ["uk,unitedkingdom,southkorea,netherlands,switzerland","belgium,austria,denmark,finland,israel,iran,pakistan,indonesia,philippines,malaysia,nigeria,ukraine,colombia,newzealand,southafrica,saudiarabia,morocco,ethiopia,iceland,czechia,ecuador,ghana,nepal,bangladesh,srilanka,cambodia","mongolia,kazakhstan,azerbaijan,namibia,botswana,madagascar,mauritius,seychelles,tonga,samoa,vanuatu,kiribati,andorra,monaco,liechtenstein,sanmarino,bahrain,qatar,kyrgyzstan,tajikistan,turkmenistan,slovenia,estonia,latvia,lithuania,albania,montenegro,haiti,belize,guyana,paraguay,uruguay,bolivia,senegal,uganda,zambia,zimbabwe,rwanda,burundi,mali,niger"],
@@ -341,8 +341,8 @@ const FN={
 31:"harry potter:harry,hermione granger:hermione,ron weasley:ron,albus dumbledore:dumbledore,lord voldemort:voldemort,severus snape:snape,rubeus hagrid:hagrid,draco malfoy:draco,sirius black:sirius,neville longbottom:neville,luna lovegood:luna,ginny weasley:ginny,fred weasley:fred,george weasley:george,minerva mcgonagall:mcgonagall,remus lupin:lupin,nymphadora tonks:tonks,bellatrix lestrange:bellatrix,lucius malfoy:lucius,dolores umbridge:umbridge,tom riddle:riddle,cedric diggory:cedric,cho chang:cho,vernon dursley:vernon,petunia dursley:petunia,dudley dursley:dudley,molly weasley:molly,arthur weasley:arthur,percy weasley:percy,bill weasley:bill,charlie weasley:charlie,gilderoy lockhart:lockhart,filius flitwick:flitwick,pomona sprout:sprout,sybill trelawney:trelawney,alastor moody:moody,mad eye moody:moody,kingsley shacklebolt:kingsley,peter pettigrew:pettigrew,fenrir greyback:greyback,gellert grindelwald:grindelwald,viktor krum:krum,fleur delacour:fleur,rita skeeter:skeeter,cornelius fudge:fudge,horace slughorn:slughorn,quirinus quirrell:quirrell,argus filch:filch"
 };
 Object.keys(FN).forEach(c=>FN[c].split(',').forEach(p=>{const[f,l]=p.split(':'),k=norm(f),lk=norm(l);if(MAP[c][lk]!==undefined&&MAP[c][k]===undefined){MAP[c][k]=MAP[c][lk];DISP[c][k]=f}}));
-const TN={1:'common',2:'uncommon',4:'rare'};
-const TL=['','common','uncommon','rare','epic','legendary','mythic'];
+const TN={1:'plankton',2:'too clever',4:'schooler'};
+const TL=['','plankton','too clever','schooler','rare','deep cut','one in a krillion'];
 let lfK=0,lfAt={};
 function ed1(a,b){if(Math.abs(a.length-b.length)>1)return false;let i=0;while(i<a.length&&i<b.length&&a[i]===b[i])i++;if(a.length===b.length)return a.slice(i+1)===b.slice(i+1)||(a[i]===b[i+1]&&a[i+1]===b[i]&&a.slice(i+2)===b.slice(i+2));return a.length>b.length?a.slice(i+1)===b.slice(i):b.slice(i+1)===a.slice(i)}
 function look(ci,txt){const m=MAP[ci],k=norm(txt);
