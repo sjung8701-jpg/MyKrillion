@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Krillion</title>
+<title>Blowfish Bash</title>
 <style>
 :root{--bg:#07151f;--panel:#10303f;--row:#174357;--ink:#eaf7f4;--mut:#8db8c2;--sun:#ffd23f;--coral:#ff6b4a;--ok:#7be0a4}
 *{box-sizing:border-box}
@@ -128,9 +128,9 @@ body.play main{padding-top:6px;padding-bottom:104px}
 .dock{padding:6px 14px 8px}
 .dock .legend{font-size:15px;margin-top:3px;line-height:1.1}
 .dock .legend i{margin:0 4px 0 9px}
-.gain{animation:gain 1s steps(10) forwards}</style></head>
+.gain{animation:gain 1s steps(10) forwards}</style><style>.say.bad{--c:#ff5d6c}.say.bad span{text-decoration:line-through;text-decoration-thickness:3px;color:#ffc2c9}</style><style>.dock .inwrap{position:relative}#err{position:absolute;left:0;bottom:calc(100% + 6px);padding:2px 10px;background:#2a0b12;color:var(--coral);border:2px solid var(--coral);font-size:20px;line-height:1.1;white-space:nowrap;opacity:0;pointer-events:none;z-index:7}#err.on{opacity:1}.say.bad small{display:none}</style><style>.say.typ{--c:#8db8c2;animation:none}.say.typ span::after{content:"|";margin-left:2px;animation:blink .9s steps(2) infinite}@keyframes blink{50%{opacity:0}}@media (prefers-reduced-motion:reduce){.say.typ span::after{animation:none}}</style></head>
 <body><main>
-<h1>Krillion</h1>
+<h1>Blowfish Bash</h1>
 <p class="sub">Answer before the puffer pops. Rarer answers score more.</p>
 
 <div id="home" class="card">
@@ -159,7 +159,7 @@ body.play main{padding-top:6px;padding-bottom:104px}
  <div class="msg" id="mg"></div>
  <div class="dock">
   <div class="lives" id="mylives"></div>
-  <div class="inwrap"><input id="ans" autocomplete="off" autocapitalize="off" placeholder="Type your answer"><div class="bar"><i id="fuse"></i></div><div class="legend"><i class="t1"></i>common<i class="t2"></i>uncommon<i class="t3"></i>rare<i class="t4"></i>epic<i class="t5"></i>legendary<i class="t6"></i>mythic</div></div>
+  <div class="inwrap"><div id="err"></div><input id="ans" autocomplete="off" autocapitalize="off" placeholder="Type your answer"><div class="bar"><i id="fuse"></i></div><div class="legend"><i class="t1"></i>common<i class="t2"></i>uncommon<i class="t3"></i>rare<i class="t4"></i>epic<i class="t5"></i>legendary<i class="t6"></i>mythic</div></div>
   <button id="go">Send</button>
  </div>
 </div>
@@ -318,6 +318,9 @@ Object.keys(MORE13).forEach(i=>MORE13[i].forEach((s,t)=>{if(s)CATS[i][t+1]+=","+
 // small towns: lots of Idaho and Colorado, plus some from nearby states
 const MORE14={48:["","broomfield,castle rock,commerce city,parker,littleton,northglenn,brighton,englewood,wheat ridge,golden,idaho falls,pocatello,caldwell,twin falls,lewiston,post falls,rexburg,eagle,moscow,kuna,sandpoint,hailey,ketchum,mccall,salmon,driggs,glenwood springs,gunnison,montrose,alamosa,winter park,frisco,dillon,silverthorne,avon,edwards,basalt,carbondale,snowmass village,cripple creek,manitou springs,woodland park,nederland,lyons,idaho springs,georgetown,buena vista,fairplay,cortez,creede,fort morgan,sterling,la junta,lamar,craig,rifle,palisade,paonia,ridgway,canon city,lone tree,greenwood village,superior,windsor,evans,fountain,johnstown,fruita,delta,walsenburg,burlington,limon,yuma,wray,estes,ammon,chubbuck,hayden,mountain home,blackfoot,garden city,jerome,burley,star,rathdrum,emmett,middleton,weiser,payette,fruitland,rupert,victor,grangeville,orofino,kellogg,wallace,bonners ferry,priest river","fort lupton,platteville,gilcrest,la salle,kersey,eaton,ault,pierce,nunn,wellington,berthoud,mead,dacono,milliken,hudson,keenesburg,bennett,strasburg,deer trail,elizabeth,kiowa,simla,calhan,peyton,black forest,falcon,security,widefield,monument,palmer lake,divide,florissant,eldorado springs,ward,jamestown,granby,grand lake,fraser,kremmling,hot sulphur springs,walden,meeker,rangely,oak creek,yampa,keystone,copper mountain,blue river,alma,como,minturn,gypsum,silt,new castle,parachute,battlement mesa,collbran,de beque,hotchkiss,crawford,cedaredge,olathe,norwood,nucla,naturita,dolores,mancos,bayfield,ignacio,del norte,monte vista,center,saguache,la jara,antonito,fort garland,san luis,la veta,aguilar,rye,westcliffe,penrose,florence,las animas,rocky ford,ordway,eads,holly,springfield,walsh,hugo,cheyenne wells,flagler,akron,holyoke,julesburg,haxtun,fleming,brush,federal heights,firestone,frederick,lafayette,louisville,superior,arvada,st anthony,ashton,island park,arco,challis,mackay,stanley,idaho city,horseshoe bend,cascade,donnelly,new meadows,council,cambridge,homedale,marsing,parma,wilder,notus,greenleaf,melba,glenns ferry,bliss,gooding,wendell,shoshone,fairfield,carey,paul,heyburn,declo,oakley,albion,american falls,aberdeen,soda springs,montpelier idaho,preston,malad city,paris idaho,georgetown idaho,lava hot springs,mccammon,downey,swan valley,rigby,shelley,sugar city,teton,athol,spirit lake,ponderay,dover idaho,sagle,kootenai,osburn,kamiah,cottonwood,st maries,hayden lake,harrison,plummer,worley,potlatch,troy,genesee,juliaetta,kendrick,deary,bovill,elk river,clark fork,hope,sandpoint idaho,albeni falls,newport,metaline falls,ione,cusick,colville,republic,omak,okanogan,twisp,winthrop,leavenworth,cashmere,chelan,wenatchee,ellensburg,cle elum,roslyn,port townsend,port angeles,forks,sequim,anacortes,la conner,friday harbor,long beach washington,seaside,cannon beach,tillamook,newport oregon,florence,coos bay,bandon,brookings,gold beach,grants pass,roseburg,sisters,madras,prineville,john day,baker city,la grande,pendleton,hermiston,the dalles,burns,lakeview,klamath falls,cody,jackson,pinedale,dubois,lander,riverton,thermopolis,worland,buffalo,sundance,newcastle,torrington,wheatland,douglas,glenrock,saratoga,encampment,rawlins,kemmerer,afton,star valley,livingston,red lodge,big sky,west yellowstone,gardiner,virginia city montana,philipsburg,anaconda,dillon montana,hamilton,stevensville,polson,kalispell,columbia falls,libby,eureka montana,glasgow,wolf point,sidney,glendive,lewistown,white sulphur springs,fort benton,choteau,cut bank,browning,heber city,midway,kamas,coalville,tooele,vernal,price,green river utah,castle dale,richfield,beaver,panguitch,escalante,kanab,springdale,hurricane,la verkin,monticello,blanding,bluff,mexican hat,torrey"]};
 Object.keys(MORE14).forEach(i=>MORE14[i].forEach((s,t)=>{if(s)CATS[i][t+1]+=","+s}));
+// small towns, especially Idaho and Colorado (plus nearby mountain-west towns)
+const MORE15={48:["","idaho falls,pocatello,caldwell,twin falls,lewiston,post falls,rexburg,moscow,eagle,kuna,ammon,chubbuck,hayden,mountain home,blackfoot,garden city,jerome,burley,rupert,hailey,ketchum,sandpoint,mccall,emmett,weiser,golden,castle rock,parker,broomfield,littleton,englewood,wheat ridge,glenwood springs,steamboat springs,frisco,dillon,silverthorne,keystone,winter park,evergreen,manitou springs,woodland park,louisville,lafayette,erie,superior,nederland,lyons,fountain,canon city,trinidad,la junta,lamar,sterling,fort morgan,montrose,gunnison,alamosa,cortez,rifle,carbondale,basalt,snowmass,avon,edwards,eagle colorado,palisade,fruita,idaho springs,georgetown,black hawk,central city","alamosa,buena vista,delta,ridgway,dolores,mancos,lake city,creede,westcliffe,florence,walsenburg,monte vista,del norte,fairplay,alma,fraser,granby,grand lake,kremmling,hot sulphur springs,craig,meeker,gypsum,minturn,monument,bailey,conifer,morrison,lone tree,berthoud,windsor,severance,timnath,wellington,brush,julesburg,burlington,limon,akron,yuma,wray,holyoke,haxtun,paonia,hotchkiss,mountain village,rico,bayfield,ignacio,nucla,naturita,rangely,dinosaur,cripple creek,victor,penrose,pueblo west,security,rye,beulah,silver cliff,salida,buena vista,leadville,twin lakes,independence pass,marble,redstone,crested butte,mt crested butte,gothic,ophir,sawpit,norwood,nathrop,saguache,moffat,hooper,mosca,san luis,fort garland,la veta,aguilar,cokedale,kim,springfield,eads,ordway,sugar city,rocky ford,swink,fowler,manzanola,las animas,hugo,flagler,stratton,seibert,arriba,genoa,cheyenne wells,kit carson,haswell,sheridan lake,stanley,salmon,challis,mackay,arco,rigby,sugar city idaho,driggs,victor idaho,tetonia,ashton,st anthony,island park,soda springs,preston,montpelier idaho,paris,malad city,american falls,aberdeen,shelley,bonners ferry,priest river,sagle,rathdrum,spirit lake,wallace,kellogg,osburn,smelterville,kamiah,orofino,grangeville,cottonwood,riggins,cascade,donnelly,new meadows,council,payette,fruitland,new plymouth,star,middleton,parma,wilder,homedale,marsing,melba,glenns ferry,bruneau,hagerman,buhl,filer,kimberly,hansen,shoshone,gooding,wendell,declo,albion,oakley,rockland,heyburn,paul,minidoka,leadore,idaho city,placerville,atlanta idaho,lowman,garden valley,horseshoe bend,banks,sweet,bayview,harrison,st maries,plummer,worley,genesee,troy,potlatch,juliaetta,kendrick,craigmont,nezperce,lapwai,culdesac,kooskia,stites,elk city,pierce,weippe,wardner,mullan,murray,pinehurst,kingston,cataldo,athol,careywood,dover,priest lake,clark fork,hope,sandpoint,ponderay,kootenai,naples,moyie springs,eastport,ririe,swan valley,irwin,felt,tetonia,newdale,teton,st charles,bloomington,georgetown idaho,grace,bancroft,lava hot springs,mccammon,downey,franklin,dayton,weston,oxford,swan lake,inkom,arimo,virginia,sterling idaho,springfield idaho,moreland,firth,basalt idaho,atomic city,howe,mud lake,terreton,dubois idaho,spencer,monteview,roberts,hamer,menan,lewisville,annis,rexburg idaho"]};
+Object.keys(MORE15).forEach(i=>MORE15[i].forEach((s,t)=>{if(s)CATS[i][t+1]+=","+s}));
 // rarity: base tier points (1/2/4) are adjusted by how often your group has given that answer before
 let ST={};try{ST=JSON.parse(localStorage.getItem('bbash-stats')||'{}')}catch(e){}
 function rate(ci,k,b){
@@ -363,7 +366,7 @@ function hostMsg(c,d){
     if(conns[c.peer])return;
     if(G.ph!=='lobby'||G.players.length>=5){c.send({t:'full'});setTimeout(()=>c.close(),400);return}
     conns[c.peer]=c;G.players.push({id:c.peer,name:String(d.n||'Player').slice(0,12),lives:3,score:0,alive:true,nl:40,pv:0,seg:[]});push();
-  }else if(d.t==='ans')answer(c.peer,String(d.x||''));
+  }else if(d.t==='ans')answer(c.peer,String(d.x||''));else if(d.t==='typ'){const cp=G.players[G.turn];if(G.ph==='play'&&!G.pause&&cp&&cp.id===c.peer)bcastTyp(c.peer,String(d.x||'').slice(0,30))}
 }
 function push(){
   const s={ph:G.ph,players:G.players,turn:G.turn,cat:G.cat>=0?CATS[G.cat][0]:'',left:deadline?Math.max(0,deadline-Date.now()):0,tot:G.tot||1,msg:G.msg,pause:G.pause,win:G.win,n:G.n,pn:G.pn,say:G.say,lf:G.lf,miss:G.ph==='over'?G.miss:undefined,room};
@@ -380,7 +383,7 @@ function turn(){
   if(G.ph!=='play')return;
   if(ended())return end();
   if(!G.players[G.turn].alive)G.turn=nextAlive();
-  G.pause=false;G.msg='';G.say=null;G.lf=null;if(G.fresh||G.cat<0||(G.same||0)>=4){if(!G.deck||!G.deck.length){G.deck=CATS.map((_,i)=>i).sort(()=>Math.random()-.5);if(G.deck[G.deck.length-1]===G.cat)G.deck.reverse()}G.cat=G.deck.pop();G.same=0;G.fresh=false;G.pn=(G.pn||0)+1}
+  G.pause=false;G.msg='';G.say=null;G.lf=null;if(G.fresh||G.cat<0||(G.same||0)>=2*G.players.filter(p=>p.alive).length){if(!G.deck||!G.deck.length){G.deck=CATS.map((_,i)=>i).sort(()=>Math.random()-.5);if(G.deck[G.deck.length-1]===G.cat)G.deck.reverse()}G.cat=G.deck.pop();G.same=0;G.fresh=false;G.pn=(G.pn||0)+1}
   G.tot=Math.max(5500,11000-G.n*300);G.n++;
   deadline=Date.now()+G.tot;clearTimeout(timer);timer=setTimeout(pop,G.tot);push();
 }
@@ -399,7 +402,7 @@ function pop(){
 function answer(id,x){
   const p=G.players[G.turn];
   if(G.ph!=='play'||G.pause||!p||p.id!==id)return;
-  const bad=m=>{if(id===me)flash(m);else if(conns[id])conns[id].send({t:'bad',m})};
+  const bad=m=>{if(id===me)flash(m);else if(conns[id])conns[id].send({t:'bad',m});const k=(G.sk=(G.sk||0)+1);G.say={id:p.id,x:x.trim().slice(0,22),p:0,t:0,bad:1,m:m.indexOf('Already')===0?'already used':'not on the list',k};push();setTimeout(()=>{if(G.say&&G.say.k===k){G.say=null;push()}},2000)};
   const r=look(G.cat,x);
   if(!r){const q=CATS[G.cat][0].replace(/^Name an? /,'')+': '+x.trim().slice(0,25);G.miss=G.miss||[];if(G.miss.indexOf(q)<0&&G.miss.length<40)G.miss.push(q);return bad('Not on my list. Try another!')}
   const key=G.cat+'|'+r[0];
@@ -430,7 +433,7 @@ function joinRoom(){
     conn.on('open',()=>conn.send({t:'join',n:nm}));
     conn.on('data',d=>{
       if(d.t==='s')render(d.s);
-      else if(d.t==='bad')flash(d.m);
+      else if(d.t==='bad')flash(d.m);else if(d.t==='typ')onTyp(d.id,d.x);
       else if(d.t==='full'){alert('That room is full or already started.');location.reload()}
     });
     conn.on('close',()=>{alert('Disconnected from the room.');location.reload()});
@@ -438,7 +441,7 @@ function joinRoom(){
   peer.on('error',e=>alert(e.type==='peer-unavailable'?'Room not found. Check the code.':'Network error: '+e.type));
 }
 function send(){
-  const x=$('ans').value.trim();if(!x)return;$('ans').value='';
+  const x=$('ans').value.trim();if(!x)return;$('ans').value='';sendTyp();
   if(isHost)answer(me,x);else conn.send({t:'ans',x});
 }
 
@@ -448,19 +451,25 @@ function pl(id,s){
   $(id).innerHTML=s.players.map((p,i)=>`<div class="pl${s.ph==='play'&&!s.pause&&i===s.turn?' turn':''}${p.alive?'':' dead'}"><span>${esc(p.name)}${p.id===me?' (you)':''}</span><span>${s.ph==='lobby'?'':'<b class="hp">'+'♥'.repeat(Math.max(0,p.lives))+'</b>'+p.score}</span></div>`).join('');
 }
 function flash(m){
-  $('mg').textContent=m;$('mg').style.color='var(--coral)';
+  const e=$('err');e.textContent=m;e.classList.add('on');clearTimeout(flash.t);flash.t=setTimeout(()=>e.classList.remove('on'),2200);
   $('ans').classList.add('shake');setTimeout(()=>$('ans').classList.remove('shake'),300);
 }
+let TYP=null,typT=0;
+function typB(s,p){return TYP&&TYP.id===p.id&&p.alive&&!s.pause?'<div class="say typ"><span>'+esc(TYP.x)+'</span></div>':''}
+function onTyp(id,x){TYP=x?{id,x}:null;if(S)render(S)}
+function bcastTyp(id,x){Object.values(conns).forEach(c=>c.open&&c.send({t:'typ',id,x}));onTyp(id,x)}
+function sendTyp(){const x=$('ans').value.slice(0,30);if(isHost){if(G&&G.ph==='play'&&!G.pause&&G.players[G.turn]&&G.players[G.turn].id===me)bcastTyp(me,x)}else if(conn&&conn.open)conn.send({t:'typ',x})}
 function seats(s){
   const n=s.players.length,mi=Math.max(0,s.players.findIndex(p=>p.id===me));let h='',px=50,py=52;
   s.players.forEach((p,i)=>{
     const a=(90+((i-mi+n)%n)*360/n)*Math.PI/180,x=50+40*Math.cos(a),y=52+34*Math.sin(a),hue=(i*67+190)%360,pv=p.pv||0,gl=Date.now()-(lfAt[p.id]||0)<1000?'<span class="gain" style="animation-delay:-'+(Date.now()-lfAt[p.id])+'ms">+1 life</span>':'',xb=p.lives>=5?'<u class="t6" style="width:100%"></u>':(p.seg||[]).map(g=>`<u class="t${g[1]}" style="width:${g[0]/((p.nl||40)-pv)*100}%"></u>`).join('');
-    h+=`<div class="seat${i===s.turn&&p.alive&&!s.pause?' act':''}${p.alive?'':' dead'}${s.say&&s.say.id===p.id?' talk':''}" style="left:${x}%;top:${y}%">${s.say&&s.say.id===p.id?`<div class="say t${s.say.t}"><span>${esc(s.say.x)}</span><small>+${s.say.p} ${TL[s.say.t]}</small></div>`:''}<svg class="crit" viewBox="0 0 9 8" width="40" height="36" shape-rendering="crispEdges" fill="hsl(${hue} 80% 62%)"><path d="M4 0h1v1H4zM3 1h3v1H3zM0 2h9v1H0zM1 3h7v1H1zM2 4h5v1H2zM1 5h3v1H1zM5 5h3v1H5zM1 6h2v1H1zM6 6h2v1H6zM0 7h2v1H0zM7 7h2v1H7z"/><path d="M3 3h1v1H3zM5 3h1v1H5z" fill="#050a14"/></svg><div class="rock r${i%5}"></div><div class="nm">${esc(p.name)}</div><b class="hp">${'♥'.repeat(Math.max(0,p.lives))}</b><div class="xpw"><div class="xp${p.lives>=5?' max':''}" title="Progress to next bonus life">${xb}</div>${gl}</div></div>`;
+    h+=`<div class="seat${i===s.turn&&p.alive&&!s.pause?' act':''}${p.alive?'':' dead'}${(s.say&&s.say.id===p.id)||typB(s,p)?' talk':''}" style="left:${x}%;top:${y}%">${typB(s,p)||(s.say&&s.say.id===p.id?`<div class="say t${s.say.t}${s.say.bad?' bad':''}"><span>${esc(s.say.x)}</span><small>${s.say.bad?esc(s.say.m):'+'+s.say.p+' '+TL[s.say.t]}</small></div>`:'')}<svg class="crit" viewBox="0 0 9 8" width="40" height="36" shape-rendering="crispEdges" fill="hsl(${hue} 80% 62%)"><path d="M4 0h1v1H4zM3 1h3v1H3zM0 2h9v1H0zM1 3h7v1H1zM2 4h5v1H2zM1 5h3v1H1zM5 5h3v1H5zM1 6h2v1H1zM6 6h2v1H6zM0 7h2v1H0zM7 7h2v1H7z"/><path d="M3 3h1v1H3zM5 3h1v1H5z" fill="#050a14"/></svg><div class="rock r${i%5}"></div><div class="nm">${esc(p.name)}</div><b class="hp">${'♥'.repeat(Math.max(0,p.lives))}</b><div class="xpw"><div class="xp${p.lives>=5?' max':''}" title="Progress to next bonus life">${xb}</div>${gl}</div></div>`;
   });
   $('seats').innerHTML=h;$('puff').style.left=px+'%';$('puff').style.top=py+'%';
 }
 function render(s){
   S=s;tot=s.tot;dl=s.left?Date.now()+s.left:0;
+  if(TYP&&(s.pause||!s.players[s.turn]||s.players[s.turn].id!==TYP.id))TYP=null;
   if(s.lf&&s.lf.k>lfK){lfK=s.lf.k;lfAt[s.lf.id]=Date.now();setTimeout(()=>S&&render(S),1100)}
   const tt=s.players.reduce((a,p)=>a+p.score,0)*4;
   $('depth').textContent=(tt<60?'Sunlight zone':tt<140?'Twilight zone':tt<240?'Midnight zone':tt<360?'The abyss':'The trench')+' · '+tt+' m';
@@ -502,5 +511,6 @@ const KELP='<svg viewBox="0 0 12 24" shape-rendering="crispEdges" fill="#0b2238"
 document.body.prepend(bb);
 $('mk').onclick=host;$('jn').onclick=joinRoom;
 $('st').onclick=start;$('again').onclick=()=>{G.ph='lobby';push()};
+$('ans').oninput=()=>{const n=Date.now();clearTimeout(sendTyp.t);if(n-typT>70){typT=n;sendTyp()}else sendTyp.t=setTimeout(sendTyp,80)};
 $('go').onclick=send;$('ans').onkeydown=e=>{if(e.key==='Enter')send()};
 </script></body></html>
