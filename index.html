@@ -138,10 +138,12 @@ body.play main{padding-top:6px;padding-bottom:104px}
  <button id="mk">Create room</button>
  <input id="rc" maxlength="4" placeholder="Room code" autocomplete="off" style="text-transform:uppercase">
  <button id="jn" class="alt">Join room</button>
+ <button id="pub" class="alt">Join public room</button>
+ <button id="tn" class="alt" style="opacity:.75">Test my connection</button>
 </div>
 
 <div id="lobby" class="card hid">
- <div class="msg">Room code. Share it with your friends.</div>
+ <div class="msg" id="rcm">Room code. Share it with your friends.</div>
  <div class="code" id="rc2"></div>
  <div id="pl1"></div>
  <button id="st">Start game</button>
@@ -488,10 +490,10 @@ const ICE={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:global.
 (function(){const e=document.createElement('div');e.id='net';e.className='msg';$('home').appendChild(e)})();
 function net(m,bad){const e=$('net');if(!e)return;e.textContent=m;e.style.color=bad?'var(--coral)':'var(--mut)'}
 function NETERR(e){const base={'peer-unavailable':'Room not found. Check the code.','network':'Cannot reach the connection server.','server-error':'Cannot reach the connection server.','socket-error':'Cannot reach the connection server.','socket-closed':'Lost the connection to the server.','webrtc':'This device could not set up a direct connection.','browser-incompatible':'This browser cannot make live connections.'}[e.type]||('Network error: '+e.type);return base+(['network','server-error','socket-error','socket-closed','webrtc'].indexOf(e.type)>=0?' School or work Wi-Fi often blocks this. Try a phone hotspot or home Wi-Fi.':'')}
-function host(){
-  nm=$('nm').value.trim()||'Player';room=mkCode();isHost=true;net('Opening a room...');peer=new Peer('bbash-'+room,{config:ICE});
+function host(fixed){
+  nm=$('nm').value.trim()||'Player';room=fixed||mkCode();isHost=true;net(fixed?'Opening the public room...':'Opening a room...');peer=new Peer('bbash-'+room,{config:ICE});
   peer.on('open',id=>{net('');me=id;G={ph:'lobby',players:[{id,name:nm,lives:3,score:0,alive:true,nl:LIFE0,pv:0,seg:[]}],turn:0,cat:-1,last:null,msg:'',used:{},n:0};push()});
-  peer.on('error',e=>{if(e.type==='unavailable-id'){peer.destroy();host()}else net(NETERR(e),1)});
+  peer.on('error',e=>{if(e.type==='unavailable-id'){peer.destroy();isHost=false;if(fixed)setTimeout(()=>pubRoom(pubN),400);else host()}else net(NETERR(e),1)});
   peer.on('connection',c=>{c.on('data',d=>hostMsg(c,d));c.on('close',()=>drop(c.peer))});
 }
 function hostMsg(c,d){
@@ -560,25 +562,49 @@ function drop(id){
 }
 
 /* ---------- client ---------- */
-function joinRoom(){
-  nm=$('nm').value.trim()||'Player';room=$('rc').value.trim().toUpperCase();
-  if(room.length!==4)return net('Enter the 4-letter room code.',1);
-  let got=false;net('Connecting to the server...');
+let pubN=1,pubTry=0;
+// public rooms: PUBLIC, PUBLIC2, PUBLIC3... Nobody has to share a code. If nobody is hosting a slot, you open it; if it is full or already playing, you try the next one.
+function pubRoom(n){pubN=n||1;if(++pubTry>25)return net('Could not find an open public room. Try again in a moment.',1);joinRoom('PUBLIC'+(pubN>1?pubN:''))}
+function joinRoom(fixed){
+  const pub=typeof fixed==='string';
+  nm=$('nm').value.trim()||'Player';room=pub?fixed:$('rc').value.trim().toUpperCase();
+  if(!pub&&room.length!==4)return net('Enter the 4-letter room code.',1);
+  let got=false,moved=false;net(pub?'Looking for a public room...':'Connecting to the server...');
+  const openIt=()=>{if(moved||got)return;moved=true;try{peer.destroy()}catch(e){}host(room)};
+  const nextOne=()=>{if(moved)return;moved=true;try{peer.destroy()}catch(e){}pubRoom(pubN+1)};
   peer=new Peer(undefined,{config:ICE});
   peer.on('open',id=>{
-    me=id;net('Looking for room '+room+'...');conn=peer.connect('bbash-'+room,{reliable:true});
-    const to=setTimeout(()=>{if(!got)net('Found the server but could not reach the host. School Wi-Fi often blocks device-to-device connections. Try a phone hotspot, or ask the host to try one.',1)},15000);
+    me=id;net(pub?'Looking for a public room...':'Looking for room '+room+'...');conn=peer.connect('bbash-'+room,{reliable:true});
+    const to=setTimeout(()=>{if(got)return;if(pub)return openIt();net('Found the server but could not reach the host. School Wi-Fi often blocks device-to-device connections. Try a phone hotspot, or ask the host to try one. The "Test my connection" button can tell you what is blocked.',1)},pub?9000:15000);
     conn.on('open',()=>{net('Joining...');conn.send({t:'join',n:nm})});
-    conn.on('iceStateChanged',st=>{if(st==='failed'&&!got)net('The connection to the host failed. This network may be blocking it. Try a phone hotspot or home Wi-Fi.',1)});
-    conn.on('error',e=>net(NETERR(e),1));
+    conn.on('iceStateChanged',st=>{if(st==='failed'&&!got){if(pub)return openIt();net('The connection to the host failed. This network may be blocking it. Try a phone hotspot or home Wi-Fi.',1)}});
+    conn.on('error',e=>{if(pub)return openIt();net(NETERR(e),1)});
     conn.on('data',d=>{
       if(d.t==='s'){got=true;clearTimeout(to);net('');render(d.s)}
       else if(d.t==='bad')flash(d.m);else if(d.t==='typ')onTyp(d.id,d.x);
-      else if(d.t==='full'){alert('That room is full or already started.');location.reload()}
+      else if(d.t==='full'){if(pub){clearTimeout(to);nextOne()}else{alert('That room is full or already started.');location.reload()}}
     });
-    conn.on('close',()=>{if(got){alert('Disconnected from the room.');location.reload()}else net('The host closed the connection.',1)});
+    conn.on('close',()=>{if(moved)return;if(got){alert('Disconnected from the room.');location.reload()}else if(pub){clearTimeout(to);openIt()}else net('The host closed the connection.',1)});
   });
-  peer.on('error',e=>net(NETERR(e),1));
+  peer.on('error',e=>{if(pub&&e.type==='peer-unavailable')return openIt();net(NETERR(e),1)});
+}
+// finds out what is blocking connections on this device or network
+async function testNet(){
+  const out=[];const log=(ok,t)=>{out.push((ok?'OK: ':'PROBLEM: ')+t);net(out.join('\n'),!ok)};$('net').style.whiteSpace='pre-line';net('Testing...');
+  try{
+    log(typeof Peer!=='undefined','the game\'s connection library '+(typeof Peer!=='undefined'?'loaded':'did not load (cdn.jsdelivr.net may be blocked)'));
+    const RTC=window.RTCPeerConnection||window.webkitRTCPeerConnection;
+    log(!!RTC,'this browser '+(RTC?'supports live connections (WebRTC)':'has WebRTC turned off or blocked, so it cannot join rooms'));
+    const ws=await new Promise(r=>{let done=false;const f=v=>{if(!done){done=true;r(v)}};try{const w=new WebSocket('wss://0.peerjs.com/peerjs?key=peerjs&id=t'+Math.random().toString(36).slice(2)+'&token=t');w.onopen=()=>{f(true);try{w.close()}catch(e){}};w.onerror=()=>f(false);setTimeout(()=>f(false),7000)}catch(e){f(false)}});
+    log(ws,'the matchmaking server (0.peerjs.com) is '+(ws?'reachable':'NOT reachable, it is blocked on this network or device'));
+    if(RTC){
+      const t=await new Promise(res=>{const seen={};let pc;try{pc=new RTC(ICE);pc.createDataChannel('x');pc.onicecandidate=e=>{if(e.candidate){const m=/ typ (\w+)/.exec(e.candidate.candidate);if(m)seen[m[1]]=1}};pc.createOffer().then(o=>pc.setLocalDescription(o)).catch(()=>{});}catch(e){return res(seen)}setTimeout(()=>{try{pc.close()}catch(e){}res(seen)},6000)});
+      log(!!t.srflx,'finding this device\'s public address (STUN) '+(t.srflx?'works':'is blocked'));
+      log(!!t.relay,'the backup relay (TURN) '+(t.relay?'works':'is blocked or down'));
+      const good=ws&&(t.srflx||t.relay);
+      out.push(good?'\nThis device looks fine. If joining still fails, the other player\'s network is probably the problem.':(ws?'\nDirect connections look blocked here. Try a different network, or a different device.':'\nThis device or network blocks the matchmaking server, so rooms cannot work here.'));net(out.join('\n'),!good);
+    }
+  }catch(e){log(false,'the test crashed: '+e.message)}
 }
 function send(){
   const x=$('ans').value.trim();if(!x)return;$('ans').value='';sendTyp();
@@ -615,7 +641,7 @@ function render(s){
   $('depth').textContent=(tt<60?'Sunlight zone':tt<140?'Twilight zone':tt<240?'Midnight zone':tt<360?'The abyss':'The trench')+' · '+tt+' m';
   document.body.style.setProperty('--d',s.ph==='lobby'?0:Math.min(1,tt/400));
   if(s.ph==='lobby'){
-    missOpen=false;show('lobby');$('rc2').textContent=s.room;pl('pl1',s);
+    missOpen=false;show('lobby');$('rc2').textContent=s.room;$('rcm').textContent=/^PUBLIC/.test(s.room)?'Public room. Anyone can join it from the home screen.':'Room code. Share it with your friends.';pl('pl1',s);
     $('st').classList.toggle('hid',!isHost);$('wt').textContent=isHost?'Up to 5 players can join.':'Waiting for the host to start...';
   }else if(s.ph==='play'){
     show('game');seats(s);
@@ -649,7 +675,7 @@ for(let i=0;i<16;i++){const b=document.createElement('i'),z=4+(Math.random()*8|0
 const KELP='<svg viewBox="0 0 12 24" shape-rendering="crispEdges" fill="#0b2238"><path d="M5 0h2v24H5zM3 4h2v2H3zM7 8h2v2H7zM3 12h2v2H3zM7 16h2v2H7zM3 20h2v2H3z"/></svg>';
 [[1,70],[5,110],[9,60],[88,90],[93,130],[97,70]].forEach(([l,hh])=>{const k=document.createElement('div');k.style.cssText='position:absolute;bottom:0;left:'+l+'%;width:'+hh/2.2+'px;height:'+hh+'px;opacity:.9';k.innerHTML=KELP;k.firstChild.setAttribute('width','100%');k.firstChild.setAttribute('height','100%');bb.appendChild(k)});
 document.body.prepend(bb);
-$('mk').onclick=host;$('jn').onclick=joinRoom;
+$('mk').onclick=()=>host();$('jn').onclick=()=>joinRoom();$('pub').onclick=()=>{pubTry=0;pubRoom(1)};$('tn').onclick=()=>testNet();
 $('showmiss').onclick=()=>{missOpen=!missOpen;if(S)render(S)};$('st').onclick=start;$('again').onclick=()=>{G.ph='lobby';push()};
 $('ans').oninput=()=>{const n=Date.now();clearTimeout(sendTyp.t);if(n-typT>70){typT=n;sendTyp()}else sendTyp.t=setTimeout(sendTyp,80)};
 $('go').onclick=send;$('ans').onkeydown=e=>{if(e.key==='Enter')send()};
