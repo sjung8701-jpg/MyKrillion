@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+\<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Puffer party</title>
 <style>
@@ -354,9 +354,14 @@ Object.keys(MORE16).forEach(i=>MORE16[i].forEach((s,t)=>{if(s)CATS[i][t+1]+=","+
 // prompt deck: a real shuffle (Fisher-Yates) that also remembers which prompts were used in recent games
 function readSeen(){try{return JSON.parse(localStorage.getItem('bbash-seen')||'[]')}catch(e){return[]}}
 function markSeen(i){const s=readSeen();if(s.indexOf(i)<0)s.push(i);try{localStorage.setItem('bbash-seen',JSON.stringify(s))}catch(e){}}
-function newDeck(last){
-  let seen=readSeen(),ids=CATS.map((_,i)=>i).filter(i=>seen.indexOf(i)<0);
-  if(ids.length<10){ids=CATS.map((_,i)=>i);try{localStorage.setItem('bbash-seen','[]')}catch(e){}}
+function newDeck(last,played){
+  played=played||[];
+  let seen=readSeen(),ids=CATS.map((_,i)=>i).filter(i=>seen.indexOf(i)<0&&played.indexOf(i)<0);
+  if(ids.length<10){ // the long-term memory is used up: start it over, but keep this game's prompts out
+    try{localStorage.setItem('bbash-seen',JSON.stringify(played))}catch(e){}
+    ids=CATS.map((_,i)=>i).filter(i=>played.indexOf(i)<0);
+    if(ids.length<10)ids=CATS.map((_,i)=>i); // a truly enormous game has played almost every prompt
+  }
   for(let i=ids.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[ids[i],ids[j]]=[ids[j],ids[i]]}
   if(ids.length>1&&ids[ids.length-1]===last)ids.reverse();
   return ids;
@@ -513,14 +518,14 @@ const ended=()=>G.players.filter(p=>p.alive).length<=lim();
 function nextAlive(){let i=G.turn;do{i=(i+1)%G.players.length}while(!G.players[i].alive);return i}
 function start(){
   G.players.forEach(p=>{p.lives=3;p.score=0;p.alive=true;p.nl=LIFE0;p.pv=0;p.seg=[]});
-  G.used={};G.miss=[];G.say=null;G.lf=null;G.deck=null;G.fresh=true;G.same=0;G.pn=0;G.n=0;G.ph='play';G.win=null;G.msg='';G.turn=Math.random()*G.players.length|0;turn();
+  G.used={};G.miss=[];G.say=null;G.lf=null;G.deck=null;G.played=[];G.fresh=true;G.same=0;G.pn=0;G.n=0;G.ph='play';G.win=null;G.msg='';G.turn=Math.random()*G.players.length|0;turn();
 }
 function turn(){
   if(G.ph!=='play')return;
   if(ended())return end();
   if(!G.players[G.turn].alive)G.turn=nextAlive();
   let intro=false;
-  G.pause=false;G.msg='';G.say=null;G.lf=null;if(G.fresh||G.cat<0||(G.popped&&G.players[G.turn].id===G.popped)||(G.same||0)>=(G.per||2)*G.players.filter(p=>p.alive).length){if(!G.deck||!G.deck.length)G.deck=newDeck(G.cat);G.cat=G.deck.pop();markSeen(G.cat);{const pool=KRP[G.cat].filter(k=>!G.used[G.cat+'|'+k]);G.kr=pool.length?pool[Math.random()*pool.length|0]:null}G.same=0;G.n=0;G.pops=0;G.popped=null;G.per=1+(Math.random()*4|0);G.fresh=false;G.pn=(G.pn||0)+1;intro=true}
+  G.pause=false;G.msg='';G.say=null;G.lf=null;if(G.fresh||G.cat<0||(G.popped&&G.players[G.turn].id===G.popped)||(G.same||0)>=(G.per||2)*G.players.filter(p=>p.alive).length){if(!G.deck||!G.deck.length)G.deck=newDeck(G.cat,G.played);G.cat=G.deck.pop();markSeen(G.cat);(G.played=G.played||[]).push(G.cat);{const pool=KRP[G.cat].filter(k=>!G.used[G.cat+'|'+k]);G.kr=pool.length?pool[Math.random()*pool.length|0]:null}G.same=0;G.n=0;G.pops=0;G.popped=null;G.per=1+(Math.random()*4|0);G.fresh=false;G.pn=(G.pn||0)+1;intro=true}
   if(intro){const k=G.ik=(G.ik||0)+1;G.np=1;G.pause=true;deadline=0;clearTimeout(timer);push();setTimeout(()=>{if(G.ik!==k||G.ph!=='play')return;G.np=0;if(ended())return end();if(!G.players[G.turn].alive)G.turn=nextAlive();G.pause=false;go()},1000);return}
   go();
   function go(){G.tot=Math.max(5500,11000-G.n*300);G.n++;deadline=Date.now()+G.tot;clearTimeout(timer);timer=setTimeout(pop,G.tot);push()}
@@ -544,7 +549,7 @@ function answer(id,x){
   const r=look(G.cat,x);
   if(!r){const q=CATS[G.cat][0].replace(/^Name an? /,'')+': '+x.trim().slice(0,25);G.miss=G.miss||[];if(G.miss.indexOf(q)<0&&G.miss.length<40)G.miss.push(q);return bad('Not on my list. Try another!')}
   const key=G.cat+'|'+r[0];
-  const sepN=t=>(t.match(/[\s\-]/g)||[]).length,tc=t=>t.split(/([\s\-]+)/).map((w,i)=>i%2?w:(i>0&&/^(of|and|the|in|on|at|to|for|a)$/.test(w))?w:/^(i{1,3}|iv|vi{0,3}|ix|x)$/.test(w)&&i>0?w.toUpperCase():w==='bbq'?'BBQ':w.replace(/^[a-z]/,c=>c.toUpperCase())).join(''),dn=FULLD[G.cat][r[0]]||(r[2]?TC(r[2]):(t=>{const d=r[3];const base=d&&(sepN(d)>sepN(t)||(d.indexOf("'")>=0&&t.indexOf("'")<0))?d:t;return /[A-Z]/.test(base)?base:TC(base)})(x.trim()));
+  const sepN=t=>(t.match(/[\s\-]/g)||[]).length,tc=t=>t.split(/([\s\-]+)/).map((w,i)=>i%2?w:(i>0&&/^(of|and|the|in|on|at|to|for|a)$/.test(w))?w:/^(i{1,3}|iv|vi{0,3}|ix|x)$/.test(w)&&i>0?w.toUpperCase():w==='bbq'?'BBQ':w.replace(/^[a-z]/,c=>c.toUpperCase())).join(''),dn=FULLD[G.cat][r[0]]||(r[2]?TC(r[2]):(t=>{const d=r[3];if(d&&sepN(d)>=sepN(t))return TC(d);return /[A-Z]/.test(t)?t:TC(t)})(x.trim()));
   if(G.used[key])return bad('Already used this game!');
   G.used[key]=1;clearTimeout(timer);deadline=0;
   const tier=rate(G.cat,r[0],r[1],G.kr),pts=PTS[tier];p.score+=pts;(p.seg=p.seg||[]).push([pts,tier]);
@@ -607,7 +612,9 @@ async function testNet(){
     }
   }catch(e){log(false,'the test crashed: '+e.message)}
 }
+const isMine=()=>{const c=S&&S.ph==='play'&&!S.pause&&S.players[S.turn];return !!c&&c.id===me&&c.alive};
 function send(){
+  if(!isMine())return; // you can type ahead, but nothing is sent until it is your turn
   const x=$('ans').value.trim();if(!x)return;$('ans').value='';sendTyp();
   if(isHost)answer(me,x);else conn.send({t:'ans',x});
 }
@@ -625,7 +632,7 @@ let TYP=null,typT=0;
 function typB(s,p){return TYP&&TYP.id===p.id&&p.alive&&!s.pause?'<div class="say typ"><span>'+esc(TYP.x)+'</span></div>':''}
 function onTyp(id,x){TYP=x?{id,x}:null;if(S)render(S)}
 function bcastTyp(id,x){Object.values(conns).forEach(c=>c.open&&c.send({t:'typ',id,x}));onTyp(id,x)}
-function sendTyp(){const x=$('ans').value.slice(0,30);if(isHost){if(G&&G.ph==='play'&&!G.pause&&G.players[G.turn]&&G.players[G.turn].id===me)bcastTyp(me,x)}else if(conn&&conn.open)conn.send({t:'typ',x})}
+function sendTyp(){if(!isMine())return;const x=$('ans').value.slice(0,30);if(isHost){if(G&&G.ph==='play'&&!G.pause&&G.players[G.turn]&&G.players[G.turn].id===me)bcastTyp(me,x)}else if(conn&&conn.open)conn.send({t:'typ',x})}
 function seats(s){
   const n=s.players.length,mi=Math.max(0,s.players.findIndex(p=>p.id===me));let h='',px=50,py=52;
   s.players.forEach((p,i)=>{
@@ -650,8 +657,8 @@ function render(s){
     const mp=s.players.find(p=>p.id===me);$('mylives').textContent='♥'+(mp?Math.max(0,mp.lives):0);
     const cur=s.players[s.turn],mine=cur&&cur.id===me&&cur.alive&&!s.pause;
     $('who').textContent=s.pause?'':(mine?'Your turn!':cur.name+"'s turn");
-    $('pr').textContent=s.np?'New prompt!':s.cat;$('pr').classList.toggle('np',!!s.np);$('pr').parentNode.classList.toggle('np',!!s.np);$('ans').placeholder=mine?'Type your answer...':cur.name+' is up...';
-    $('ans').disabled=$('go').disabled=!mine;
+    $('pr').textContent=s.np?'New prompt!':s.cat;$('pr').classList.toggle('np',!!s.np);$('pr').parentNode.classList.toggle('np',!!s.np);$('ans').placeholder=mine?'Type your answer...':cur.name+' is up. You can type ahead.';
+    $('ans').disabled=false;$('go').disabled=!mine;
     $('mg').textContent=s.msg;$('mg').style.color=s.msg.startsWith('💥')?'var(--coral)':'var(--ok)';
     if(mine)$('ans').focus();
   }else{
