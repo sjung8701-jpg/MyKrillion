@@ -1,4 +1,4 @@
-\<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Puffer party</title>
 <style>
@@ -128,7 +128,21 @@ body.play main{padding-top:6px;padding-bottom:104px}
 .dock{padding:6px 14px 8px}
 .dock .legend{font-size:15px;margin-top:3px;line-height:1.1}
 .dock .legend i{margin:0 4px 0 9px}
-.gain{animation:gain 1s steps(10) forwards}</style><style>.say.bad{--c:#ff5d6c}.say.bad span{text-decoration:line-through;text-decoration-thickness:3px;color:#ffc2c9}</style><style>.dock .inwrap{position:relative}#err{position:absolute;left:0;bottom:calc(100% + 6px);padding:2px 10px;background:#2a0b12;color:var(--coral);border:2px solid var(--coral);font-size:20px;line-height:1.1;white-space:nowrap;opacity:0;pointer-events:none;z-index:7}#err.on{opacity:1}.say.bad small{display:none}</style><style>.say.typ{--c:#8db8c2;animation:none}.say.typ span::after{content:"|";margin-left:2px;animation:blink .9s steps(2) infinite}@keyframes blink{50%{opacity:0}}@media (prefers-reduced-motion:reduce){.say.typ span::after{animation:none}}</style></head>
+.gain{animation:gain 1s steps(10) forwards}</style><style>.say.bad{--c:#ff5d6c}.say.bad span{text-decoration:line-through;text-decoration-thickness:3px;color:#ffc2c9}</style><style>.dock .inwrap{position:relative}#err{position:absolute;left:0;bottom:calc(100% + 6px);padding:2px 10px;background:#2a0b12;color:var(--coral);border:2px solid var(--coral);font-size:20px;line-height:1.1;white-space:nowrap;opacity:0;pointer-events:none;z-index:7}#err.on{opacity:1}.say.bad small{display:none}</style><style>.say.typ{--c:#8db8c2;animation:none}.say.typ span::after{content:"|";margin-left:2px;animation:blink .9s steps(2) infinite}@keyframes blink{50%{opacity:0}}@media (prefers-reduced-motion:reduce){.say.typ span::after{animation:none}}
+#lobby{position:relative}
+.leave-room{width:auto;padding:5px 10px;font-size:18px;margin:0 0 8px;position:relative;z-index:2}
+#game .hud{position:relative}
+#leaveGame{position:absolute;right:0;top:0;z-index:3}
+.settings-trigger{position:absolute;left:calc(100% + 14px);top:12px;right:auto;width:auto;white-space:nowrap;margin:0;padding:7px 12px;z-index:8;display:block;min-width:112px;box-shadow:4px 4px 0 #02060d}
+.settings-backdrop{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(0,5,14,.78);z-index:20}
+.settings-backdrop.hid{display:none}
+.settings-popup{width:min(420px,100%);max-height:calc(100vh - 36px);overflow:auto;margin:0;padding:18px;border:3px solid var(--glow);box-shadow:8px 8px 0 #02060d}
+.settings-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.settings-heading h2{margin:0;color:var(--glow);font-size:30px;font-weight:400}
+.settings-close{width:auto;margin:0;padding:4px 10px;font-size:24px}
+.settings-popup label{display:block;margin-top:8px}
+@media(max-width:720px){.settings-trigger{left:auto;right:0;top:calc(100% + 10px);padding:5px 9px;font-size:18px;min-width:0}#lobby{margin-bottom:58px}}
+</style></head>
 <body><main>
 <h1>Puffer party</h1>
 <p class="sub">Answer before the puffer pops. Rarer answers score more.</p>
@@ -144,15 +158,28 @@ body.play main{padding-top:6px;padding-bottom:104px}
 </div>
 
 <div id="lobby" class="card hid">
+ <button type="button" id="openSettings" class="alt settings-trigger" aria-haspopup="dialog" aria-controls="settingsPopup">⚙ Settings</button>
+ <button type="button" id="leaveLobby" class="alt leave-room">← Leave room</button>
  <div class="msg" id="rcm">Room code. Share it with your friends.</div>
  <div class="code" id="rc2"></div>
  <div id="pl1"></div>
+ <div class="settings-backdrop hid" id="settingsBackdrop">
+  <section class="card settings-popup" id="roomSettings" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+   <div class="settings-heading"><h2 id="settingsTitle">Room settings</h2><button type="button" id="closeSettings" class="alt settings-close" aria-label="Close settings">✕</button></div>
+   <label for="settingStarting">Starting lives</label><input id="settingStarting" type="number" min="1" max="20" step="1" value="2">
+   <label for="settingMax">Max lives</label><input id="settingMax" type="number" min="1" max="20" step="1" value="5">
+   <label for="settingCountdown">Minimum countdown (seconds)</label><input id="settingCountdown" type="number" min="5" max="60" step="1" value="5">
+   <button type="button" id="resetSettings" class="alt">Reset settings to defaults</button>
+   <div class="msg" id="settingsStatus" aria-live="polite"></div>
+  </section>
+ </div>
  <button id="st">Start game</button>
  <div class="msg" id="wt"></div>
 </div>
 
 <div id="game" class="hid">
  <div class="hud">
+  <button type="button" id="leaveGame" class="alt leave-room">← Leave room</button>
   <div class="badge"><small>Room</small><b id="hroom"></b></div>
   <div class="depth" id="depth"></div>
   <div class="badge r"><small>Alive</small><b id="halive"></b></div>
@@ -487,6 +514,20 @@ function look(ci,txt){const m=MAP[ci],k=norm(txt);
   if(k.length>=6)for(const w in m)if(ed1(k,w))return[w,m[w],DISP[ci][w]];
   return null}
 const $=id=>document.getElementById(id);
+const DEFAULT_ROOM_SETTINGS={startingLives:2,maxLives:5,minCountdown:5};
+let ROOM_SETTINGS={...DEFAULT_ROOM_SETTINGS};
+function syncRoomSettings(){ $('settingStarting').value=ROOM_SETTINGS.startingLives;$('settingMax').value=ROOM_SETTINGS.maxLives;$('settingCountdown').value=ROOM_SETTINGS.minCountdown }
+function applyRoomSettings(settings){ROOM_SETTINGS={...DEFAULT_ROOM_SETTINGS,...(settings||{})};syncRoomSettings()}
+function saveRoomSettings(){
+ if(!isHost||!G||G.ph!=='lobby')return;
+ const startingLives=Math.max(1,Math.min(20,parseInt($('settingStarting').value,10)||DEFAULT_ROOM_SETTINGS.startingLives));
+ const maxLives=Math.max(1,Math.min(20,parseInt($('settingMax').value,10)||DEFAULT_ROOM_SETTINGS.maxLives));
+ const minCountdown=Math.max(5,Math.min(60,parseInt($('settingCountdown').value,10)||DEFAULT_ROOM_SETTINGS.minCountdown));
+ ROOM_SETTINGS={startingLives:Math.min(startingLives,maxLives),maxLives,minCountdown};
+ G.settings={...ROOM_SETTINGS};syncRoomSettings();$('settingsStatus').textContent='Room settings updated for everyone.';push();
+}
+function resetRoomSettings(){if(!isHost||!G||G.ph!=='lobby')return;ROOM_SETTINGS={...DEFAULT_ROOM_SETTINGS};G.settings={...ROOM_SETTINGS};syncRoomSettings();$('settingsStatus').textContent='Defaults restored for this room.';push()}
+
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let missOpen=false,peer,conn,conns={},me,isHost=false,G,S,room,nm,timer,deadline=0,dl=0,tot=1;
 
@@ -495,10 +536,23 @@ const mkCode=()=>Array.from({length:4},()=>"ABCDEFGHJKMNPQRSTUVWXYZ"[Math.random
 const ICE={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:global.stun.twilio.com:3478'},{urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'},{urls:'turns:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'}]};
 (function(){const e=document.createElement('div');e.id='net';e.className='msg';$('home').appendChild(e)})();
 function net(m,bad){const e=$('net');if(!e)return;e.textContent=m;e.style.color=bad?'var(--coral)':'var(--mut)'}
+let leavingRoom=false,intentionalLeave=false;
+function leaveRoom(){
+ if(leavingRoom||(!S&&!G))return;
+ leavingRoom=true;
+ if(!confirm(isHost?'Leave this room? The room will close for everyone.':'Leave this room?')){setTimeout(()=>{leavingRoom=false},500);return;}
+ intentionalLeave=true;
+ clearTimeout(timer);deadline=0;
+ try{Object.values(conns||{}).forEach(c=>{try{c.close()}catch(e){}})}catch(e){}
+ try{if(conn)conn.close()}catch(e){}
+ try{if(peer)peer.destroy()}catch(e){}
+ conns={};conn=null;peer=null;G=null;S=null;isHost=false;room=null;me=null;ROOM_SETTINGS={...DEFAULT_ROOM_SETTINGS};
+ show('home');net('');$('rc').value='';$('ans').value='';leavingRoom=false;
+}
 function NETERR(e){const base={'peer-unavailable':'Room not found. Check the code.','network':'Cannot reach the connection server.','server-error':'Cannot reach the connection server.','socket-error':'Cannot reach the connection server.','socket-closed':'Lost the connection to the server.','webrtc':'This device could not set up a direct connection.','browser-incompatible':'This browser cannot make live connections.'}[e.type]||('Network error: '+e.type);return base+(['network','server-error','socket-error','socket-closed','webrtc'].indexOf(e.type)>=0?' School or work Wi-Fi often blocks this. Try a phone hotspot or home Wi-Fi.':'')}
 function host(fixed){
   nm=$('nm').value.trim()||'Player';room=fixed||mkCode();isHost=true;net(fixed?'Opening the public room...':'Opening a room...');peer=new Peer('bbash-'+room,{config:ICE});
-  peer.on('open',id=>{net('');me=id;G={ph:'lobby',players:[{id,name:nm,lives:3,score:0,alive:true,nl:LIFE0,pv:0,seg:[]}],turn:0,cat:-1,last:null,msg:'',used:{},n:0};push()});
+  peer.on('open',id=>{net('');me=id;ROOM_SETTINGS={...DEFAULT_ROOM_SETTINGS};G={ph:'lobby',settings:{...ROOM_SETTINGS},players:[{id,name:nm,lives:ROOM_SETTINGS.startingLives,score:0,alive:true,nl:LIFE0,pv:0,seg:[]}],turn:0,cat:-1,last:null,msg:'',used:{},n:0};push()});
   peer.on('error',e=>{if(e.type==='unavailable-id'){peer.destroy();isHost=false;if(fixed)setTimeout(()=>pubRoom(pubN),400);else host()}else net(NETERR(e),1)});
   peer.on('connection',c=>{c.on('data',d=>hostMsg(c,d));c.on('close',()=>drop(c.peer))});
 }
@@ -506,18 +560,18 @@ function hostMsg(c,d){
   if(d.t==='join'){
     if(conns[c.peer])return;
     if(G.ph!=='lobby'||G.players.length>=5){c.send({t:'full'});setTimeout(()=>c.close(),400);return}
-    conns[c.peer]=c;G.players.push({id:c.peer,name:String(d.n||'Player').slice(0,12),lives:3,score:0,alive:true,nl:LIFE0,pv:0,seg:[]});push();
+    conns[c.peer]=c;G.players.push({id:c.peer,name:String(d.n||'Player').slice(0,12),lives:ROOM_SETTINGS.startingLives,score:0,alive:true,nl:LIFE0,pv:0,seg:[]});push();
   }else if(d.t==='ans')answer(c.peer,String(d.x||''));else if(d.t==='typ'){const cp=G.players[G.turn];if(G.ph==='play'&&!G.pause&&cp&&cp.id===c.peer)bcastTyp(c.peer,String(d.x||'').slice(0,30))}
 }
 function push(){
-  const s={ph:G.ph,players:G.players,turn:G.turn,cat:G.cat>=0?CATS[G.cat][0]:'',left:deadline?Math.max(0,deadline-Date.now()):0,tot:G.tot||1,msg:G.msg,pause:G.pause,np:G.np,win:G.win,n:G.n,pn:G.pn,say:G.say,lf:G.lf,miss:G.ph==='over'?G.miss:undefined,room};
+  const s={ph:G.ph,settings:G.settings||DEFAULT_ROOM_SETTINGS,players:G.players,turn:G.turn,cat:G.cat>=0?CATS[G.cat][0]:'',left:deadline?Math.max(0,deadline-Date.now()):0,tot:G.tot||1,msg:G.msg,pause:G.pause,np:G.np,win:G.win,n:G.n,pn:G.pn,say:G.say,lf:G.lf,miss:G.ph==='over'?G.miss:undefined,room};
   Object.values(conns).forEach(c=>c.open&&c.send({t:'s',s}));render(s);
 }
 const lim=()=>G.players.length>1?1:0;
 const ended=()=>G.players.filter(p=>p.alive).length<=lim();
 function nextAlive(){let i=G.turn;do{i=(i+1)%G.players.length}while(!G.players[i].alive);return i}
 function start(){
-  G.players.forEach(p=>{p.lives=3;p.score=0;p.alive=true;p.nl=LIFE0;p.pv=0;p.seg=[]});
+  G.players.forEach(p=>{p.lives=ROOM_SETTINGS.startingLives;p.score=0;p.alive=true;p.nl=LIFE0;p.pv=0;p.seg=[]});
   G.used={};G.miss=[];G.say=null;G.lf=null;G.deck=null;G.played=[];G.fresh=true;G.same=0;G.pn=0;G.n=0;G.ph='play';G.win=null;G.msg='';G.turn=Math.random()*G.players.length|0;turn();
 }
 function turn(){
@@ -525,10 +579,10 @@ function turn(){
   if(ended())return end();
   if(!G.players[G.turn].alive)G.turn=nextAlive();
   let intro=false;
-  G.pause=false;G.msg='';G.say=null;G.lf=null;if(G.fresh||G.cat<0||(G.popped&&G.players[G.turn].id===G.popped)||(G.same||0)>=(G.per||2)*G.players.filter(p=>p.alive).length){if(!G.deck||!G.deck.length)G.deck=newDeck(G.cat,G.played);G.cat=G.deck.pop();markSeen(G.cat);(G.played=G.played||[]).push(G.cat);{const pool=KRP[G.cat].filter(k=>!G.used[G.cat+'|'+k]);G.kr=pool.length?pool[Math.random()*pool.length|0]:null}G.same=0;G.n=0;G.pops=0;G.popped=null;G.per=1+(Math.random()*4|0);G.fresh=false;G.pn=(G.pn||0)+1;intro=true}
+  G.pause=false;G.msg='';G.say=null;G.lf=null;if(G.fresh||G.cat<0||(G.popped&&G.players[G.turn].id===G.popped)||(G.same||0)>=(G.per||2)*G.players.filter(p=>p.alive).length){if(!G.deck||!G.deck.length)G.deck=newDeck(G.cat,G.played);G.cat=G.deck.pop();markSeen(G.cat);(G.played=G.played||[]).push(G.cat);{const pool=KRP[G.cat].filter(k=>!G.used[G.cat+'|'+k]);G.kr=pool.length?pool[Math.random()*pool.length|0]:null}G.same=0;G.n=0;G.pops=0;G.popped=null;G.per=2+(Math.random()*4|0);G.fresh=false;G.pn=(G.pn||0)+1;intro=true}
   if(intro){const k=G.ik=(G.ik||0)+1;G.np=1;G.pause=true;deadline=0;clearTimeout(timer);push();setTimeout(()=>{if(G.ik!==k||G.ph!=='play')return;G.np=0;if(ended())return end();if(!G.players[G.turn].alive)G.turn=nextAlive();G.pause=false;go()},1000);return}
   go();
-  function go(){G.tot=Math.max(5500,11000-G.n*300);G.n++;deadline=Date.now()+G.tot;clearTimeout(timer);timer=setTimeout(pop,G.tot);push()}
+  function go(){G.tot=Math.max(ROOM_SETTINGS.minCountdown*1000,11000-G.n*300);G.n++;deadline=Date.now()+G.tot;clearTimeout(timer);timer=setTimeout(pop,G.tot);push()}
 }
 function after(){
   if(ended())return end();
@@ -554,7 +608,7 @@ function answer(id,x){
   G.used[key]=1;clearTimeout(timer);deadline=0;
   const tier=rate(G.cat,r[0],r[1],G.kr),pts=PTS[tier];p.score+=pts;(p.seg=p.seg||[]).push([pts,tier]);
   let m=p.name+': '+dn.trim().slice(0,30)+' (+'+pts+', '+TL[tier]+')';
-  while(p.score>=p.nl){p.pv=p.nl;p.nl+=LIFE;p.seg=p.score>p.pv?[[Math.min(pts,p.score-p.pv),tier]]:[];if(p.lives<5){p.lives++;m+=' +1 life!';G.lf={id:p.id,k:(G.lfk=(G.lfk||0)+1)}}}
+  while(p.score>=p.nl){p.pv=p.nl;p.nl+=LIFE;p.seg=p.score>p.pv?[[Math.min(pts,p.score-p.pv),tier]]:[];if(p.lives<ROOM_SETTINGS.maxLives){p.lives++;m+=' +1 life!';G.lf={id:p.id,k:(G.lfk=(G.lfk||0)+1)}}}
   G.say={id:p.id,x:dn.trim().slice(0,22),p:pts,t:tier};G.same=(G.same||0)+1;G.msg=m;after();
 }
 function drop(id){
@@ -572,6 +626,7 @@ let pubN=1,pubTry=0;
 // public rooms: PUBLIC, PUBLIC2, PUBLIC3... Nobody has to share a code. If nobody is hosting a slot, you open it; if it is full or already playing, you try the next one.
 function pubRoom(n){pubN=n||1;if(++pubTry>25)return net('Could not find an open public room. Try again in a moment.',1);joinRoom('PUBLIC'+(pubN>1?pubN:''))}
 function joinRoom(fixed){
+  intentionalLeave=false;
   const pub=typeof fixed==='string';
   nm=$('nm').value.trim()||'Player';room=pub?fixed:$('rc').value.trim().toUpperCase();
   if(!pub&&room.length!==4)return net('Enter the 4-letter room code.',1);
@@ -590,7 +645,7 @@ function joinRoom(fixed){
       else if(d.t==='bad')flash(d.m);else if(d.t==='typ')onTyp(d.id,d.x);
       else if(d.t==='full'){if(pub){clearTimeout(to);nextOne()}else{alert('That room is full or already started.');location.reload()}}
     });
-    conn.on('close',()=>{if(moved)return;if(got){alert('Disconnected from the room.');location.reload()}else if(pub){clearTimeout(to);openIt()}else net('The host closed the connection.',1)});
+    conn.on('close',()=>{if(moved||intentionalLeave)return;if(got){alert('Disconnected from the room.');location.reload()}else if(pub){clearTimeout(to);openIt()}else net('The host closed the connection.',1)});
   });
   peer.on('error',e=>{if(pub&&e.type==='peer-unavailable')return openIt();net(NETERR(e),1)});
 }
@@ -636,13 +691,13 @@ function sendTyp(){if(!isMine())return;const x=$('ans').value.slice(0,30);if(isH
 function seats(s){
   const n=s.players.length,mi=Math.max(0,s.players.findIndex(p=>p.id===me));let h='',px=50,py=52;
   s.players.forEach((p,i)=>{
-    const a=(90+((i-mi+n)%n)*360/n)*Math.PI/180,x=50+40*Math.cos(a),y=52+34*Math.sin(a),hue=(i*67+190)%360,pv=p.pv||0,gl=Date.now()-(lfAt[p.id]||0)<1000?'<span class="gain" style="animation-delay:-'+(Date.now()-lfAt[p.id])+'ms">+1 life</span>':'',xb=p.lives>=5?'<u class="t6" style="width:100%"></u>':(p.seg||[]).map(g=>`<u class="t${g[1]}" style="width:${g[0]/((p.nl||LIFE0)-pv)*100}%"></u>`).join('');
-    h+=`<div class="seat${i===s.turn&&p.alive&&!s.pause?' act':''}${p.alive?'':' dead'}${(s.say&&s.say.id===p.id)||typB(s,p)?' talk':''}" style="left:${x}%;top:${y}%">${typB(s,p)||(s.say&&s.say.id===p.id?`<div class="say t${s.say.t}${s.say.bad?' bad':''}"><span>${esc(s.say.x)}</span><small>${s.say.bad?esc(s.say.m):'+'+s.say.p+' '+TL[s.say.t]}</small></div>`:'')}<svg class="crit" viewBox="0 0 9 8" width="40" height="36" shape-rendering="crispEdges" fill="hsl(${hue} 80% 62%)"><path d="M4 0h1v1H4zM3 1h3v1H3zM0 2h9v1H0zM1 3h7v1H1zM2 4h5v1H2zM1 5h3v1H1zM5 5h3v1H5zM1 6h2v1H1zM6 6h2v1H6zM0 7h2v1H0zM7 7h2v1H7z"/><path d="M3 3h1v1H3zM5 3h1v1H5z" fill="#050a14"/></svg><div class="rock r${i%5}"></div><div class="nm">${esc(p.name)}</div><b class="hp">${'♥'.repeat(Math.max(0,p.lives))}</b><div class="xpw"><div class="xp${p.lives>=5?' max':''}" title="Progress to next bonus life">${xb}</div>${gl}</div></div>`;
+    const a=(90+((i-mi+n)%n)*360/n)*Math.PI/180,x=50+40*Math.cos(a),y=52+34*Math.sin(a),hue=(i*67+190)%360,pv=p.pv||0,gl=Date.now()-(lfAt[p.id]||0)<1000?'<span class="gain" style="animation-delay:-'+(Date.now()-lfAt[p.id])+'ms">+1 life</span>':'',xb=p.lives>=ROOM_SETTINGS.maxLives?'<u class="t6" style="width:100%"></u>':(p.seg||[]).map(g=>`<u class="t${g[1]}" style="width:${g[0]/((p.nl||LIFE0)-pv)*100}%"></u>`).join('');
+    h+=`<div class="seat${i===s.turn&&p.alive&&!s.pause?' act':''}${p.alive?'':' dead'}${(s.say&&s.say.id===p.id)||typB(s,p)?' talk':''}" style="left:${x}%;top:${y}%">${typB(s,p)||(s.say&&s.say.id===p.id?`<div class="say t${s.say.t}${s.say.bad?' bad':''}"><span>${esc(s.say.x)}</span><small>${s.say.bad?esc(s.say.m):'+'+s.say.p+' '+TL[s.say.t]}</small></div>`:'')}<svg class="crit" viewBox="0 0 9 8" width="40" height="36" shape-rendering="crispEdges" fill="hsl(${hue} 80% 62%)"><path d="M4 0h1v1H4zM3 1h3v1H3zM0 2h9v1H0zM1 3h7v1H1zM2 4h5v1H2zM1 5h3v1H1zM5 5h3v1H5zM1 6h2v1H1zM6 6h2v1H6zM0 7h2v1H0zM7 7h2v1H7z"/><path d="M3 3h1v1H3zM5 3h1v1H5z" fill="#050a14"/></svg><div class="rock r${i%5}"></div><div class="nm">${esc(p.name)}</div><b class="hp">${'♥'.repeat(Math.max(0,p.lives))}</b><div class="xpw"><div class="xp${p.lives>=ROOM_SETTINGS.maxLives?' max':''}" title="Progress to next bonus life">${xb}</div>${gl}</div></div>`;
   });
   $('seats').innerHTML=h;$('puff').style.left=px+'%';$('puff').style.top=py+'%';
 }
 function render(s){
-  S=s;tot=s.tot;if(render.d!==s){render.d=s;dl=s.left?Date.now()+s.left:0}
+  S=s;applyRoomSettings(s.settings||DEFAULT_ROOM_SETTINGS);tot=s.tot;if(render.d!==s){render.d=s;dl=s.left?Date.now()+s.left:0}
   if(TYP&&(s.pause||!s.players[s.turn]||s.players[s.turn].id!==TYP.id))TYP=null;
   if(s.lf&&s.lf.k>lfK){lfK=s.lf.k;lfAt[s.lf.id]=Date.now();setTimeout(()=>S&&render(S),1100)}
   const tt=Math.round(s.players.reduce((a,p)=>a+p.score,0)*.4);
@@ -650,7 +705,7 @@ function render(s){
   document.body.style.setProperty('--d',s.ph==='lobby'?0:Math.min(1,tt/400));
   if(s.ph==='lobby'){
     missOpen=false;show('lobby');$('rc2').textContent=s.room;$('rcm').textContent=/^PUBLIC/.test(s.room)?'Public room. Anyone can join it from the home screen.':'Room code. Share it with your friends.';pl('pl1',s);
-    $('st').classList.toggle('hid',!isHost);$('wt').textContent=isHost?'Up to 5 players can join.':'Waiting for the host to start...';
+    $('st').classList.toggle('hid',!isHost);['settingStarting','settingMax','settingCountdown','resetSettings'].forEach(id=>$(id).disabled=!isHost);$('settingsStatus').textContent=isHost?'Only the room host can change these settings.':'Room settings set by the host.';$('wt').textContent=isHost?'Up to 5 players can join.':'Waiting for the host to start...';
   }else if(s.ph==='play'){
     show('game');seats(s);
     $('hroom').textContent=s.room;$('halive').textContent=s.players.filter(p=>p.alive).length+'/'+s.players.length;$('plab').textContent='Prompt '+(s.pn||1);
@@ -683,6 +738,10 @@ for(let i=0;i<16;i++){const b=document.createElement('i'),z=4+(Math.random()*8|0
 const KELP='<svg viewBox="0 0 12 24" shape-rendering="crispEdges" fill="#0b2238"><path d="M5 0h2v24H5zM3 4h2v2H3zM7 8h2v2H7zM3 12h2v2H3zM7 16h2v2H7zM3 20h2v2H3z"/></svg>';
 [[1,70],[5,110],[9,60],[88,90],[93,130],[97,70]].forEach(([l,hh])=>{const k=document.createElement('div');k.style.cssText='position:absolute;bottom:0;left:'+l+'%;width:'+hh/2.2+'px;height:'+hh+'px;opacity:.9';k.innerHTML=KELP;k.firstChild.setAttribute('width','100%');k.firstChild.setAttribute('height','100%');bb.appendChild(k)});
 document.body.prepend(bb);
+['settingStarting','settingMax','settingCountdown'].forEach(id=>$(id).addEventListener('change',saveRoomSettings));$('resetSettings').onclick=resetRoomSettings;
+function setSettingsOpen(open){$('settingsBackdrop').classList.toggle('hid',!open);$('openSettings').setAttribute('aria-expanded',String(open));if(open){$('closeSettings').focus() }else{$('openSettings').focus()}}
+$('openSettings').onclick=()=>setSettingsOpen(true);$('closeSettings').onclick=()=>setSettingsOpen(false);$('settingsBackdrop').addEventListener('click',e=>{if(e.target===$('settingsBackdrop'))setSettingsOpen(false)});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('settingsBackdrop').classList.contains('hid'))setSettingsOpen(false)});
+$('leaveLobby').onclick=leaveRoom;$('leaveGame').onclick=leaveRoom;
 $('mk').onclick=()=>host();$('jn').onclick=()=>joinRoom();$('pub').onclick=()=>{pubTry=0;pubRoom(1)};$('tn').onclick=()=>testNet();
 $('showmiss').onclick=()=>{missOpen=!missOpen;if(S)render(S)};$('st').onclick=start;$('again').onclick=()=>{G.ph='lobby';push()};
 $('ans').oninput=()=>{const n=Date.now();clearTimeout(sendTyp.t);if(n-typT>70){typT=n;sendTyp()}else sendTyp.t=setTimeout(sendTyp,80)};
