@@ -131,8 +131,8 @@ body.play main{padding-top:6px;padding-bottom:104px}
 .gain{animation:gain 1s steps(10) forwards}</style><style>.say.bad{--c:#ff5d6c}.say.bad span{text-decoration:line-through;text-decoration-thickness:3px;color:#ffc2c9}</style><style>.dock .inwrap{position:relative}#err{position:absolute;left:0;bottom:calc(100% + 6px);padding:2px 10px;background:#2a0b12;color:var(--coral);border:2px solid var(--coral);font-size:20px;line-height:1.1;white-space:nowrap;opacity:0;pointer-events:none;z-index:7}#err.on{opacity:1}.say.bad small{display:none}</style><style>.say.typ{--c:#8db8c2;animation:none}.say.typ span::after{content:"|";margin-left:2px;animation:blink .9s steps(2) infinite}@keyframes blink{50%{opacity:0}}@media (prefers-reduced-motion:reduce){.say.typ span::after{animation:none}}
 #lobby{position:relative}
 .leave-room{width:auto;padding:5px 10px;font-size:18px;margin:0 0 8px;position:relative;z-index:2}
-#game .hud{position:relative}
-#leaveGame{position:absolute;right:0;top:0;z-index:3}
+#game .hud{position:relative;margin-bottom:46px}
+#leaveGame{position:absolute;right:0;top:calc(100% + 8px);z-index:3;margin:0}
 .settings-trigger{position:absolute;left:calc(100% + 14px);top:12px;right:auto;width:auto;white-space:nowrap;margin:0;padding:7px 12px;z-index:8;display:block;min-width:112px;box-shadow:4px 4px 0 #02060d}
 .settings-backdrop{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(0,5,14,.78);z-index:20}
 .settings-backdrop.hid{display:none}
@@ -142,7 +142,79 @@ body.play main{padding-top:6px;padding-bottom:104px}
 .settings-close{width:auto;margin:0;padding:4px 10px;font-size:24px}
 .settings-popup label{display:block;margin-top:8px}
 @media(max-width:720px){.settings-trigger{left:auto;right:0;top:calc(100% + 10px);padding:5px 9px;font-size:18px;min-width:0}#lobby{margin-bottom:58px}}
-</style></head>
+</style><style>
+
+/* Compact vertical layout: keep the existing game structure and behavior intact. */
+main{padding-top:8px;padding-bottom:76px}
+body.play main{padding-top:3px;padding-bottom:76px}
+h1{font-size:clamp(42px,7vw,58px);margin:2px 0 0}
+.sub{font-size:19px;margin:0 0 8px}
+.card{padding:12px;margin:8px 0}
+#home,#lobby,#over{padding:12px}
+#home input,#home button,#lobby input,#lobby button,#over button{margin-top:3px;margin-bottom:3px;padding-top:5px;padding-bottom:5px}
+.code{font-size:68px;line-height:1;padding-top:2px;padding-bottom:2px}
+.pl{padding:6px 9px;margin:3px 0}
+#game .hud{gap:6px;align-items:center}
+#game .badge{min-width:84px;padding:1px 9px 3px}
+#game .badge small{font-size:15px}
+#game .badge b{font-size:27px;letter-spacing:2px}
+#game .hud .depth{font-size:17px}
+#game .ptitle{margin-top:5px;padding:4px 12px 6px}
+#game .ptitle .prompt{font-size:clamp(24px,4vw,32px);line-height:1.05}
+#game .ptitle small{font-size:16px;letter-spacing:2px}
+#game .ptitle .who{font-size:18px;min-height:18px}
+#arena{height:clamp(170px,calc(100dvh - 330px),440px);min-height:170px;margin:2px 0}
+#arena #puff{width:clamp(90px,13vw,125px)}
+#game .msg{min-height:18px;font-size:17px;margin:2px 0}
+.dock{gap:8px;padding:5px 10px 7px}
+.dock .lives{width:48px;height:48px;font-size:21px}
+.dock input{font-size:22px;padding:4px 8px}
+.dock button{font-size:22px;padding:4px 12px}
+.dock .legend{font-size:13px;line-height:1;margin-top:2px}
+.dock .bar{margin-top:3px;height:6px}
+#game .hud{margin-bottom:34px}
+#leaveGame{top:calc(100% + 5px);font-size:16px;padding:3px 8px}
+.leave-room{font-size:16px;padding:3px 8px}
+@media(max-height:700px){
+ body{font-size:20px}
+ #arena{height:clamp(145px,calc(100dvh - 290px),340px);min-height:145px}
+ #game .ptitle{padding:3px 10px 4px;margin-top:3px}
+ #game .ptitle .prompt{font-size:25px}
+ #game .ptitle .who{font-size:16px;min-height:16px}
+ #game .badge b{font-size:23px}
+ .dock{padding:3px 8px 5px}
+ .dock .lives{width:42px;height:42px}
+ .dock .legend{font-size:11px}
+}
+@media(max-width:600px){
+ main{padding-left:10px;padding-right:10px}
+ #arena{height:clamp(160px,calc(100dvh - 320px),420px);min-height:160px}
+ .dock{gap:6px;padding-left:6px;padding-right:6px}
+ .dock .lives{width:40px;height:40px;font-size:18px}
+ .dock button{padding:4px 8px;font-size:19px}
+ .dock input{font-size:19px;min-width:0}
+}
+
+</style>
+<style>
+/* Full-viewport underwater backdrop; keeps all game UI sizing and positioning unchanged. */
+html{min-height:100%;background:#050a14}
+body{min-height:100vh;min-height:100svh;width:100%;background-size:cover;background-position:center center;background-repeat:no-repeat;background-attachment:fixed}
+</style>
+
+<style>
+/* True full-screen game backdrop: a fixed layer spans the viewport behind all UI. */
+html{min-height:100%;background:#050a14}
+body{background:transparent !important;min-height:100vh;min-height:100svh}
+body::after{position:fixed;inset:0;left:0;right:0;top:0;bottom:0;height:auto;z-index:0;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 2px,transparent 2px 5px),
+  linear-gradient(transparent 54%,rgba(20,60,88,.5)),
+  linear-gradient(hsl(205 65% calc(26% - 17% * var(--d))),hsl(220 70% calc(9% - 5% * var(--d))) 75%);
+  pointer-events:none}
+main{position:relative;z-index:1}
+#bubs{z-index:0}
+</style>
+</head>
 <body><main>
 <h1>Puffer party</h1>
 <p class="sub">Answer before the puffer pops. Rarer answers score more.</p>
@@ -216,6 +288,120 @@ const CATS=[
 ["Name a car brand","toyota,honda,ford,chevrolet,bmw,mercedes,audi,tesla,nissan,volkswagen","hyundai,kia,subaru,mazda,jeep,dodge,lexus,volvo,porsche,ferrari,lamborghini,cadillac","bugatti,maserati,mclaren,lotus,alfaromeo,peugeot,renault,fiat,skoda,suzuki,pagani,koenigsegg,rivian,saab,lancia"],
 ["Name a dog breed","labrador,poodle,bulldog,beagle,boxer,pug,husky,chihuahua","dachshund,corgi,dalmatian,rottweiler,greatdane,shihtzu,akita,collie,maltese,doberman","basenji,saluki,komondor,puli,otterhound,borzoi,vizsla,keeshond,briard,schipperke,whippet,xoloitzcuintli"]
 ];
+
+// Extra answers for existing prompts. These are appended before answer maps are built.
+const EXTRA_ANSWERS = {
+  "Name a fruit": [
+    "clementine,mandarin,tangerine,granny smith,red delicious,honeydew,blackcurrant,cranberry,elderberry,gooseberry",
+    "boysenberry,loganberry,cloudberry,cherimoya,plantain,breadfruit,feijoa,loquat,medlar,soursop",
+    "salak,langsat,ackee, jabuticaba,marionberry,miracle fruit, yuzu, finger lime, white sapote"
+  ],
+  "Name a country": [
+    "south korea,north korea,south africa,new zealand,united kingdom,saudi arabia,indonesia,switzerland,netherlands,belgium",
+    "bangladesh,sri lanka,nepal,ghana,tanzania,ethiopia,ukraine,romania,serbia,croatia,iceland",
+    "liechtenstein,andorra,san marino,monaco,seychelles,comoros,eswatini,kiribati,micronesia,marshall islands"
+  ],
+  "Name an animal": [
+    "goat,duck,goose,camel,donkey,chimpanzee,seal,shark,whale,crocodile",
+    "lemur,meerkat,hyena,moose,bison,elk,porcupine,armadillo,flamingo,peacock,stingray",
+    "coelacanth,shoebill,quoll,jerboa, solenodon,leafy seadragon,blue-footed booby,glass frog"
+  ],
+  "Name a color": [
+    "cream,ivory,coral,burgundy,bronze,copper,khaki,sky blue",
+    "aqua,plum, lilac,rose,indigo blue,midnight blue,seafoam,salmon",
+    "amaranth,celadon,coquelicot,glaucous,isabelline,smaragdine,feldgrau"
+  ],
+  "Name a sport": [
+    "track and field,weightlifting,table tennis,ice skating,horse racing,diving,water polo",
+    "futsal,triathlon,softball,beach volleyball,figure skating,freestyle skiing,ultimate frisbee",
+    "pankration,bandy,shinty,underwater hockey,cycle polo,canicross,skyrunning"
+  ],
+  "Name a pizza topping": [
+    "ham,red onion,green pepper,red pepper,black olives,sausage,mozzarella",
+    "sun-dried tomato,roasted garlic,roasted red pepper,ricotta,smoked salmon,hot honey",
+    " nduja, soppressata, stracciatella, rapini, porcini, mortadella"
+  ],
+  "Name a musical instrument": [
+    "keyboard,recorder,electric guitar,acoustic guitar, French horn,triangle",
+    "french horn,flugelhorn,steelpan,concertina,crumhorn,shamisen,tabla",
+    "nyckelharpa,bandoneon,glass armonica,sheng,guqin,berimbau, koto"
+  ],
+  "Name a vegetable": [
+    "sweet potato,green bean,brussels sprouts,mushroom,pumpkin,artichoke",
+    "yam,arugula,collard greens,mustard greens,water chestnut,spaghetti squash",
+    "samphire,cardoon,skirret,amaranth greens,sea kale,malabar spinach"
+  ],
+  "Name a car brand": [
+    "gmc,buick,lincoln,acura,infiniti,mitsubishi,genesis,mini",
+    "polestar,alpine,cupra,seat,opel,vauxhall,holden, daihatsu",
+    "wiesmann,donkervoort,spyker, rimac,zenvo, gac,mahindra"
+  ],
+  "Name a dog breed": [
+    "golden retriever,german shepherd,golden doodle,pomeranian,shiba inu,boston terrier",
+    "weimaraner,bernese mountain dog,cane corso,english setter,irish setter,staffordshire bull terrier",
+    "lagotto romagnolo,azawakh,sloughi,thai ridgeback,peruvian inca orchid,american hairless terrier"
+  ]
+};
+for (const cat of CATS) {
+  const extra = EXTRA_ANSWERS[cat[0]];
+  if (extra) extra.forEach((answers, tier) => {
+    // Append directly here; norm() is initialized later when the answer maps are built.
+    cat[tier + 1] += (cat[tier + 1] ? "," : "") + answers;
+  });
+}
+
+// New prompts use the same three answer tiers as the existing game.
+CATS.push(
+  ["Name a US state",
+   "california,texas,florida,new york,ohio,georgia,illinois,pennsylvania,arizona,washington",
+   "oregon,colorado,utah,nevada,maine,vermont,alaska,hawaii,tennessee,louisiana,minnesota",
+   "delaware,rhode island,west virginia,new hampshire,north dakota,south dakota, wyoming"],
+  ["Name a school subject",
+   "math,english,science,history,geography,art,music,biology,chemistry,physics",
+   "literature,economics,psychology,sociology,computer science,algebra,geometry, civics,drama",
+   "epistemology,linguistics,forensic science,astronomy,anthropology, paleontology"],
+  ["Name a board game",
+   "monopoly,scrabble,chess,checkers,clue,life,candy land,uno,risk,battleship",
+   "catan, ticket to ride,carcassonne,stratego,sequence,connect four, sorry!,trivial pursuit",
+   "gloomhaven,root,terraforming mars,brass birmingham,twilight struggle,spirit island"],
+  ["Name a breakfast food",
+   "eggs,bacon,pancakes,waffles,cereal,oatmeal,toast,sausage,yogurt,hash browns",
+   "french toast,bagel,croissant,granola,omelet, breakfast burrito,fruit salad,porridge",
+   "shakshuka,congee,arepa,menemen,smorrebrod, pain perdu,khachapuri"],
+  ["Name an ice cream flavor",
+   "vanilla,chocolate,strawberry,mint chocolate chip,cookies and cream, rocky road,butter pecan",
+   "pistachio,coffee,caramel,cotton candy,peanut butter,black raspberry,lemon, mango",
+   "ube, kulfi, stracciatella, tahini, hojicha, lavender honey, rosewater, malted milk"],
+  ["Name a movie genre",
+   "comedy,horror,action,romance,drama,thriller,science fiction,adventure,documentary",
+   "mystery, fantasy,western,musical,animation,crime,war,sports,romantic comedy",
+   "mockumentary,neo-noir, mumblecore,body horror, cyberpunk, biographical drama"],
+  ["Name a holiday",
+   "christmas,halloween,thanksgiving,new year's day,easter,valentine's day,independence day",
+   "memorial day,labor day,veterans day,martin luther king jr day,presidents day,juneteenth",
+   "vesak,nowruz,diwali,hanukkah,kwanzaa,obon, midsummer,day of the dead"],
+  ["Name an ocean animal",
+   "shark,dolphin,whale,octopus,crab,jellyfish,sea turtle,seal,starfish",
+   "sea otter, manta ray, seahorse,lobster,squid,walrus,orca,clownfish,stingray",
+   "vampire squid,blue dragon nudibranch, giant isopod, dumbo octopus, gulper eel, sea pig"],
+  ["Name a video game",
+   "minecraft,mario kart,fortnite, roblox,minecraft,super mario bros, tetris, pokemon,zelda",
+   "stardew valley,animal crossing, portal,halo,overwatch,terraria,celeste,hades,fall guys",
+   "baba is you,outer wilds,disco elysium,return of the obra dinn, tunic,inscryption"],
+  ["Name a famous landmark",
+   "eiffel tower,statue of liberty,great wall of china,big ben,pyramids of giza, golden gate bridge",
+   "colosseum,machu picchu,taj mahal,stonehenge, mount rushmore,christ the redeemer",
+   "borobudur,petra,angkor wat,moai statues, abu simbel, sagrada familia"],
+  ["Name a job",
+   "teacher,doctor,nurse,police officer, firefighter,chef,lawyer,engineer, pilot",
+   "architect,plumber,electrician, journalist,pharmacist,mechanic,therapist,accountant",
+   "actuary,entomologist,cartographer,conservator,onomatologist,ornithologist"],
+  ["Name something in a kitchen",
+   "refrigerator,oven,microwave,sink,stove, toaster,knife,spoon,fork,plate",
+   "blender,air fryer,colander,cutting board,measuring cup,whisk,ladle,rolling pin",
+   "mandoline, chinois,ramekin,immersion blender,proofing basket,meat thermometer"]
+);
+
 // extra answers for the first 10 prompts, same order: [plankton, too clever, schooler]
 const MORE=[
 ["melon,tangerine,avocado","honeydew,cranberry,clementine,mandarin,date,elderberry,currant,gooseberry,boysenberry","soursop,longan,feijoa,loquat,salak,mangosteen,cherimoya,pomelo,yuzu,bilberry,lingonberry,physalis"],
@@ -473,6 +659,56 @@ function rate(ci,k,b,kr){
   else t=b<5.04?4:5;
   return kr&&k===kr?6:t;
 }
+
+// Additional prompt pack. Inserted before answer-map initialization so every
+// new category is included in the same scoring, display, and deck systems.
+CATS.push(
+ ["Name a famous singer","taylor swift,beyonce,adele,ed sheeran,ariana grande,bruno mars,rihanna,justin bieber,billie eilish,elvis presley","lady gaga,shakira,drake,dua lipa,harry styles,selena gomez,bruce springsteen,freddie mercury, stevie wonder,janet jackson","patsy cline, nina simone,robert plant,celine dion, george michael,grace jones,erykah badu, bjork"],
+ ["Name a TV show","friends,the office,breaking bad,stranger things,game of thrones,the simpsons,spongebob squarepants,bluey,modern family","the mandalorian,parks and recreation,brooklyn nine nine,better call saul,the crown,avatar the last airbender,doctor who, gilmore girls","severance,the wire, twin peaks, fleabag, the leftovers, reservation dogs, deadwood, dark"],
+ ["Name a book","harry potter,the hobbit, the hunger games,twilight, charlotte's web, green eggs and ham, the cat in the hat","the giver,holes, wonder, the fault in our stars,percy jackson, little women, the book thief, anne of green gables","middlemarch,beloved,infinite jest, one hundred years of solitude, the master and margarita, parable of the sower"],
+ ["Name a city","new york,los angeles,chicago,london,paris,tokyo,rome,sydney,toronto,miami","seattle,denver,boston,atlanta,barcelona,amsterdam,berlin,seoul,mumbai,cairo","tbilisi,ljubljana,chiang mai, addis ababa,antananarivo,ushuaia, samarkand, reykjavik"],
+ ["Name a dessert","cake,cookie,brownie,ice cream,pie,donut,pudding,cheesecake,cupcake","tiramisu, crème brûlée,macaron,baklava,churro,cannoli, panna cotta,mochi,flan","kulfi,basbousa, clafoutis, pavlova, tres leches, knafeh, taiyaki, malva pudding"],
+ ["Name a breakfast drink","coffee,tea,orange juice,milk,water,hot chocolate,apple juice","latte,cappuccino,matcha,chai,grapefruit juice, smoothie, kefir, oat milk","yerba mate, chicory coffee, barley tea, lassi, atole, salep, cascara tea"],
+ ["Name a type of weather","sunny,rainy,snowy,windy,cloudy,foggy,stormy,hot,cold","humid,dry,icy,hail,drizzle,sleet,thunderstorm,blizzard,heat wave","graupel, freezing fog, virga, haboob, derechos, bomb cyclone, thundersnow"],
+ ["Name something at the beach","sand,ocean,waves,umbrella,towel,sunscreen,shells,bucket,shovel","lifeguard,surfboard,boogie board,beach chair,seagull,sandcastle,snorkel,flip flops","skimboard, beach cabana, tide pool, parasol, kitesurfing kite, beachcomber"],
+ ["Name a thing in a classroom","desk,chair,book,pencil,pen,whiteboard,computer,backpack,notebook","projector,globe,calculator,protractor,compass, stapler, bulletin board, microscope","document camera, interactive display, abacus, anatomical model, map cabinet"],
+ ["Name a mode of transportation","car,bus,train,plane,bicycle,boat,motorcycle,truck,subway","tram,ferry,scooter,helicopter,hot air balloon,cable car,monorail,tractor","hydrofoil, funicular, zeppelin, rickshaw, snowmobile, hovercraft, gondola"],
+ ["Name a flower","rose,tulip,daisy,sunflower,lily,orchid,daffodil,tiger lily","peony,hydrangea,marigold,lavender,iris,hibiscus,foxglove, zinnia","ranunculus, protea, fritillaria, hellebore, lisianthus, celosia, anemone"],
+ ["Name a tree","oak,maple,pine,birch,willow,cedar,apple tree,cherry tree","redwood,sequoia,sycamore, magnolia, aspen, eucalyptus, cypress, spruce","baobab, ginkgo, dawn redwood, monkey puzzle, cork oak, dragon blood tree"],
+ ["Name a body part","head,arm,leg,hand,foot,eye,ear,nose,mouth,knee","ankle,elbow,wrist,shoulder,thumb,eyebrow,chin,heel,spine","clavicle,scapula,sternum,patella,phalanx,mandible, Achilles tendon"],
+ ["Name a planet or dwarf planet","mercury,venus,earth,mars,jupiter,saturn,uranus,neptune,pluto","ceres,eris,haumea,makemake","orcus,quaoar,sedna,gonggong, makemake, varuna"],
+ ["Name a computer or phone app","youtube,tiktok,instagram,snapchat,facebook,spotify,google maps, netflix,discord","whatsapp,telegram, pinterest,reddit,duolingo,notion,zoom,slack, capcut","obsidian,procreate, blender, davinci resolve, signal, bitwarden, home assistant"],
+ ["Name a clothing item","shirt,pants,shoes,socks,hat,jacket,dress,shorts,skirt","hoodie,sweater,blazer,cardigan,overalls,leggings,scarf,mittens","ascot, bolero, culottes, kaftan, gambeson, spats, waistcoat"],
+ ["Name a kitchen appliance","refrigerator,oven,microwave,toaster,blender,coffee maker,dishwasher","air fryer, rice cooker,slow cooker,stand mixer,food processor,electric kettle, waffle iron","sous vide circulator, dehydrator, induction hob, vacuum sealer, pressure canner"],
+ ["Name a candy","chocolate bar,gummy bears,lollipop,jelly beans,skittles,m&m's,twix,kit kat","sour patch kids,starburst,licorice,caramel,taffy,peanut brittle,rock candy","bonbon,dragée, turkish delight,halva,brigadeiro,pâte de fruit, praline"],
+ ["Name a superhero","superman,batman,spider-man,wonder woman,iron man,hulk,thor, captain america","black panther, captain marvel, doctor strange,ant-man,flash,green lantern, storm, daredevil","moon knight,blue beetle, zatanna, namor, silver surfer, squirrel girl, booster gold"],
+ ["Name a musical genre","pop,rock,hip hop,jazz,classical,country,blues,metal,reggae","punk,disco, funk,soul,house,techno,folk,gospel,bluegrass","shoegaze,afrobeat,drum and bass, trip hop,math rock,highlife,kwaito, grime"],
+ ["Name a board or card game piece","die,card,token,pawn,king,queen,rook,bishop,knight","meeple, tile, marker, miniature, score pad, spinner, game board","resource cube, worker placement piece, deck box, initiative tracker, terrain hex"],
+ ["Name a farm animal","cow,pig,chicken,sheep,horse,goat,duck, turkey,donkey","goose, llama, alpaca, mule, rabbit, guinea fowl, water buffalo","yak, zebu, emu, ostrich, angora goat, kune kune pig, miniature donkey"],
+ ["Name a sport played with a ball","soccer,basketball,football,baseball,tennis,volleyball,golf,rugby","cricket,handball,water polo,lacrosse,netball,softball,table tennis","jai alai, sepak takraw, pelota mixteca, bossaball, fistball, kin-ball"],
+ ["Name a place to shop","grocery store,mall,supermarket,bookstore,pharmacy,convenience store","farmers market,department store,thrift store,hardware store,shopping center,outlet mall","haberdashery, mercantile, co-op, emporium, bazaar, specialty grocer"],
+ ["Name a musical artist group","the beatles,queen,abba,nirvana, coldplay, imagine dragons,maroon 5","fleetwood mac,earth wind and fire, the rolling stones, daft punk, outkast, run dmc","talking heads, belle and sebastian, television, kraftwerk, the velvet underground"],
+ ["Name a famous scientist","albert einstein,isaac newton,marie curie,charles darwin,nikola tesla,galileo,stephen hawking","ada lovelace,alan turing,rosalind franklin,jane goodall,katherine johnson, richard feynman","emmy noether, chandrasekhar, george washington carver, vera rubin, abdus salam"],
+ ["Name a US president","george washington,thomas jefferson,abraham lincoln,theodore roosevelt,franklin roosevelt,barack obama,donald trump,joe biden","john adams,james madison,ulysses grant,woodrow wilson,harry truman,dwight eisenhower,john f kennedy,ronald reagan","james k polk,chester a arthur,calvin coolidge,grover cleveland,william howard taft,gerald ford"],
+ ["Name a mythical creature","dragon,unicorn,phoenix,mermaid,centaur,griffin,werewolf,vampire","minotaur,hydra,pegasus,cyclops,kraken,basilisk, banshee, kitsune","manticore, qilin, roc, kelpie, domovoi, amphisbaena, tikbalang"],
+ ["Name something you take on vacation","suitcase,clothes,toothbrush,phone,charger,passport,wallet,sunglasses","camera, sunscreen, swimsuit,travel pillow, guidebook,medication,adapter,earplugs","packing cubes, e-reader, dry bag, universal plug, luggage scale, binoculars"],
+ ["Name a type of dance","ballet,tango,salsa,hip hop,breakdance,tap dance,waltz","foxtrot,rumba,cha cha,flamenco,contemporary dance, swing, krumping","kathak, bharatanatyam, butoh, clogging, waacking, voguing, capoeira"],
+ ["Name a natural disaster","earthquake,flood,hurricane,tornado,wildfire,tsunami,volcanic eruption","avalanche,landslide,drought,blizzard,storm surge, mudslide, heat wave","lahar, pyroclastic flow, sinkhole collapse, glacial outburst flood, derecho"]
+);
+
+
+// Regionally inclusive answer expansion: entries from Asia, Africa, Latin America,
+// the Pacific, the Middle East and Indigenous cultures, distributed across tiers.
+const GLOBAL_ANSWER_EXPANSIONS = {"Name a fruit": ["mango,papaya,guava,lychee,jackfruit,passion fruit,dragon fruit", "rambutan,durian,persimmon,pomelo,starfruit,tamarind,sugar apple", "mangosteen, langsat, salak, bael, jabuticaba, lucuma, gac fruit"], "Name a country": ["india,pakistan,china,japan,thailand,vietnam,kenya,egypt,brazil,mexico", "laos, cambodia, myanmar, mongolia, nepal, bhutan, senegal, ghana, peru, chile", "brunei,timor-leste, lesotho, malawi, burkina faso, suriname, kiribati, tuvalu"], "Name an animal": ["elephant,tiger,lion,giraffe,zebra,monkey,panda,kangaroo,koala", "orangutan,tapir,capybara, pangolin, okapi, binturong, manatee, civet", "aye-aye, saiga, takin, proboscis monkey, shoebill, fossa, pangolin"], "Name a color": ["turquoise,maroon,beige,magenta,cyan,teal,ochre", "vermillion, chartreuse, mauve, sienna, ultramarine, indigo", "han blue, gamboge, coquelicot, malachite, tyrian purple"], "Name a sport": ["badminton,table tennis,cricket,taekwondo,judo,wrestling,boxing", "kabaddi,wushu, sepak takraw, sumo, kendo, pencak silat, muay thai", "buzkashi, kushti, kho kho, silambam, capoeira, pelota"], "Name a pizza topping": ["paneer,tandoori chicken,corn, jalapeno, olives, pineapple, feta", "kimchi, chorizo, shawarma chicken, za'atar, halloumi, harissa", "sujuk, merguez, furikake, pickled daikon, sambal, labneh"], "Name a musical instrument": ["sitar,tabla,shamisen,koto,erhu,oud,djembe", "santoor, sarangi, guzheng, pipa, shakuhachi, gayageum, balalaika", "mbira, kora, berimbau, nyckelharpa, didgeridoo, kulintang, taiko"], "Name a vegetable": ["okra,daikon,bok choy, bitter melon, taro, cassava, yam", "lotus root, napa cabbage, water spinach, chayote, malanga, jicama", "yardlong bean, winged bean, celtuce, amaranth greens, breadfruit"], "Name a car brand": ["tata,mahindra,proton,perodua,byd,geely,maruti suzuki", "great wall motors,chery,vinfast,saic,haval,ssangyong", "wuling,li auto,nio,xpeng,force motors,irizar"], "Name a dog breed": ["shiba inu,akita, chow chow,indian pariah dog,thai ridgeback", "jindo,carolina dog,basenji,afghan hound,sloughi, saluki", "xoloitzcuintli, kishu ken, kai ken, telomian, azawakh"], "Name a US state": ["new mexico, north carolina, south carolina, mississippi, arkansas", "connecticut, massachusetts, new jersey, maryland, kentucky", "no additional states beyond the existing 50"], "Name a school subject": ["world history, environmental science, anthropology, economics, astronomy", "comparative religion, media studies, public health, agriculture, oceanography", "ethnomusicology, numismatics, paleography, sinology, climatology"], "Name a board game": ["mahjong,go, carrom, ludo, backgammon, mancala", "shogi, xiangqi, parcheesi, othello, pachisi, nine men's morris", "hnefatafl, tafl, bao, congkak, fanorona, surakarta"], "Name a breakfast food": ["congee,idli,dosa,poha,paratha, miso soup, steamed buns", "upma, putu, injera, ful medames, shakshuka, nasi lemak", "silog, akara, cheela, appam, khao tom, tamagoyaki"], "Name an ice cream flavor": ["mango,matcha,green tea,ube,coconut,black sesame,red bean", "durian,pandan,taro,rose,lychee,saffron,pistachio", "kulfi, mishti doi, soursop, mahlab, salep, mastic"], "Name a movie genre": ["martial arts, bollywood musical, wuxia, jidaigeki, anime", "masala film, jidai-geki, samurai cinema, melodrama, folklore fantasy", "griot film, third cinema, docufiction, regional folk horror"], "Name a holiday": ["diwali,eid al-fitr,eid al-adha,lunar new year,holi,nowruz", "songkran,vesak,obon,mid-autumn festival,navratri,lohri", "int'i raymi, timkat, meskel, gawai dayak, chuseok, tet"], "Name an ocean animal": ["dugong,whale shark,manta ray,nautilus,sea cucumber,giant clam", "sunfish, moray eel, cuttlefish, coconut crab, sea snake, manta", "leafy seadragon, yeti crab, oarfish, blue-ringed octopus, coelacanth"], "Name a video game": ["genshin impact, tekken, street fighter, final fantasy, sonic, pac-man", "monster hunter, yakuza, persona, nier automata, honkai star rail", "granblue fantasy, octopath traveler, bravely default, phantom brave"], "Name a famous landmark": ["angkor wat,petra,burj khalifa, mount fuji, great sphinx, taj mahal", "potala palace, meenakshi temple, golden temple, borobudur, shwedagon pagoda", "lalibela churches, great zimbabwe, sigiriya, bamiyan buddhas, ajanta caves"], "Name a job": ["farmer,carpenter, tailor, fisher, translator, nurse, teacher", "weaver, potter, midwife, game warden, interpreter, horticulturist", "thatched-roof specialist, luthier, conservator, ethnobotanist"], "Name something in a kitchen": ["wok,rice cooker, mortar and pestle, steamer, chopsticks, cleaver", "tagine, tandoor, tortilla press, bamboo steamer, suribachi", "idli stand, injera mitad, takoyaki pan, roti tawa"], "Name a programming language": ["kotlin,swift,rust,go,php,ruby,scala", "elixir,erlang, dart, lua, haskell, ocaml, julia", "clojure, f sharp, solidity, nim, crystal, zig, v"], "Name a planet or moon": ["europa,titan,io,ganymede,enceladus,triton", "callisto, phobos, deimos, charon, titan, miranda", "mimas, oberon, ariel, dione, rhea, makemake"], "Name a Greek or Roman god": ["isis,osiris,anubis,ra,horus,freyr,freya", "amaterasu,susanoo,izanagi,ganesha,shiva,vishnu", "quetzalcoatl,tezcatlipoca,perun,marduk,inari, izanami"], "Name a famous painter": ["frida kahlo,hiroshige,hokusai,amrita sher-gil,remedios varo", "kehinde wiley, yayoi kusama, zhang daqian, banksy, diego rivera", "tarsila do amaral, ben enwonwu, jamini roy, abdulnasser gharem"], "Name a famous scientist": ["abdus salam,subrahmanyan chandrasekhar,tu youyou,cv raman", "jocelyn bell burnell, mae jemison, fei-fei li, salim ali", "wangari maathai, rosalind franklin, chien-shiung wu, katsuko saruhashi"], "Name a type of pasta": ["udon,soba,ramen, glass noodles, rice noodles, pho noodles", "mee pok, laksa noodles, japchae, shirataki, somen", "pici, malloreddus, trofie, fregola, spaetzle, orzo"], "Name a Shakespeare play": ["no extra global entries: Shakespeare play titles are fixed"], "Name a US president": ["no extra entries: preserve the complete historical president answer list"], "Name a superhero": ["shaktimaan, krrish, kamen rider, ultraman, sailor moon, iron fist", "tokusatsu heroes, moon girl, kamala khan, static shock, blue beetle", "captain vietnam, black samson, miracleman, the phantom"], "Name a Disney movie": ["no extra entries: avoid adding non-Disney titles"], "Name an app or website": ["line,wechat, kakao talk, grab, gojek, paytm, alipay", "rakuten, mercari, lazada, shopee, bytedance, jio cinema", "naver, baidu, yandex, olx, carousell, momo"], "Name a candy": ["pocky, hi-chew, yan yan, kopiko, white rabbit, tamarind candy", "gulab jamun, jalebi, chikki, lokum, date candy, sesame snaps", "dodol, mochi candy, yuzu gummy, haw flakes, marukawa gum"], "Name a fast food restaurant": ["jollibee, nando's, lotteria, mos burger, bonchon, el pollo loco", "chicken republic, mr bigg's, indomie cafe, hokka hokka tei", "dicos, mixue, cha time, wow momo, nandos"], "Name a Pokemon": ["no extra entries: Pokemon names are franchise-specific"], "Name a cheese": ["paneer,queso fresco, cotija, oaxaca, halloumi, labneh", "akkawi, nabulsi, chhena, queso blanco, kesong puti", "bandel, kalari, mish, wagashi, jibneh arabieh"], "Name a dinosaur": ["no extra entries: dinosaur names are scientifically fixed"], "Name a Harry Potter character": ["no extra entries: preserve franchise-specific answers"], "Name a type of tree": ["neem,banyan,baobab,jacaranda,flamboyant,kapok", "moringa, tamarind, sandalwood, teak, sal, acacia", "dragon blood tree, quiver tree, monkey puzzle, ginkgo, breadfruit tree"], "Name a gemstone": ["jade,lapis lazuli, turquoise, moonstone, opal, spinel", "tanzanite, alexandrite, sugilite, charoite, tourmaline", "serendibite, painite, poudretteite, grandidierite, jeremejevite"], "Name a chemical element": ["no extra entries: element names are a fixed list"], "Name a type of bread": ["naan,roti,chapati,injera,pita,lavash,bao", "paratha, kulcha, dosa, mantou, sangak, barbari", "arepa, bammy, kisra, lahoh, taboon, pão de queijo"], "Name a soft drink": ["ting, irn bru, fanta, solo, sunkist, pocari sweat", "ting, maaza, thumbs up, mirinda, yakult, calpis", "kinnie, chinotto, kvass, tepache, ayran, salgam"], "Name a breakfast cereal": ["milo cereal, koko krunch, honey stars, weetabix, muesli", "nasi goreng cereal, corn flakes, chocos, koko pops", "sorghum porridge, millet flakes, teff porridge, amaranth cereal"], "Name an NBA team": ["no extra entries: NBA teams are a fixed league list"], "Name an NFL team": ["no extra entries: NFL teams are a fixed league list"], "Name a world capital": ["jakarta,dhaka,manila,nairobi,addis ababa,accra, lima, bogota", "kathmandu,thimphu,ulaanbaatar, vientiane, phnom penh, dakar", "bandar seri begawan, n'djamena, malabo, dodoma, asmara, suva"], "Name a famous river": ["mekong,nile,ganges,yangtze,amazon,danube,indus", "irrawaddy, zambesi, orinoco, lena, congo, salween", "tsangpo, okavango, senegal river, fly river, sepik, amu darya"], "Name a famous mountain": ["kilimanjaro,fuji, everest, aconcagua, denali, table mountain", "kinabalu, elbrus, ararat, damavand, mount kenya, ruwenzori", "puncak jaya, uluru, mount apo, mount cook, chimborazo"], "Name a currency": ["rupee,yen,yuan,won,baht,ringgit, peso, rand", "naira, cedi, birr, taka, dong, kip, riel, kyat", "ariary, metical, tala, pa'anga, vatu, ouguiya, lempira"], "Name a language": ["swahili,hindi,bengali,urdu,tagalog,vietnamese,thai", "tamil, telugu, malay, javanese, yoruba, amharic, zulu", "quechua, aymara, kalaallisut, kalaallisut, kalaallisut, kalaallisut, kalaallisut"], "Name a spice or herb": ["turmeric,cardamom,cumin, coriander, lemongrass, galangal, fenugreek", "sumac, za'atar, ajwain, asafoetida, pandan, shiso, curry leaf", "grains of paradise, urfa biber, sansho, grains of selim, long pepper"], "Name a flower": ["hibiscus,frangipani,plumeria, lotus,chrysanthemum, marigold", "jasmine, bougainvillea, bird of paradise, ylang-ylang, protea", "corpse flower, jade vine, ghost orchid, flame lily, king protea"], "Name a mythical creature": ["kitsune, naga, qilin, garuda, baku, yokai", "aswang, pontianak, tikbalang, rakshasa, djinn, simurgh", "adze, impundulu, bunyip, taniwha, amarok, camazotz"], "Name a US city": ["honolulu, anchorage, san juan, guam, phoenix, san diego", "albuquerque, el paso, fresno, tucson, sacramento", "no extra entries: keep to US cities"], "Name a Star Wars character": ["no extra entries: preserve franchise-specific character list"], "Name a Lord of the Rings character": ["no extra entries: preserve franchise-specific character list"], "Name a Nintendo character": ["no extra entries: preserve franchise-specific character list"], "Name a Pixar movie": ["no extra entries: preserve studio-specific movie list"], "Name a card game": ["hanafuda,teen patti,tarot,briscola,scopa", "rummy, truco, pinochle, euchre, durak, president", "kabufuda, ombre, tarot de marseille, conquian, kemps"], "Name a type of music": ["afrobeats, qawwali, bhangra, gamelan, reggae, rai, highlife", "gnawa, taarab, soukous, mbalax, dangdut, kulintang", "maqam, throat singing, joik, tuvan folk, mor lam, fado"], "Name a cocktail": ["pisco sour,caipirinha,mojito,sake cocktail, singapore sling", "dark 'n' stormy, paloma, michelada, batida, soju cocktail", "canchanchara, clover club, jungle bird, pandan negroni"], "Name a type of soup": ["pho, tom yum, miso soup, laksa, sinigang, ramen", "soto ayam, menudo, harira, mulligatawny, congee", "banga soup, egusi soup, pepperpot, kalguksu, tinola"], "Name a type of cookie": ["fortune cookie, alfajor, maamoul, amaretti, speculoos", "nankhatai, kuih bangkit, polvoron, butter mochi, sesame cookie", "kourabiedes, melomakarona, anzac biscuit, ghoriba"], "Name a type of dance": ["bhangra, kathak, bharatanatyam, dabke, samba, hula", "kizomba, bachata, capoeira, gumboot dance, odissi", "bon odori, lion dance, haka, khon, adumu, gumboot"], "Name a bone in the human body": ["no extra entries: anatomy terms are fixed"], "Name a European country": ["no extra entries: retain European-only category"], "Name an Asian country": ["no extra entries: retain Asian-only category"], "Name an African country": ["no extra entries: retain African-only category"], "Name a US state capital": ["no extra entries: preserve US state capitals"], "Name a Norse god or being": ["no extra entries: preserve Norse mythology category"], "Name a type of cloud": ["no extra entries: cloud types are a fixed taxonomy"], "Name a famous band": ["bts,blackpink,yoasobi, babymetal, se so neon, the hu", "king gizzard, tinariwen, orchestra baobab, altin gün", "fela kuti and africa 70, bhangra groups, ladysmith black mambazo"], "Name a famous singer or rapper": ["burna boy, wizkid, tems, yemi alade, angélique kidjo, ali farka touré", "ar rahman, lata mangeshkar, diljit dosanjh, yoasobi, utada hikaru", "nusrat fateh ali khan, fairuz, omar souleyman, yuna, dadju"], "Name a TV show": ["squid game, alice in borderland, sacred games, money heist, lupin", "kingdom, crash landing on you, pachinko, reply 1988, the glory", "ramy, shogun, the three body problem, extraordinary attorney woo"], "Name a famous movie": ["parasite, crouching tiger hidden dragon, spirited away, rrr, lagaan", "train to busan, the raid, hero, your name, shoplifters", "tumbbad, lunana a yak in the classroom, theeb, rafiki, mustang"], "Name a famous actor or actress": ["jackie chan, michelle yeoh, deepika padukone, shah rukh khan, tony leung", "gong li, song kang-ho, irrfan khan, lupita nyong'o, danai gurira", "sanaa lathan, omar sy, golshifteh farahani, dev patel, yvonne orji"], "Name a cartoon character": ["doraemon, shin chan, heidi, astro boy, masha", "hattori, anpanman, oggy, motu patlu, larva", "mighty raju, chhota bheem, molang, pingu, mumintroll"], "Name a Disney character": ["no extra entries: keep to Disney characters"], "Name a video game character": ["kirby, link, samus, sephiroth, cloud strife, chun-li", "riku, sora, kazuma kiryu, jill valentine, lara croft", "amaterasu, 2b, jin sakai, bayonetta, phoenix wright"], "Name a bird": ["peacock, hornbill, kingfisher, toucan, crane, myna, weaver bird", "shoebill, secretary bird, hoopoe, bee-eater, lyrebird, kākāpō", "satin bowerbird, kakapo, kori bustard, lammergeier, resplendent quetzal"], "Name a sea creature": ["dugong, nautilus, manta ray, sea cucumber, giant clam, sea snake", "coconut crab, cuttlefish, moray eel, sea kraits, whale shark", "yeti crab, oarfish, leafy seadragon, vampire squid, sea pig"], "Name an insect or bug": ["stick insect, praying mantis, cicada, atlas moth, lanternfly", "goliath beetle, jewel beetle, orchid mantis, leaf insect", "weta, dobsonfly, giraffe weevil, orchid bee, driver ant"], "Name a reptile or amphibian": ["gecko, monitor lizard, cobra, python, iguana, tokay gecko", "komodo dragon, gharial, caecilian, axolotl, flying snake", "tuatara, mata mata, sailfin lizard, olm, thorny devil"], "Name a clothing item": ["sari,kimono,hanbok,thobe,kaftan,kurta,lungi", "baju kurung, ao dai, dashiki, kente cloth, salwar kameez", "barong tagalog, dhoti, abaya, qipao, sarong"], "Name a type of shoe": ["geta,jutti,mojari,espadrille,clog,sandal", "babouche, zori, kolhapuri chappal, huarache, opanak", "peshawari chappal, paduka, abarcas, mukluk"], "Name a type of hat": [" fez,turban, kufi, pakol, conical hat, sombrero", "kofia, gele, songkok, taqiyah, beret", "ushanka, kalpak, salakot, keffiyeh"], "Name a body part": ["no extra entries: use existing body-part list"], "Name a job or profession": ["artisan,midwife,farmer, fisher, translator, weaver, potter", "ranger, herbalist, mason, blacksmith, boatbuilder, interpreter", "luthier, conservator, ethnobotanist, cartographer, falconer"], "Name a tool": ["machete,adze,hoe, sickle, mortar and pestle, wok spatula", "mattock, drawknife, auger, spokeshave, billhook", "gimlet, froe, scythe, ulu, kris"], "Name a piece of furniture": ["tatami mat, futon, low table, hammock, daybed", "charpoy, divan, floor cushion, shoji screen, tansu chest", "peacock chair, papasan, campaign stool, settee"], "Name a kitchen item": ["wok, tagine, tandoor, rice cooker, bamboo steamer, chopsticks", "suribachi, tortilla press, idli stand, roti tawa, clay pot", "takoyaki pan, injera mitad, balti bowl, couscoussier"], "Name a type of sandwich": ["banh mi,katsu sando,shawarma, falafel wrap, arepa", "torta, jibarito, sabich, kati roll, roti john", "smorrebrod, cemita, bocadillo, pan bagnat"], "Name a nut": ["cashew,macadamia,pistachio,peanut,almond,pecan", "candlenut, pili nut, betel nut, kola nut, tiger nut", "baru nut, mongongo nut, sapucaia nut, kukui nut"], "Name a Japanese food": ["onigiri,okonomiyaki,takoyaki, soba, udon, yakitori", "natto, chawanmushi, tonkatsu, tamagoyaki, nikujaga", "shirako, funazushi, hoba miso, kuromame, zoni"], "Name a Mexican food": ["pozole,mole,elote,tamales,chilaquiles,tostada", "cochinita pibil, tlayuda, birria, pambazo, huarache", "mixiote, zacahuil, sopa tarasca, papadzules"], "Name an Italian dish": ["risotto,polenta,gnocchi,osso buco,arancini", "ribollita, pappa al pomodoro, orecchiette, caponata", "malloreddus, fregola, testaroli, culurgiones"], "Name a Chinese or Asian dish": ["bibimbap, pho, pad thai, laksa, dumplings, mapo tofu", "char kway teow, nasi goreng, rendang, adobo, khao soi", "thukpa, momo, amok trey, laap, kuy teav"], "Name a sauce or condiment": ["sambal,gochujang, fish sauce, miso, tahini, chutney", "harissa, toum, nuoc cham, ponzu, kecap manis, zhug", "shito, berbere paste, doubanjiang, yuzu kosho, achar"], "Name a coffee or tea drink": ["matcha,chai, Vietnamese iced coffee, Turkish coffee, bubble tea", "kopi, teh tarik, dalgona coffee, masala chai, Thai tea", "café de olla, qahwa, sahlab, mate cocido, bissap"], "Name a dessert": ["mochi,baklava,gulab jamun,halo-halo, tres leches", "kulfi, ras malai, kunafa, mango sticky rice, chè", "kue lapis, malva pudding, brigadeiro, basbousa, pastel de nata"], "Name a famous athlete": ["naomi osaka, son heung-min, sachin tendulkar, manny pacquiao, simone biles", "eliud kipchoge, yuna kim, hidilyn diaz, lewis hamilton, sprinter usain bolt", "marta, didier drogba, abebe bikila, p v sindhu, armand duplantis"], "Name a famous city": ["mumbai,delhi,lagos,nairobi,seoul,jakarta,bangkok,manila", "dhaka, karachi, hanoi, addis ababa, accra, lima, medellin", "luang prabang, fes, samarkand, pokhara, maputo, dakar"], "Name a king or queen": ["queen elizabeth ii, cleopatra, akbar, ashoka, ramses ii", "mansa musa, queen nzinga, sejong the great, empress wu zetian", "sundiata keita, jayavarman vii, shaka zulu, amanirenas"], "Name a war or famous battle": ["battle of adwa, battle of saragarhi, battle of midway, battle of plassey", "battle of isandlwana, battle of sekigahara, battle of kursk", "battle of talas, battle of panipat, battle of cuito cuanavale"], "Name a toy": ["yo-yo, kendama, beyblade, tamagotchi, spinning top", "matryoshka, diablo, carrom board, wooden abacus, kite", "bilboquet, cup-and-ball, kendama, shadow puppet"], "Name a clothing brand": ["uniqlo,muji,gucci,prada,adidas,nike,li-ning, anta", "mango, massimo dutti, zara, superdry, onitsuka tiger", "bata, k-way, pepe jeans, patagonia, decathlon, miniso"], "Name a social media app or streaming service": ["wechat,line,kakao talk, bilibili, crunchyroll, viu, iflix", "jio cinema, hotstar, niconico, viki, iqiyi, viu", "joox, anghami, boomplay, deezer, soundcloud"], "Name a famous novel or book": ["things fall apart, one hundred years of solitude, the god of small things", "midnight's children, season of migration to the north, the alchemist", "so long a letter, the kite runner, the palm-wine drinkard, snow country"], "Name a famous author or writer": ["chinua achebe, rabindranath tagore, haruki murakami, arundhati roy", "ngugi wa thiong'o, khaled hosseini, mo yan, mahmoud darwish", "naguib mahfouz, buchi emecheta, yoko ogawa, leila aboulela"], "Name a type of vehicle": ["rickshaw, tuk tuk, jeepney, matatu, autorickshaw, songthaew", "bajaj, dala dala, bemo, angkot, tro tro, dala dala", "chiva bus, dala dala, becak, cycle rickshaw, ox cart"], "Name a type of weather": ["monsoon, sandstorm, typhoon, tropical cyclone, dust storm", "sirocco, harmattan, haboob, nor'easter, chinook wind", "loo wind, pampero, willy-willy, bora, mistral"], "Name a constellation or zodiac sign": ["crux, scorpius, sagittarius, orion, cassiopeia, draco", "andromeda, cygnus, lyra, aquarius, pisces", "apus, ara, dorado, mensa, tucana, vela"], "Name a fabric or material": ["silk,bamboo fabric,batik, ikat, kente, denim, linen", "khadi, muslin, brocade, tencel, ramie, hemp", "shweshwe, barkcloth, tapa, piña, abaca, eri silk"], "Name a shape": ["crescent,spiral,diamond,oval,star,heart", "trapezoid, rhombus, hexagon, octagon, teardrop", "vesica piscis, lemniscate, enneagon, hendecagon"], "Name a unit of measurement": ["kilometer,kilogram,liter,hectare,nautical mile, Celsius", "mu, rai, tael, jin, picul, lakh", "fathom, dan, chi, li, tola, viss"], "Name a famous singer": ["burna boy,wizkid,tems,ar rahman,shreya ghoshal,yoasobi", "lata mangeshkar, angélique kidjo, yuna, fairuz, utada hikaru", "nusrat fateh ali khan, omar souleyman, salif keita, sezen aksu"], "Name a book": ["the joy luck club, things fall apart, the god of small things, the kite runner", "persepolis, the namesake, season of migration to the north, so long a letter", "the palm-wine drinkard, wizard of the crow, the famished road, snow country"], "Name a city": ["mumbai,lagos,dhaka,jakarta,seoul,manila,bangkok,karachi", "nairobi,addis ababa,accra,hanoi,medellin,casablanca,dhaka", "luang prabang, fes, samarkand, pokhara, maputo, dakar"], "Name a breakfast drink": ["masala chai,teh tarik, Vietnamese coffee, matcha, Thai tea", "café de olla, qahwa, mate, sahlab, horchata", "bissap, sobolo, salep, barley tea, kopi tubruk"], "Name something at the beach": ["sarong, parasol, beach mat, coconut, surfboard, snorkel", "outrigger canoe, beach tent, reef-safe sunscreen, paddleboard", "bamboo beach hut, fishing net, shell necklace, tide pool"], "Name a thing in a classroom": ["abacus, chalkboard, globe, map, calligraphy brush, floor mat", "tatami, slate, low desk, science kit, wall chart", "counting frame, phonics chart, chalk holder, specimen jar"], "Name a mode of transportation": ["jeepney,tuk tuk,matatu,autorickshaw,bullet train, ferry", "songthaew, bemo, angkot, dala dala, tro tro, rickshaw", "chiva bus, becak, cyclo, dhow, felucca, longtail boat"], "Name a tree": ["neem,banyan,baobab,tamarind,teak,sandalwood", "kapok, sal, moringa, jacaranda, flamboyant, breadfruit", "dragon blood tree, quiver tree, ginkgo, monkey puzzle"], "Name a planet or dwarf planet": ["no extra entries: astronomy names are a fixed list"], "Name a computer or phone app": ["wechat,line,kakao talk,grab,gojek,paytm,alipay,naver", "baidu, yandex, shopee, lazada, bilibili, niconico", "momo, carousell, jio cinema, anghami, boomplay"], "Name a kitchen appliance": ["rice cooker, electric kettle, wok burner, pressure cooker, tandoor", "idli steamer, tortilla press, tagine, bamboo steamer", "takoyaki maker, injera mitad, couscoussier, roti tawa"], "Name a musical genre": ["afrobeats,bhangra,qawwali,highlife,taarab,dangdut", "gnawa, mbalax, soukous, rai, gamelan, mor lam", "joik, maqam, kwaito, amapiano, taarab, fado"], "Name a board or card game piece": ["mahjong tile, go stone, carrom striker, shogi piece, xiangqi piece", "ludo token, mancala stone, playing card, domino tile", "bao seed, fanorona piece, hnefatafl king, pachisi pawn"], "Name a farm animal": ["water buffalo,yak, llama, alpaca, guinea fowl, zebu", "silkie chicken, kune kune pig, angora goat, camel", "muscovy duck, bali cattle, dromedary, mithun"], "Name a sport played with a ball": ["kabaddi, sepak takraw, cricket, handball, netball, rugby", "pelota, fistball, bossaball, kin-ball, kho kho", "polo, jai alai, footvolley, beach soccer"], "Name a place to shop": ["bazaar,souk,wet market,night market,hawker centre", "department store, sari shop, spice market, street market", "cooperative, emporium, floating market, flea market"], "Name a musical artist group": ["bts,blackpink,yoasobi,babymetal,ladysmith black mambazo", "tinariwen, orchestra baobab, altin gün, se so neon", "africa 70, king gizzard, the hu, milli vanilli"], "Name something you take on vacation": ["mosquito repellent, travel adapter, sarong, water filter, visa", "portable prayer mat, universal adapter, travel kettle, mosquito net", "water purification tablets, dry bag, headlamp, money belt"], "Name a natural disaster": ["typhoon,monsoon flood,cyclone,landslide,volcanic ashfall", "lahar, storm surge, drought, dust storm, glacial lake outburst", "haboob, pyroclastic flow, mud volcano, sinkhole"]};
+for (const category of CATS) {
+  const extraTiers = GLOBAL_ANSWER_EXPANSIONS[category[0]];
+  if (!extraTiers) continue;
+  for (let tier = 0; tier < 3; tier++) {
+    const extra = extraTiers[tier] || "";
+    if (extra && !extra.startsWith("no extra")) category[tier + 1] += (category[tier + 1] ? "," : "") + extra;
+  }
+}
+
 const norm=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
 const DISP=CATS.map(()=>({}));
 const MAP=CATS.map((c,ci)=>{const m={};c.slice(1).forEach((s,t)=>{const a=s.split(',');a.forEach((w,j)=>{const k=norm(w);if(k&&!m[k]){const q=j/Math.max(1,a.length-1);m[k]=[.6+.8*q,1.6+1.6*q,3.6+2.4*q][t];DISP[ci][k]=w.trim()}})});return m});
@@ -503,15 +739,122 @@ const OVR=["McDonald's", "Wendy's", "Domino's", "Arby's", "Chick-fil-A", "In-N-O
 OVR.forEach(d=>{const k=norm(d);CATS.forEach((_,i)=>{if(MAP[i][k]!==undefined&&FULLD[i][k]===undefined)FULLD[i][k]=d})});
 const ALIAS={"country": {"usa": "United States", "america": "United States", "uk": "United Kingdom", "uae": "United Arab Emirates", "dprk": "North Korea", "png": "Papua New Guinea", "drc": "Democratic Republic of the Congo", "fsm": "Federated States of Micronesia", "the united states": "United States", "the netherlands": "Netherlands", "the bahamas": "Bahamas", "holland": "Netherlands", "burma": "Myanmar"}, "European country": {"uk": "United Kingdom"}, "Asian country": {"uae": "United Arab Emirates"}, "African country": {"drc": "Democratic Republic of the Congo"}, "US city": {"nyc": "New York City", "la": "Los Angeles", "sf": "San Francisco", "nola": "New Orleans", "dc": "Washington, D.C.", "vegas": "Las Vegas", "philly": "Philadelphia", "st louis": "St. Louis", "saint louis": "St. Louis", "st paul": "St. Paul", "st petersburg": "St. Petersburg", "st george": "St. George", "st cloud": "St. Cloud", "st augustine": "St. Augustine"}, "candy": {"mandms": "M&M's", "mms": "M&M's", "mm": "M&M's", "reeses pieces": "Reese's Pieces"}, "fast food restaurant": {"bk": "Burger King", "dq": "Dairy Queen", "mcds": "McDonald's", "5 guys": "Five Guys", "canes": "Raising Cane's", "kfc": "KFC", "ihop": "IHOP", "kentucky fried chicken": "KFC"}, "car brand": {"gm": "General Motors", "vw": "Volkswagen", "benz": "Mercedes-Benz", "mercedes": "Mercedes-Benz", "rolls": "Rolls-Royce", "chevy": "Chevrolet", "bmw": "BMW", "gmc": "GMC", "mg": "MG", "ds": "DS", "saic": "SAIC", "byd": "BYD", "nio": "NIO", "tvr": "TVR", "zil": "ZIL", "gaz": "GAZ", "uaz": "UAZ", "fso": "FSO", "faw": "FAW", "gac": "GAC", "jac": "JAC", "ssc": "SSC", "ora": "ORA", "ram": "Ram"}, "soft drink": {"coke": "Coca-Cola", "coca cola": "Coca-Cola", "7up": "7 Up", "seven up": "7 Up"}, "coffee or tea drink": {"psl": "Pumpkin Spice Latte"}, "dog breed": {"gsd": "German Shepherd", "lab": "Labrador Retriever", "golden": "Golden Retriever", "husky": "Siberian Husky"}, "board game": {"dnd": "Dungeons & Dragons", "dungeons and dragons": "Dungeons & Dragons", "7 wonders": "7 Wonders", "pass the pigs": "Pass the Pigs"}, "sport": {"f1": "Formula 1", "bjj": "Brazilian Jiu-Jitsu", "mma": "MMA", "bmx": "BMX", "jiu jitsu": "Jiu-Jitsu"}, "dinosaur": {"trex": "T. rex"}, "programming language": {"html": "HTML", "css": "CSS", "sql": "SQL", "php": "PHP", "vb": "VB", "vba": "VBA", "tcl": "Tcl", "awk": "AWK", "vhdl": "VHDL", "sas": "SAS", "spss": "SPSS", "jsx": "JSX", "tsx": "TSX", "json": "JSON", "yaml": "YAML", "xml": "XML", "wasm": "WebAssembly", "javascript": "JavaScript", "typescript": "TypeScript", "csharp": "C#", "objectivec": "Objective-C", "fsharp": "F#", "nodejs": "Node.js", "postgresql": "PostgreSQL", "mysql": "MySQL", "coffeescript": "CoffeeScript", "actionscript": "ActionScript", "applescript": "AppleScript", "powershell": "PowerShell", "labview": "LabVIEW", "matlab": "MATLAB", "cobol": "COBOL", "fortran": "Fortran", "basic": "BASIC", "pascal": "Pascal", "vbnet": "VB.NET", "dotnet": ".NET"}, "Star Wars character": {"r2d2": "R2-D2", "c3po": "C-3PO", "bb8": "BB-8", "k2so": "K-2SO", "4lom": "4-LOM", "qira": "Qi'ra", "bb9e": "BB-9E", "r5d4": "R5-D4", "ig88": "IG-88", "hux": "General Hux", "ewok": "Ewok"}, "famous band": {"u2": "U2", "acdc": "AC/DC", "rem": "R.E.M.", "tlc": "TLC", "bts": "BTS", "exo": "EXO", "mgmt": "MGMT", "nofx": "NOFX", "kiss": "KISS", "abba": "ABBA", "wham": "Wham!", "blink 182": "Blink-182", "nsync": "*NSYNC", "guns n roses": "Guns N' Roses", "panic at the disco": "Panic! at the Disco", "beatles": "The Beatles", "the beatles": "The Beatles", "rolling stones": "The Rolling Stones", "who": "The Who", "the who": "The Who", "doors": "The Doors", "the doors": "The Doors", "eagles": "Eagles", "blackpink": "BLACKPINK", "bigbang": "BIGBANG", "big bang": "BIGBANG", "twice": "TWICE", "stray kids": "Stray Kids"}, "famous singer or rapper": {"sza": "SZA", "psy": "PSY", "rza": "RZA", "gza": "GZA", "jid": "JID", "jay z": "Jay-Z", "dr dre": "Dr. Dre", "notorious big": "The Notorious B.I.G.", "biggie": "The Notorious B.I.G.", "ne yo": "Ne-Yo", "t pain": "T-Pain", "mc hammer": "MC Hammer", "ll cool j": "LL Cool J", "kanye": "Kanye West", "beyonce": "Beyoncé", "pink": "P!nk", "bad bunny": "Bad Bunny", "50 cent": "50 Cent", "lil nas x": "Lil Nas X", "tyler the creator": "Tyler, the Creator", "xxxtentacion": "XXXTentacion", "juice wrld": "Juice WRLD", "dababy": "DaBaby", "j cole": "J. Cole", "a ha": "a-ha"}, "TV show": {"csi": "CSI", "ncis": "NCIS", "qi": "QI", "office": "The Office", "simpsons": "The Simpsons", "sopranos": "The Sopranos", "wire": "The Wire", "crown": "The Crown", "boys": "The Boys", "bear": "The Bear", "mandalorian": "The Mandalorian", "walking dead": "The Walking Dead", "last of us": "The Last of Us", "big bang theory": "The Big Bang Theory"}, "famous movie": {"godfather": "The Godfather", "matrix": "The Matrix", "avengers": "The Avengers", "dark knight": "The Dark Knight", "lion king": "The Lion King", "wizard of oz": "The Wizard of Oz", "shawshank redemption": "The Shawshank Redemption", "sound of music": "The Sound of Music", "princess bride": "The Princess Bride", "breakfast club": "The Breakfast Club", "lord of the rings": "The Lord of the Rings", "hunger games": "The Hunger Games", "hobbit": "The Hobbit", "it": "It", "us": "Us", "big": "Big", "up": "Up"}, "Disney movie": {"lion king": "The Lion King", "little mermaid": "The Little Mermaid", "jungle book": "The Jungle Book", "incredibles": "The Incredibles", "aristocats": "The Aristocats", "rescuers": "The Rescuers", "fox and the hound": "The Fox and the Hound", "princess and the frog": "The Princess and the Frog", "emperors new groove": "The Emperor's New Groove", "hunchback of notre dame": "The Hunchback of Notre Dame", "three caballeros": "The Three Caballeros", "up": "Up", "101 dalmatians": "101 Dalmatians", "lilo and stitch": "Lilo & Stitch"}, "Pixar movie": {"incredibles": "The Incredibles", "up": "Up"}, "famous novel or book": {"great gatsby": "The Great Gatsby", "hunger games": "The Hunger Games", "catcher in the rye": "The Catcher in the Rye", "lord of the rings": "The Lord of the Rings", "hobbit": "The Hobbit", "bible": "The Bible", "outsiders": "The Outsiders", "giving tree": "The Giving Tree", "cat in the hat": "The Cat in the Hat", "1984": "1984", "it": "It"}, "Shakespeare play": {"tempest": "The Tempest", "merchant of venice": "The Merchant of Venice", "taming of the shrew": "The Taming of the Shrew", "comedy of errors": "The Comedy of Errors", "merry wives": "The Merry Wives of Windsor", "winters tale": "The Winter's Tale", "lear": "King Lear", "titus": "Titus Andronicus", "troilus": "Troilus and Cressida", "macbeth": "Macbeth", "hamlet": "Hamlet", "othello": "Othello", "pericles": "Pericles"}, "ice cream flavor": {"smores": "S'mores", "reeses": "Reese's", "pb and j": "PB&J", "baileys": "Baileys", "moose tracks": "Moose Tracks"}, "breakfast food": {"pop tarts": "Pop-Tarts", "mcmuffin": "McMuffin", "egg mcmuffin": "Egg McMuffin"}, "sandwich": {}, "type of sandwich": {"blt": "BLT", "pb and j": "PB&J", "peanut butter and jelly": "Peanut Butter & Jelly", "po boy": "Po' Boy", "banh mi": "Bánh Mì", "sloppy joe": "Sloppy Joe"}, "sauce or condiment": {"a1": "A1", "bbq sauce": "BBQ Sauce", "mayo": "Mayo"}, "cocktail": {"b52": "B-52", "b 52": "B-52"}, "Pokemon": {"mr mime": "Mr. Mime", "farfetchd": "Farfetch'd", "hooh": "Ho-Oh", "porygonz": "Porygon-Z", "mimejr": "Mime Jr.", "nidoranf": "Nidoran♀", "nidoranm": "Nidoran♂", "typenull": "Type: Null", "kommoo": "Kommo-o", "jangmoo": "Jangmo-o", "hakamoo": "Hakamo-o"}, "type of music": {"edm": "EDM", "rnb": "R&B", "r and b": "R&B", "kpop": "K-Pop", "jpop": "J-Pop", "hip hop": "Hip-Hop", "hiphop": "Hip-Hop", "idm": "IDM", "lofi": "Lo-Fi", "lo fi": "Lo-Fi"}, "app or website": {"vk": "VK", "vsco": "VSCO", "imdb": "IMDb", "hbo": "HBO", "qq": "QQ", "ebay": "eBay", "youtube": "YouTube", "tiktok": "TikTok", "linkedin": "LinkedIn", "whatsapp": "WhatsApp", "wechat": "WeChat"}, "social media app or streaming service": {"x": "X", "hulu": "Hulu", "max": "Max"}, "famous athlete": {"shaq": "Shaquille O'Neal", "pele": "Pelé", "jordan": "Michael Jordan", "lebron": "LeBron James", "messi": "Lionel Messi", "ronaldo": "Cristiano Ronaldo", "federer": "Roger Federer", "tiger woods": "Tiger Woods", "tiger": "Tiger Woods", "brady": "Tom Brady", "serena": "Serena Williams", "bolt": "Usain Bolt", "phelps": "Michael Phelps", "ali": "Muhammad Ali", "babe ruth": "Babe Ruth", "kobe": "Kobe Bryant", "curry": "Stephen Curry", "gretzky": "Wayne Gretzky", "mahomes": "Patrick Mahomes", "biles": "Simone Biles", "beckham": "David Beckham", "maradona": "Diego Maradona", "jeter": "Derek Jeter"}, "famous author or writer": {"shakespeare": "William Shakespeare", "tolkien": "J.R.R. Tolkien", "jrr tolkien": "J.R.R. Tolkien", "jk rowling": "J.K. Rowling", "rowling": "J.K. Rowling", "cs lewis": "C.S. Lewis", "twain": "Mark Twain", "dickens": "Charles Dickens", "austen": "Jane Austen", "hemingway": "Ernest Hemingway", "orwell": "George Orwell", "steinbeck": "John Steinbeck", "poe": "Edgar Allan Poe", "christie": "Agatha Christie", "dahl": "Roald Dahl", "dr seuss": "Dr. Seuss", "seuss": "Dr. Seuss", "stephen king": "Stephen King", "f scott fitzgerald": "F. Scott Fitzgerald", "fitzgerald": "F. Scott Fitzgerald", "tolstoy": "Leo Tolstoy", "dostoevsky": "Fyodor Dostoevsky", "kafka": "Franz Kafka", "woolf": "Virginia Woolf", "joyce": "James Joyce", "wilde": "Oscar Wilde", "homer": "Homer", "dante": "Dante Alighieri", "hugo": "Victor Hugo", "dumas": "Alexandre Dumas", "murakami": "Haruki Murakami", "rushdie": "Salman Rushdie", "atwood": "Margaret Atwood", "angelou": "Maya Angelou", "morrison": "Toni Morrison", "harper lee": "Harper Lee"}, "famous actor or actress": {"tom hanks": "Tom Hanks", "dicaprio": "Leonardo DiCaprio", "leo dicaprio": "Leonardo DiCaprio", "brad pitt": "Brad Pitt", "depp": "Johnny Depp", "will smith": "Will Smith", "robert downey jr": "Robert Downey Jr.", "rdj": "Robert Downey Jr.", "the rock": "Dwayne Johnson", "dwayne the rock johnson": "Dwayne Johnson", "samuel jackson": "Samuel L. Jackson", "samuel l jackson": "Samuel L. Jackson", "morgan freeman": "Morgan Freeman", "arnold": "Arnold Schwarzenegger", "schwarzenegger": "Arnold Schwarzenegger", "keanu": "Keanu Reeves", "reeves": "Keanu Reeves", "meryl": "Meryl Streep", "streep": "Meryl Streep", "hathaway": "Anne Hathaway", "zendaya": "Zendaya", "timothee chalamet": "Timothée Chalamet", "chalamet": "Timothée Chalamet", "jlaw": "Jennifer Lawrence", "j lo": "Jennifer Lopez", "jlo": "Jennifer Lopez"}, "cartoon character": {"mickey": "Mickey Mouse", "minnie": "Minnie Mouse", "donald": "Donald Duck", "goofy": "Goofy", "homer": "Homer Simpson", "bart": "Bart Simpson", "lisa": "Lisa Simpson", "marge": "Marge Simpson", "spongebob": "SpongeBob SquarePants", "bugs": "Bugs Bunny", "daffy": "Daffy Duck", "porky": "Porky Pig", "tweety": "Tweety", "scooby": "Scooby-Doo", "scooby doo": "Scooby-Doo", "charlie brown": "Charlie Brown", "snoopy": "Snoopy", "fred": "Fred Flintstone", "popeye": "Popeye", "garfield": "Garfield", "tom and jerry": "Tom and Jerry", "rick": "Rick Sanchez", "morty": "Morty Smith", "peter griffin": "Peter Griffin", "stewie": "Stewie Griffin", "cartman": "Eric Cartman", "kyle": "Kyle Broflovski", "stan": "Stan Marsh", "kenny": "Kenny McCormick", "shaggy": "Shaggy Rogers", "velma": "Velma Dinkley", "daphne": "Daphne Blake", "coyote": "Wile E. Coyote", "road runner": "Road Runner", "pikachu": "Pikachu", "sonic": "Sonic the Hedgehog", "goku": "Goku", "naruto": "Naruto Uzumaki", "luffy": "Monkey D. Luffy", "bluey": "Bluey"}, "Disney character": {"mickey": "Mickey Mouse", "minnie": "Minnie Mouse", "donald": "Donald Duck", "woody": "Woody", "buzz": "Buzz Lightyear", "buzz lightyear": "Buzz Lightyear", "elsa": "Elsa", "stitch": "Stitch", "simba": "Simba", "ariel": "Ariel", "belle": "Belle", "genie": "Genie", "moana": "Moana", "tinker bell": "Tinker Bell", "tinkerbell": "Tinker Bell", "hook": "Captain Hook", "captain hook": "Captain Hook", "cruella": "Cruella de Vil", "cruella de vil": "Cruella de Vil", "mad hatter": "The Mad Hatter", "cheshire cat": "The Cheshire Cat", "beast": "The Beast", "the beast": "The Beast", "snow white": "Snow White", "sleeping beauty": "Aurora", "aurora": "Aurora", "jasmine": "Jasmine", "rapunzel": "Rapunzel", "mulan": "Mulan", "pocahontas": "Pocahontas", "tiana": "Tiana", "cinderella": "Cinderella", "scar": "Scar", "jafar": "Jafar", "ursula": "Ursula", "maleficent": "Maleficent", "mike": "Mike Wazowski", "mike wazowski": "Mike Wazowski", "sully": "Sulley", "sulley": "Sulley", "nemo": "Nemo", "dory": "Dory", "wall e": "WALL-E", "eve": "EVE", "remy": "Remy", "lightning mcqueen": "Lightning McQueen", "mater": "Mater", "baymax": "Baymax", "olaf": "Olaf", "anna": "Anna", "kristoff": "Kristoff", "sven": "Sven", "maui": "Maui", "hei hei": "Hei Hei", "heihei": "Hei Hei", "timon": "Timon", "pumbaa": "Pumbaa", "nala": "Nala", "mufasa": "Mufasa", "baloo": "Baloo", "mowgli": "Mowgli", "bambi": "Bambi", "dumbo": "Dumbo", "pinocchio": "Pinocchio", "goofy": "Goofy", "pluto": "Pluto"}, "video game character": {"mario": "Mario", "luigi": "Luigi", "link": "Link", "zelda": "Princess Zelda", "peach": "Princess Peach", "bowser": "Bowser", "kirby": "Kirby", "samus": "Samus Aran", "pacman": "Pac-Man", "pac man": "Pac-Man", "master chief": "Master Chief", "lara croft": "Lara Croft", "steve": "Steve", "kratos": "Kratos", "solid snake": "Solid Snake", "snake": "Solid Snake", "cloud": "Cloud Strife", "cloud strife": "Cloud Strife", "sephiroth": "Sephiroth", "ganon": "Ganon", "ganondorf": "Ganondorf", "sonic": "Sonic the Hedgehog", "tails": "Miles \"Tails\" Prower", "knuckles": "Knuckles the Echidna", "eggman": "Dr. Eggman", "dr eggman": "Dr. Eggman", "crash": "Crash Bandicoot", "crash bandicoot": "Crash Bandicoot", "spyro": "Spyro", "megaman": "Mega Man", "mega man": "Mega Man", "yoshi": "Yoshi", "toad": "Toad", "donkey kong": "Donkey Kong", "dk": "Donkey Kong", "diddy kong": "Diddy Kong", "wario": "Wario", "waluigi": "Waluigi", "pikachu": "Pikachu", "geralt": "Geralt of Rivia", "ciri": "Ciri", "aloy": "Aloy", "joel": "Joel Miller", "ellie": "Ellie", "nathan drake": "Nathan Drake", "drake": "Nathan Drake", "gordon freeman": "Gordon Freeman", "glados": "GLaDOS", "chell": "Chell", "commander shepard": "Commander Shepard", "shepard": "Commander Shepard", "arthur morgan": "Arthur Morgan", "niko bellic": "Niko Bellic", "cj": "Carl \"CJ\" Johnson", "ezio": "Ezio Auditore", "altair": "Altaïr Ibn-La'Ahad", "doomguy": "Doomguy", "doom slayer": "Doom Slayer", "sans": "Sans", "papyrus": "Papyrus", "frisk": "Frisk", "isaac": "Isaac", "madeline": "Madeline"}, "Lord of the Rings character": {}, "Nintendo character": {"mr game and watch": "Mr. Game & Watch", "dk": "Donkey Kong", "rob": "R.O.B."}, "language": {"asl": "American Sign Language", "bsl": "British Sign Language", "patois": "Jamaican Patois"}, "school subject": {"pe": "Physical Education", "gym": "Gym", "ag": "Agriculture", "asl": "American Sign Language", "cpr": "CPR", "math": "Math"}, "famous painter": {"da vinci": "Leonardo da Vinci", "davinci": "Leonardo da Vinci", "van gogh": "Vincent van Gogh", "vangogh": "Vincent van Gogh"}, "unit of measurement": {"mph": "mph", "kph": "kph", "mmhg": "mmHg", "dpi": "dpi", "ppi": "ppi", "ppm": "ppm", "psi": "psi", "btu": "BTU", "amp": "amp", "ohm": "ohm", "volt": "volt", "watt": "watt", "hz": "hertz", "kwh": "kWh"}};
 CATS.forEach((c,i)=>{const t=ALIAS[c[0].replace(/^Name an? /,'')];if(t)for(const a in t){const k=norm(a);if(MAP[i][k]!==undefined)FULLD[i][k]=t[a]}});
+// Display the requested possessive form for Veterans Day without changing accepted input.
+const HOLIDAY_CAT=CATS.findIndex(c=>c[0]==='Name a holiday');
+if(HOLIDAY_CAT>=0){
+  ["veterans day","veteran's day","veteransday","veteran'sday"].forEach(a=>{
+    if(MAP[HOLIDAY_CAT][norm(a)]!==undefined)FULLD[HOLIDAY_CAT][norm(a)]="Veteran's Day";
+  });
+}
+// Expand the FDR abbreviation to the president's full display name.
+const PRESIDENT_CAT=CATS.findIndex(c=>c[0]==='Name a US president');
+if(PRESIDENT_CAT>=0){
+  ["fdr","franklin roosevelt","franklin d roosevelt","franklin delano roosevelt"].forEach(a=>{
+    if(MAP[PRESIDENT_CAT][norm(a)]!==undefined)FULLD[PRESIDENT_CAT][norm(a)]="Franklin D. Roosevelt";
+  });
+}
+// Video-game titles: accept franchise-wide and fully-qualified names, but
+// normalize alternate spellings to the same underlying game so they cannot score twice.
+const GAME_CAT=CATS.findIndex(c=>c[0]==='Name a video game');
+if(GAME_CAT>=0){
+ const GAME_DISPLAY={
+  zelda:'The Legend of Zelda',mario:'Super Mario',pokemon:'Pokémon',gta:'Grand Theft Auto',
+  fifa:'FIFA',callofduty:'Call of Duty',pacman:'Pac-Man',sonic:'Sonic the Hedgehog',
+  smashbros:'Super Smash Bros.',supersmashbros:'Super Smash Bros.',mariokart:'Mario Kart',
+  donkeykong:'Donkey Kong',metroid:'Metroid',kirby:'Kirby',fallout:'Fallout',skyrim:'The Elder Scrolls V: Skyrim',
+  halflife:'Half-Life',godofwar:'God of War',thelastofus:'The Last of Us',assassinscreed:"Assassin's Creed",
+  farcry:'Far Cry',residentevil:'Resident Evil',silenthill:'Silent Hill',finalfantasy:'Final Fantasy',
+  kingdomhearts:'Kingdom Hearts',monsterhunter:'Monster Hunter',animalcrossing:'Animal Crossing',
+  worldofwarcraft:'World of Warcraft',leagueoflegends:'League of Legends',counterstrike:'Counter-Strike',
+  rocketleague:'Rocket League',apexlegends:'Apex Legends',eldenring:'Elden Ring',darksouls:'Dark Souls',
+  breathofthewild:'The Legend of Zelda: Breath of the Wild',tearsofthekingdom:'The Legend of Zelda: Tears of the Kingdom',
+  zeldaocarinaoftime:'The Legend of Zelda: Ocarina of Time',majorasmask:'The Legend of Zelda: Majora\'s Mask',
+  windwaker:'The Legend of Zelda: The Wind Waker',twilightprincess:'The Legend of Zelda: Twilight Princess',
+  skywardsword:'The Legend of Zelda: Skyward Sword',linktothepast:'The Legend of Zelda: A Link to the Past',
+  linksawakening:'The Legend of Zelda: Link\'s Awakening',minishcap:'The Legend of Zelda: The Minish Cap',
+  phantomhourglass:'The Legend of Zelda: Phantom Hourglass',spirittracks:'The Legend of Zelda: Spirit Tracks',
+  alinkbetweenworlds:'The Legend of Zelda: A Link Between Worlds',ageofcalamity:'Hyrule Warriors: Age of Calamity',
+  supermariobros:'Super Mario Bros.',supermario64:'Super Mario 64',supermariosunshine:'Super Mario Sunshine',
+  supermariogalaxy:'Super Mario Galaxy',supermarioodyssey:'Super Mario Odyssey',supermarioworld:'Super Mario World',
+  supermariobros3:'Super Mario Bros. 3',supermariobros2:'Super Mario Bros. 2',supermario3dworld:'Super Mario 3D World',
+  supermariomaker:'Super Mario Maker',newsupermariobros:'New Super Mario Bros.',supermariowonder:'Super Mario Bros. Wonder',
+  mariokart8:'Mario Kart 8',mariokartwii:'Mario Kart Wii',mariokartds:'Mario Kart DS',mariokart64:'Mario Kart 64',
+  supermariokart:'Super Mario Kart',mariokartdoubledash:'Mario Kart: Double Dash!!',
+  pokemonred:'Pokémon Red',pokemonblue:'Pokémon Blue',pokemongold:'Pokémon Gold',pokemonsilver:'Pokémon Silver',
+  pokemoncrystal:'Pokémon Crystal',pokemonruby:'Pokémon Ruby',pokemonsapphire:'Pokémon Sapphire',pokemonemerald:'Pokémon Emerald',
+  pokemondiamond:'Pokémon Diamond',pokemonswordshield:'Pokémon Sword and Shield',pokemonscarletviolet:'Pokémon Scarlet and Violet',
+  pokemonlegendsarceus:'Pokémon Legends: Arceus',
+  halo:'Halo',minecraft:'Minecraft',fortnite:'Fortnite',roblox:'Roblox',overwatch:'Overwatch',valorant:'VALORANT',
+  amongus:'Among Us',stardewvalley:'Stardew Valley',animalcrossing:'Animal Crossing',grandtheftauto:'Grand Theft Auto'
+ };
+ Object.entries(GAME_DISPLAY).forEach(([k,v])=>{if(v&&MAP[GAME_CAT][k]!==undefined)FULLD[GAME_CAT][k]=v});
+ // Well-known sequels are separate answers, so different games in a series count separately.
+ const EXTRA_GAME_TITLES={
+  grandtheftautov:'Grand Theft Auto V',grandtheftautoiv:'Grand Theft Auto IV',grandtheftautosanandreas:'Grand Theft Auto: San Andreas',
+  grandtheftautovicecity:'Grand Theft Auto: Vice City',grandtheftauto3:'Grand Theft Auto III',
+  reddeadredemption:'Red Dead Redemption',reddeadredemption2:'Red Dead Redemption 2',
+  fallout3:'Fallout 3',fallout4:'Fallout 4',falloutnewvegas:'Fallout: New Vegas',
+  assassinscreedii:"Assassin's Creed II",assassinscreedbrotherhood:"Assassin's Creed: Brotherhood",
+  assassinscreedodyssey:"Assassin's Creed Odyssey",assassinscreedvalhalla:"Assassin's Creed Valhalla",
+  'resident evil 2':'Resident Evil 2','resident evil 4':'Resident Evil 4',
+  finalfantasyvii:'Final Fantasy VII',finalfantasyviiiremake:'Final Fantasy VII Remake',finalfantasyx:'Final Fantasy X',
+  darksouls2:'Dark Souls II',darksouls3:'Dark Souls III',halo2:'Halo 2',halo3:'Halo 3',halo4:'Halo 4',
+  pokemonyellow:'Pokémon Yellow',pokemonpearl:'Pokémon Pearl',pokemonplatinum:'Pokémon Platinum'
+ };
+ Object.entries(EXTRA_GAME_TITLES).forEach(([k,v])=>{const key=norm(k);if(!MAP[GAME_CAT][key])MAP[GAME_CAT][key]=2.2;DISP[GAME_CAT][key]=v;FULLD[GAME_CAT][key]=v});
+ const GAME_INPUT_ALIASES={
+  thelegendofzelda:'zelda',legendofzelda:'zelda',
+  thelegendofzeldabreathofthewild:'breathofthewild',legendofzeldabreathofthewild:'breathofthewild',
+  thelegendofzeldatearsofthekingdom:'tearsofthekingdom',legendofzeldatearsofthekingdom:'tearsofthekingdom',
+  thelegendofzeldaocarinaoftime:'zeldaocarinaoftime',legendofzeldaocarinaoftime:'zeldaocarinaoftime',
+  thelegendofzeldaocarina:'zeldaocarinaoftime',ocarina:'zeldaocarinaoftime',
+  'thelegendofzeldamajoras mask':'majorasmask','thelegendofzeldamajorasmask':'majorasmask',
+  thewindwaker:'windwaker',thelegendofzeldathewindwaker:'windwaker',
+  thelegendofzeldatwilightprincess:'twilightprincess',thelegendofzeldaskywardsword:'skywardsword',
+  thelegendofzeldalinktothepast:'linktothepast',thelegendofzeldalinksawakening:'linksawakening',
+  thelegendofzeldatheminishcap:'minishcap',thelegendofzeldaphantomhourglass:'phantomhourglass',
+  thelegendofzeldaspirittracks:'spirittracks',thelegendofzeldaalinkbetweenworlds:'alinkbetweenworlds',
+  grandtheftauto:'grandtheftauto',gta5:'grandtheftautov',grandtheftauto5:'grandtheftautov',gta4:'grandtheftautoiv',callofdutymodernwarfare:'callofduty',
+  grandtheftautosanandreas:'grandtheftautosanandreas',gtasanandreas:'grandtheftautosanandreas',
+  grandtheftautovicecity:'grandtheftautovicecity',gtavicecity:'grandtheftautovicecity',
+  pokemonswordandshield:'pokemonswordshield',pokemonlegendsarceus:'pokemonlegendsarceus',
+  pokemonscarletandviolet:'pokemonscarletviolet',supermariobroswonder:'supermariowonder',supermariokart:'supermariokart'
+ };
+ // Correct any readable aliases with punctuation/spacing through norm() once, here.
+ const gameAliasKeys={};Object.entries(GAME_INPUT_ALIASES).forEach(([a,k])=>gameAliasKeys[norm(a)]=norm(k));
+ window.__pufferGameAliasKeys=gameAliasKeys;
+}
 const TN={1:'plankton',2:'too clever',4:'schooler'};
 // points per tier: plankton, too clever, schooler, rare, deep cut, one in a krillion
 const PTS=[0,10,15,30,60,85,100],LIFE0=600,LIFE=750; // first bonus life at 600 points, then every 750
 const TL=['','plankton','too clever','schooler','rare','deep cut','one in a krillion'];
 let lfK=0,lfAt={};
-function ed1(a,b){if(Math.abs(a.length-b.length)>1)return false;let i=0;while(i<a.length&&i<b.length&&a[i]===b[i])i++;if(a.length===b.length)return a.slice(i+1)===b.slice(i+1)||(a[i]===b[i+1]&&a[i+1]===b[i]&&a.slice(i+2)===b.slice(i+2));return a.length>b.length?a.slice(i+1)===b.slice(i):b.slice(i+1)===a.slice(i)}
-function look(ci,txt){const m=MAP[ci],k=norm(txt);
+function editDist(a,b,limit){
+  if(Math.abs(a.length-b.length)>limit)return limit+1;
+  const prev2=[],prev=Array.from({length:b.length+1},(_,j)=>j);
+  for(let i=1;i<=a.length;i++){
+    const cur=[i];let rowMin=i;
+    for(let j=1;j<=b.length;j++){
+      let v=Math.min(cur[j-1]+1,prev[j]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));
+      if(i>1&&j>1&&a[i-1]===b[j-2]&&a[i-2]===b[j-1])v=Math.min(v,prev2[j-2]+1);
+      cur[j]=v;if(v<rowMin)rowMin=v;
+    }
+    if(rowMin>limit)return limit+1;
+    prev2.splice(0,prev2.length,...prev);prev.splice(0,prev.length,...cur);
+  }
+  return prev[b.length];
+}
+function look(ci,txt){const m=MAP[ci];let k=norm(txt);if(ci===GAME_CAT&&window.__pufferGameAliasKeys&&window.__pufferGameAliasKeys[k])k=window.__pufferGameAliasKeys[k];
   for(const b of[k,k.replace(/^(the|a)/,''),'the'+k,'a'+k])for(const x of[b,b.replace(/(es|s)$/,''),b.replace(/s$/,'')])if(x&&m[x])return[x,m[x],undefined,DISP[ci][x]];
-  if(k.length>=6)for(const w in m)if(ed1(k,w))return[w,m[w],DISP[ci][w]];
+  // Be forgiving of small typos: one edit for shorter words, up to two for longer ones.
+  // Only accept a fuzzy result when it is the single closest match, avoiding ambiguous guesses.
+  if(k.length>=4){
+    const limit=k.length>=8?2:1;let best=limit+1,matches=[];
+    for(const w in m){if(Math.abs(k.length-w.length)>limit)continue;const d=editDist(k,w,limit);
+      if(d<best){best=d;matches=[w]}else if(d===best)matches.push(w);
+    }
+    if(best<=limit&&matches.length===1){const w=matches[0];return[w,m[w],DISP[ci][w]]}
+  }
   return null}
 const $=id=>document.getElementById(id);
 const DEFAULT_ROOM_SETTINGS={startingLives:2,maxLives:5,minCountdown:5};
@@ -579,7 +922,7 @@ function turn(){
   if(ended())return end();
   if(!G.players[G.turn].alive)G.turn=nextAlive();
   let intro=false;
-  G.pause=false;G.msg='';G.say=null;G.lf=null;if(G.fresh||G.cat<0||(G.popped&&G.players[G.turn].id===G.popped)||(G.same||0)>=(G.per||2)*G.players.filter(p=>p.alive).length){if(!G.deck||!G.deck.length)G.deck=newDeck(G.cat,G.played);G.cat=G.deck.pop();markSeen(G.cat);(G.played=G.played||[]).push(G.cat);{const pool=KRP[G.cat].filter(k=>!G.used[G.cat+'|'+k]);G.kr=pool.length?pool[Math.random()*pool.length|0]:null}G.same=0;G.n=0;G.pops=0;G.popped=null;G.per=2+(Math.random()*4|0);G.fresh=false;G.pn=(G.pn||0)+1;intro=true}
+  G.pause=false;G.msg='';G.say=null;G.lf=null;if(G.fresh||G.cat<0||(G.popped&&G.players[G.turn].id===G.popped)||(G.same||0)>=(G.per||2)*G.players.filter(p=>p.alive).length){if(!G.deck||!G.deck.length)G.deck=newDeck(G.cat,G.played);G.cat=G.deck.pop();markSeen(G.cat);(G.played=G.played||[]).push(G.cat);{const pool=KRP[G.cat].filter(k=>!G.used[G.cat+'|'+k]);G.kr=pool.length?pool[Math.random()*pool.length|0]:null}G.same=0;G.n=0;G.pops=0;G.popped=null;G.per=(G.players.length>1?2:1)+(Math.random()*4|0);G.fresh=false;G.pn=(G.pn||0)+1;intro=true}
   if(intro){const k=G.ik=(G.ik||0)+1;G.np=1;G.pause=true;deadline=0;clearTimeout(timer);push();setTimeout(()=>{if(G.ik!==k||G.ph!=='play')return;G.np=0;if(ended())return end();if(!G.players[G.turn].alive)G.turn=nextAlive();G.pause=false;go()},1000);return}
   go();
   function go(){G.tot=Math.max(ROOM_SETTINGS.minCountdown*1000,11000-G.n*300);G.n++;deadline=Date.now()+G.tot;clearTimeout(timer);timer=setTimeout(pop,G.tot);push()}
