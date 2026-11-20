@@ -722,12 +722,12 @@ let missOpen=false,peer,conn,conns={},me,isHost=false,G,S,room,nm,timer,deadline
 
 /* ---------- host (runs the game) ---------- */
 const mkCode=()=>Array.from({length:4},()=>"ABCDEFGHJKMNPQRSTUVWXYZ"[Math.random()*23|0]).join('');
-const ICE={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:global.stun.twilio.com:3478'},{urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'},{urls:'turns:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'}]};
+const ICE={iceServers:[{urls:'stun:stun.relay.metered.ca:80'},{urls:'stun:stun.l.google.com:19302'},{urls:'turn:global.relay.metered.ca:80',username:'a98a0099b2c19bc4b3c2d94d',credential:'yWz1NWA0Fq3VKxuB'},{urls:'turn:global.relay.metered.ca:80?transport=tcp',username:'a98a0099b2c19bc4b3c2d94d',credential:'yWz1NWA0Fq3VKxuB'},{urls:'turn:global.relay.metered.ca:443',username:'a98a0099b2c19bc4b3c2d94d',credential:'yWz1NWA0Fq3VKxuB'},{urls:'turns:global.relay.metered.ca:443?transport=tcp',username:'a98a0099b2c19bc4b3c2d94d',credential:'yWz1NWA0Fq3VKxuB'},{urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'},{urls:'turns:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'}]};
 // ---- Own TURN relay (Metered) ----
 // 1) Make a free account at metered.ca, create an app, and copy its app name and API key (Dashboard > TURN Server).
 // 2) Paste them below. The game then fetches fresh relay servers (including turns: on port 443) when it loads.
 // If left blank, or if the fetch fails, it falls back to the shared public relay above.
-const TURN_CONFIG={appName:'schs_krillion',apiKey:'a216fb0faec085944a26908c1c806d9492bd'};
+const TURN_CONFIG={appName:'',apiKey:''}; // not needed: relay servers are built into ICE above
 (function(){
   if(!TURN_CONFIG.appName||!TURN_CONFIG.apiKey)return;
   const ctl=new AbortController(),t=setTimeout(()=>ctl.abort(),6000);
@@ -864,7 +864,7 @@ function scanPub(){
   const finish=err=>{
     if(finished||id!==pubScanId)return;finished=true;
     try{if(pubScanPeer)pubScanPeer.destroy()}catch(e){}pubScanPeer=null;
-    if(err){$('pubMsg').textContent=err;$('pubMsg').style.color='var(--coral)';pubScanTimer=setTimeout(()=>{if(!$('publ').classList.contains('hid'))scanPub()},6000);return}
+    if(err){$('pubMsg').textContent=err;$('pubMsg').style.color='var(--coral)';return}
     const open=[];pubFree=PUB_SLOTS+1;
     for(let n=1;n<=PUB_SLOTS;n++){if(res[n])open.push([n,res[n]]);else if(pubFree>PUB_SLOTS)pubFree=n}
     const rows=$('pubRows');rows.innerHTML='';
@@ -876,9 +876,8 @@ function scanPub(){
       const b=document.createElement('button');b.textContent=joinable?'Join':playing?'In game':'Unavailable';b.disabled=!joinable;b.style.width='auto';b.style.margin='0 0 0 8px';
       b.onclick=()=>{stopPubScan();show('home');pubTry=0;joinRoom(pubName(n))};d.appendChild(b);rows.appendChild(d)});
     $('pubMsg').style.color='';
-    $('pubMsg').textContent=open.length?open.length+' public room'+(open.length>1?'s':'')+' open. Updates automatically.':'No public rooms are open right now. Start one and others can join it.';
+    $('pubMsg').textContent=open.length?open.length+' public room'+(open.length>1?'s':'')+' open. Press Refresh to update.':'No public rooms are open right now. Start one and others can join it.';
     $('pubNew').disabled=pubFree>PUB_SLOTS;
-    pubScanTimer=setTimeout(()=>{if(!$('publ').classList.contains('hid'))scanPub()},5000);
   };
   const got=(n,v)=>{if(res[n]!==undefined)return;res[n]=v;if(++cnt>=PUB_SLOTS)finish()};
   const p=new Peer(undefined,{config:ICE});pubScanPeer=p;
