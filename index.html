@@ -211,6 +211,15 @@ h1{font-size:clamp(42px,7vw,58px);margin:2px 0 0}
  <div class="msg" style="font-size:13px;opacity:.6">Version: 18 Nov 2026 · public rooms</div>
 </div>
 
+<div id="publ" class="card hid">
+ <button type="button" id="pubBack" class="alt">← Back</button>
+ <h2 style="margin:8px 0 2px;font-size:22px">Public rooms</h2>
+ <div class="msg" id="pubMsg">Looking for rooms...</div>
+ <div id="pubRows"></div>
+ <button type="button" id="pubNew">Start a new public room</button>
+ <button type="button" id="pubRefresh" class="alt">Refresh</button>
+</div>
+
 <div id="lobby" class="card hid">
  <button type="button" id="openSettings" class="alt settings-trigger" aria-haspopup="dialog" aria-controls="settingsPopup">⚙ Settings</button>
  <button type="button" id="leaveLobby" class="alt leave-room">← Leave room</button>
@@ -714,6 +723,19 @@ let missOpen=false,peer,conn,conns={},me,isHost=false,G,S,room,nm,timer,deadline
 /* ---------- host (runs the game) ---------- */
 const mkCode=()=>Array.from({length:4},()=>"ABCDEFGHJKMNPQRSTUVWXYZ"[Math.random()*23|0]).join('');
 const ICE={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:global.stun.twilio.com:3478'},{urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},{urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'},{urls:'turns:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'}]};
+// ---- Own TURN relay (Metered) ----
+// 1) Make a free account at metered.ca, create an app, and copy its app name and API key (Dashboard > TURN Server).
+// 2) Paste them below. The game then fetches fresh relay servers (including turns: on port 443) when it loads.
+// If left blank, or if the fetch fails, it falls back to the shared public relay above.
+const TURN_CONFIG={appName:'schs_krillion',apiKey:'a216fb0faec085944a26908c1c806d9492bd'};
+(function(){
+  if(!TURN_CONFIG.appName||!TURN_CONFIG.apiKey)return;
+  const ctl=new AbortController(),t=setTimeout(()=>ctl.abort(),6000);
+  fetch('https://'+encodeURIComponent(TURN_CONFIG.appName)+'.metered.live/api/v1/turn/credentials?apiKey='+encodeURIComponent(TURN_CONFIG.apiKey),{signal:ctl.signal})
+    .then(r=>r.ok?r.json():Promise.reject(new Error('HTTP '+r.status)))
+    .then(list=>{clearTimeout(t);if(Array.isArray(list)&&list.length){ICE.iceServers=list.concat(ICE.iceServers.filter(x=>/^stun:/.test(x.urls)));window.__turnOk=true}})
+    .catch(e=>{console.warn('Could not load TURN relay, using fallback',e)});
+})();
 (function(){const e=document.createElement('div');e.id='net';e.className='msg';$('home').appendChild(e)})();
 function net(m,bad){const e=$('net');if(!e)return;e.textContent=m;e.style.color=bad?'var(--coral)':'var(--mut)'}
 let leavingRoom=false,intentionalLeave=false;
@@ -737,6 +759,7 @@ function host(fixed){
   peer.on('connection',c=>{c.on('data',d=>hostMsg(c,d));c.on('close',()=>drop(c.peer))});
 }
 function hostMsg(c,d){
+  if(d.t==='peek'){if(G)c.send({t:'info',ph:G.ph,n:G.players.length,max:5,names:G.players.map(p=>p.name),rd:G.n||0});setTimeout(()=>{try{c.close()}catch(e){}},400);return}
   if(d.t==='join'){
     if(conns[c.peer])return;
     if(G.ph!=='lobby'||G.players.length>=5){c.send({t:'full'});setTimeout(()=>c.close(),400);return}
@@ -829,6 +852,53 @@ function joinRoom(fixed){
   });
   peer.on('error',e=>{if(pub&&e.type==='peer-unavailable')return openIt();net(NETERR(e),1)});
 }
+
+/* ---------- public room browser ---------- */
+const PUB_SLOTS=12,pubName=n=>'PUBLIC'+(n>1?n:'');
+let pubScanId=0,pubScanPeer=null,pubScanTimer=null,pubFree=1;
+function stopPubScan(){pubScanId++;clearTimeout(pubScanTimer);try{if(pubScanPeer)pubScanPeer.destroy()}catch(e){}pubScanPeer=null}
+function scanPub(){
+  stopPubScan();const id=pubScanId;
+  const res={};let cnt=0,finished=false;
+  $('pubMsg').textContent=$('pubRows').children.length?'Refreshing...':'Looking for rooms...';$('pubMsg').style.color='';
+  const finish=err=>{
+    if(finished||id!==pubScanId)return;finished=true;
+    try{if(pubScanPeer)pubScanPeer.destroy()}catch(e){}pubScanPeer=null;
+    if(err){$('pubMsg').textContent=err;$('pubMsg').style.color='var(--coral)';pubScanTimer=setTimeout(()=>{if(!$('publ').classList.contains('hid'))scanPub()},6000);return}
+    const open=[];pubFree=PUB_SLOTS+1;
+    for(let n=1;n<=PUB_SLOTS;n++){if(res[n])open.push([n,res[n]]);else if(pubFree>PUB_SLOTS)pubFree=n}
+    const rows=$('pubRows');rows.innerHTML='';
+    open.forEach(([n,r])=>{
+      const lobby=r.ph==='lobby',full=r.n>=r.max,playing=r.ph==='play',joinable=lobby&&!full;
+      const status=lobby?(full?'Waiting in lobby (full)':'Waiting in lobby'):playing?'Playing'+(r.rd?' · round '+r.rd:''):'Game just ended';
+      const d=document.createElement('div');d.className='pl';d.style.alignItems='center';
+      d.innerHTML='<div style="flex:1;min-width:0"><b>Room '+n+'</b> · '+r.n+'/'+r.max+' players<br><span style="font-size:13px;color:'+(joinable?'var(--ok)':'var(--mut)')+'">'+esc(status)+'</span><br><span style="font-size:12px;color:var(--mut)">'+esc((r.names||[]).join(', '))+'</span></div>';
+      const b=document.createElement('button');b.textContent=joinable?'Join':playing?'In game':'Unavailable';b.disabled=!joinable;b.style.width='auto';b.style.margin='0 0 0 8px';
+      b.onclick=()=>{stopPubScan();show('home');pubTry=0;joinRoom(pubName(n))};d.appendChild(b);rows.appendChild(d)});
+    $('pubMsg').style.color='';
+    $('pubMsg').textContent=open.length?open.length+' public room'+(open.length>1?'s':'')+' open. Updates automatically.':'No public rooms are open right now. Start one and others can join it.';
+    $('pubNew').disabled=pubFree>PUB_SLOTS;
+    pubScanTimer=setTimeout(()=>{if(!$('publ').classList.contains('hid'))scanPub()},5000);
+  };
+  const got=(n,v)=>{if(res[n]!==undefined)return;res[n]=v;if(++cnt>=PUB_SLOTS)finish()};
+  const p=new Peer(undefined,{config:ICE});pubScanPeer=p;
+  p.on('open',()=>{
+    for(let n=1;n<=PUB_SLOTS;n++){
+      try{
+        const c=p.connect('bbash-'+pubName(n),{reliable:true});
+        c.on('open',()=>c.send({t:'peek'}));
+        c.on('data',d=>{if(d&&d.t==='info'){got(n,d);try{c.close()}catch(e){}}else if(d&&d.t==='full'){got(n,{ph:'lobby',n:5,max:5,names:[]})}});
+        c.on('error',()=>got(n,null));
+      }catch(e){got(n,null)}
+    }
+    setTimeout(()=>{for(let n=1;n<=PUB_SLOTS;n++)got(n,null)},7000);
+  });
+  p.on('error',e=>{
+    if(e.type==='peer-unavailable'){const m=/bbash-PUBLIC(\d*)/.exec(e.message||'');if(m)got(m[1]?+m[1]:1,null);return}
+    finish(NETERR(e));
+  });
+}
+function openPubList(){nm=$('nm').value.trim();show('publ');$('pubRows').innerHTML='';scanPub()}
 // finds out what is blocking connections on this device or network
 async function testNet(){
   const out=[];const log=(ok,t)=>{out.push((ok?'OK: ':'PROBLEM: ')+t);net(out.join('\n'),!ok)};$('net').style.whiteSpace='pre-line';net('Testing...');
@@ -855,7 +925,7 @@ function send(){
 }
 
 /* ---------- display ---------- */
-function show(id){['home','lobby','game','over'].forEach(x=>$(x).classList.toggle('hid',x!==id))}
+function show(id){['home','publ','lobby','game','over'].forEach(x=>$(x).classList.toggle('hid',x!==id))}
 function pl(id,s){
   $(id).innerHTML=s.players.map((p,i)=>`<div class="pl${s.ph==='play'&&!s.pause&&i===s.turn?' turn':''}${p.alive?'':' dead'}"><span>${esc(p.name)}${p.id===me?' (you)':''}</span><span>${s.ph==='lobby'?'':'<b class="hp">'+'♥'.repeat(Math.max(0,p.lives))+'</b>'+p.score}</span></div>`).join('');
 }
@@ -922,7 +992,7 @@ document.body.prepend(bb);
 function setSettingsOpen(open){$('settingsBackdrop').classList.toggle('hid',!open);$('openSettings').setAttribute('aria-expanded',String(open));if(open){$('closeSettings').focus() }else{$('openSettings').focus()}}
 $('openSettings').onclick=()=>setSettingsOpen(true);$('closeSettings').onclick=()=>setSettingsOpen(false);$('settingsBackdrop').addEventListener('click',e=>{if(e.target===$('settingsBackdrop'))setSettingsOpen(false)});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('settingsBackdrop').classList.contains('hid'))setSettingsOpen(false)});
 $('leaveLobby').onclick=leaveRoom;$('leaveGame').onclick=leaveRoom;
-$('mk').onclick=()=>host();$('jn').onclick=()=>joinRoom();$('pub').onclick=()=>{pubTry=0;pubRoom(1)};$('tn').onclick=()=>testNet();
+$('mk').onclick=()=>host();$('jn').onclick=()=>joinRoom();$('pub').onclick=openPubList;$('pubBack').onclick=()=>{stopPubScan();show('home')};$('pubRefresh').onclick=scanPub;$('pubNew').onclick=()=>{stopPubScan();show('home');pubTry=0;pubN=pubFree;if(pubFree>PUB_SLOTS)return net('All public rooms are in use. Try again in a moment.',1);host(pubName(pubFree))};$('tn').onclick=()=>testNet();
 $('showmiss').onclick=()=>{missOpen=!missOpen;if(S)render(S)};$('st').onclick=start;$('again').onclick=()=>{G.ph='lobby';push()};
 $('ans').oninput=()=>{const n=Date.now();clearTimeout(sendTyp.t);if(n-typT>70){typT=n;sendTyp()}else sendTyp.t=setTimeout(sendTyp,80)};
 $('go').onclick=send;$('ans').onkeydown=e=>{if(e.key==='Enter')send()};
