@@ -277,6 +277,11 @@ h1{font-size:clamp(42px,7vw,58px);margin:2px 0 0}
 .chat-heading small{font-size:16px}
 .chat-compose input{font-size:20px;min-height:42px}
 .chat-compose button{min-height:42px}
+
+/* Anchor each player's latest lobby message to their own avatar. */
+.lobby-chat-player-bubble{position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);z-index:8;width:max-content;max-width:180px;padding:3px 7px;background:#071426;color:#fff;border:2px solid var(--glow);box-shadow:2px 2px 0 #02060d;text-align:center;font-size:16px;line-height:1.05;overflow-wrap:anywhere;white-space:normal;pointer-events:none}
+.lobby-chat-player-bubble b{display:block;color:var(--sun);font-weight:400;font-size:14px}
+.lobby-chat-player-bubble:after{content:"";position:absolute;left:50%;top:100%;margin-left:-6px;width:12px;height:8px;background:var(--glow);clip-path:polygon(0 0,100% 0,100% 35%,70% 35%,70% 70%,45% 70%,45% 100%,20% 100%,20% 70%,0 70%)}
 @media (min-width:601px) and (max-width:1100px){
   #lobby{max-width:620px!important}
   #larena{height:clamp(190px,32dvh,270px);margin:3px 0 6px}
@@ -324,7 +329,27 @@ h1{font-size:clamp(42px,7vw,58px);margin:2px 0 0}
   #lobbyChatBubbles{width:min(82vw,270px)}
   .lobby-chat-bubble{font-size:16px}
 }
-</style></head>
+</style>
+<style id="ipad-player-chat-layer-fix">
+/* Keep lobby player avatars and their speech bubbles above the puffer on
+   tablet/mobile layouts. The seats container is its own stacking context,
+   so raising only the bubble cannot lift it above the puffer. */
+#larena{isolation:isolate}
+#lseats{z-index:4!important;overflow:visible}
+#lseats .seat{position:absolute;overflow:visible;z-index:5}
+#lseats .seat .lobby-chat-player-bubble{position:absolute;left:50%;top:auto;bottom:calc(100% + 9px);transform:translateX(-50%);z-index:20;display:block;visibility:visible;opacity:1;max-width:min(180px,42vw);white-space:normal}
+#lpuff{z-index:3}
+@media (min-width:601px) and (max-width:1100px){
+  #lseats{z-index:4!important}
+  #lseats .seat .lobby-chat-player-bubble{font-size:15px;max-width:150px}
+}
+@media (max-width:600px){
+  #lseats{z-index:4!important}
+  #lseats .seat .lobby-chat-player-bubble{font-size:14px;max-width:125px;padding:3px 5px}
+  #lseats .seat .lobby-chat-player-bubble b{font-size:12px}
+}
+</style>
+</head>
 <body><main>
 <h1>Puffer party</h1>
 <p class="sub">Answer before the puffer pops. Rarer answers score more.</p>
@@ -1232,18 +1257,15 @@ function seats(s){
 }
 function lobbyArena(s){
   const n=s.players.length,mi=Math.max(0,s.players.findIndex(p=>p.id===me)),st=(s.settings&&s.settings.startingLives)||ROOM_SETTINGS.startingLives;let h='';
+  const latestChatByPlayer={};
+  (Array.isArray(s.chat)?s.chat:[]).forEach(m=>{if(m&&m.id)latestChatByPlayer[m.id]=m});
   s.players.forEach((p,i)=>{
-    const a=(90+((i-mi+n)%n)*360/n)*Math.PI/180,x=50+38*Math.cos(a),y=50+30*Math.sin(a),hue=(i*67+190)%360;
-    h+=`<div class="seat${p.id===me?' me':''}" style="left:${x}%;top:${y}%"><svg class="crit" viewBox="0 0 9 8" width="40" height="36" shape-rendering="crispEdges" fill="hsl(${hue} 80% 62%)"><path d="M4 0h1v1H4zM3 1h3v1H3zM0 2h9v1H0zM1 3h7v1H1zM2 4h5v1H2zM1 5h3v1H1zM5 5h3v1H5zM1 6h2v1H1zM6 6h2v1H6zM0 7h2v1H0zM7 7h2v1H7z"/><path d="M3 3h1v1H3zM5 3h1v1H5z" fill="#050a14"/></svg><div class="rock r${i%5}"></div><div class="nm">${esc(p.name)}${p.id===me?' (you)':''}</div><b class="hp">${'♥'.repeat(Math.max(0,st))}</b>${i===0?'<small class="host">HOST</small>':''}</div>`;
+    const a=(90+((i-mi+n)%n)*360/n)*Math.PI/180,x=50+38*Math.cos(a),y=50+30*Math.sin(a),hue=(i*67+190)%360,m=latestChatByPlayer[p.id];
+    const chatBubble=m?`<div class="lobby-chat-player-bubble"><b>${esc(m.name||p.name)}:</b>${esc(m.text||'')}</div>`:'';
+    h+=`<div class="seat${p.id===me?' me':''}" style="left:${x}%;top:${y}%">${chatBubble}<svg class="crit" viewBox="0 0 9 8" width="40" height="36" shape-rendering="crispEdges" fill="hsl(${hue} 80% 62%)"><path d="M4 0h1v1H4zM3 1h3v1H3zM0 2h9v1H0zM1 3h7v1H1zM2 4h5v1H2zM1 5h3v1H1zM5 5h3v1H5zM1 6h2v1H1zM6 6h2v1H6zM0 7h2v1H0zM7 7h2v1H7z"/><path d="M3 3h1v1H3zM5 3h1v1H5z" fill="#050a14"/></svg><div class="rock r${i%5}"></div><div class="nm">${esc(p.name)}${p.id===me?' (you)':''}</div><b class="hp">${'♥'.repeat(Math.max(0,st))}</b>${i===0?'<small class="host">HOST</small>':''}</div>`;
   });
   $('lseats').innerHTML=h;
   const ps=$('lpuffsvg');if(!ps.dataset.k){ps.dataset.k=1;ps.innerHTML=PUF}
-  const bubbleRows=(Array.isArray(s.chat)?s.chat:[]).slice(-3);
-  const bubbles=bubbleRows.map(m=>`<div class="lobby-chat-bubble"><b>${esc(m.name||'Player')}:</b> ${esc(m.text||'')}</div>`).join('');
-  let bubbleBox=$('lobbyChatBubbles');
-  if(!bubbleBox){bubbleBox=document.createElement('div');bubbleBox.id='lobbyChatBubbles';$('lpuff').insertBefore(bubbleBox,$('lpuff').firstChild)}
-  bubbleBox.innerHTML=bubbles;
-  bubbleBox.classList.toggle('has-messages',bubbleRows.length>0);
   $('lcount').textContent=n+'/5';$('llives').textContent=st;$('lmax').textContent=(s.settings&&s.settings.maxLives)||ROOM_SETTINGS.maxLives;
 }
 function render(s){
