@@ -349,6 +349,14 @@ h1{font-size:clamp(42px,7vw,58px);margin:2px 0 0}
   #lseats .seat .lobby-chat-player-bubble b{font-size:12px}
 }
 </style>
+<style id="lobby-chat-cross-device-layer-fix">
+/* Keep player speech bubbles visible above the puffer and overlapping seats. */
+#larena{overflow:visible!important;isolation:isolate}
+#lseats{position:absolute;inset:0;z-index:20!important;overflow:visible!important;pointer-events:none}
+#lseats .seat{overflow:visible!important}
+#lpuff{z-index:2!important}
+#lseats .seat .lobby-chat-player-bubble{z-index:9999!important}
+</style>
 </head>
 <body><main>
 <h1>Puffer party</h1>
@@ -1262,7 +1270,7 @@ function lobbyArena(s){
   s.players.forEach((p,i)=>{
     const a=(90+((i-mi+n)%n)*360/n)*Math.PI/180,x=50+38*Math.cos(a),y=50+30*Math.sin(a),hue=(i*67+190)%360,m=latestChatByPlayer[p.id];
     const chatBubble=m?`<div class="lobby-chat-player-bubble"><b>${esc(m.name||p.name)}:</b>${esc(m.text||'')}</div>`:'';
-    h+=`<div class="seat${p.id===me?' me':''}" style="left:${x}%;top:${y}%">${chatBubble}<svg class="crit" viewBox="0 0 9 8" width="40" height="36" shape-rendering="crispEdges" fill="hsl(${hue} 80% 62%)"><path d="M4 0h1v1H4zM3 1h3v1H3zM0 2h9v1H0zM1 3h7v1H1zM2 4h5v1H2zM1 5h3v1H1zM5 5h3v1H5zM1 6h2v1H1zM6 6h2v1H6zM0 7h2v1H0zM7 7h2v1H7z"/><path d="M3 3h1v1H3zM5 3h1v1H5z" fill="#050a14"/></svg><div class="rock r${i%5}"></div><div class="nm">${esc(p.name)}${p.id===me?' (you)':''}</div><b class="hp">${'♥'.repeat(Math.max(0,st))}</b>${i===0?'<small class="host">HOST</small>':''}</div>`;
+    h+=`<div class="seat${p.id===me?' me':''}" style="left:${x}%;top:${y}%;z-index:${1000+Math.round(100-y)}">${chatBubble}<svg class="crit" viewBox="0 0 9 8" width="40" height="36" shape-rendering="crispEdges" fill="hsl(${hue} 80% 62%)"><path d="M4 0h1v1H4zM3 1h3v1H3zM0 2h9v1H0zM1 3h7v1H1zM2 4h5v1H2zM1 5h3v1H1zM5 5h3v1H5zM1 6h2v1H1zM6 6h2v1H6zM0 7h2v1H0zM7 7h2v1H7z"/><path d="M3 3h1v1H3zM5 3h1v1H5z" fill="#050a14"/></svg><div class="rock r${i%5}"></div><div class="nm">${esc(p.name)}${p.id===me?' (you)':''}</div><b class="hp">${'♥'.repeat(Math.max(0,st))}</b>${i===0?'<small class="host">HOST</small>':''}</div>`;
   });
   $('lseats').innerHTML=h;
   const ps=$('lpuffsvg');if(!ps.dataset.k){ps.dataset.k=1;ps.innerHTML=PUF}
