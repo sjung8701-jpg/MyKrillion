@@ -29,6 +29,19 @@ button:disabled,input:disabled{opacity:.45;cursor:not-allowed}
 @keyframes sh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
 .hid{display:none!important}
 @media (prefers-reduced-motion:reduce){.shake{animation:none}}
+</style><style>
+#lobbyChat{margin:14px 0 8px;padding:10px;border:2px solid var(--line);background:rgba(2,10,22,.82);box-shadow:4px 4px 0 #02060d;text-align:left}
+.chat-heading{display:flex;align-items:baseline;justify-content:space-between;gap:8px;color:var(--glow);font-size:24px}
+.chat-heading small{font-size:17px;color:var(--mut)}
+#lobbyChatLog{height:150px;overflow-y:auto;margin:8px 0;padding:8px;background:#020914;border:1px solid var(--line);font-size:19px;overflow-wrap:anywhere;scrollbar-color:var(--line) #020914}
+.chat-empty{color:var(--mut);text-align:center;padding:42px 4px 0}
+.chat-line{margin:0 0 5px;line-height:1.2}
+.chat-line b{color:var(--sun);font-weight:400}
+.chat-line .chat-time{color:var(--mut);font-size:15px;margin-left:5px}
+.chat-compose{display:flex;gap:8px;align-items:stretch}
+.chat-compose input{min-width:0;flex:1;margin:0;font-size:21px;padding:5px 8px}
+.chat-compose button{width:auto;min-width:76px;margin:0;padding:4px 12px;font-size:22px}
+@media(max-width:420px){#lobbyChatLog{height:125px}.chat-heading{font-size:21px}.chat-compose input{font-size:19px}}
 </style><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap"><style>@property --d{syntax:'<number>';inherits:true;initial-value:0}
 :root{--bg:#050a14;--panel:#0b1c30;--row:#102a44;--ink:#d8f3ff;--mut:#6f9bb8;--sun:#ffd166;--coral:#ff6b6b;--ok:#6ef2b0;--line:#25577f;--glow:#5ee7ff}
 body{font-family:"VT323","Courier New",monospace;font-size:23px;line-height:1.15;transition:--d 1.5s;background:linear-gradient(hsl(205 65% calc(26% - 17% * var(--d))),hsl(220 70% calc(9% - 5% * var(--d))) 75%) fixed}
@@ -286,6 +299,11 @@ h1{font-size:clamp(42px,7vw,58px);margin:2px 0 0}
  <div id="larena"><div id="lseats"></div><div id="lpuff"><div class="zzz">z z z</div><div id="lpuffsvg"></div></div></div>
  <div class="lpanels"><div class="lpan"><small>Players</small><b id="lcount">1/5</b></div><div class="lpan"><small>Lives</small><b id="llives">2</b></div><div class="lpan"><small>Max lives</small><b id="lmax">5</b></div></div>
  <div id="pl1"></div>
+ <section id="lobbyChat" aria-label="Lobby chat">
+  <div class="chat-heading"><b>Lobby chat</b><small>Chat while you wait</small></div>
+  <div id="lobbyChatLog" role="log" aria-live="polite" aria-relevant="additions text" aria-label="Lobby messages"><div class="chat-empty">No messages yet. Say hello!</div></div>
+  <div class="chat-compose"><input id="lobbyChatInput" type="text" maxlength="180" autocomplete="off" placeholder="Type a message..." aria-label="Chat message"><button type="button" id="lobbyChatSend">Send</button></div>
+ </section>
  <div class="settings-backdrop hid" id="settingsBackdrop">
   <section class="card settings-popup" id="roomSettings" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
    <div class="settings-heading"><h2 id="settingsTitle">Room settings</h2><button type="button" id="closeSettings" class="alt settings-close" aria-label="Close settings">✕</button></div>
@@ -921,7 +939,7 @@ function leaveRoom(){
 function NETERR(e){const base={'peer-unavailable':'Room not found. Check the code.','network':'Cannot reach the connection server.','server-error':'Cannot reach the connection server.','socket-error':'Cannot reach the connection server.','socket-closed':'Lost the connection to the server.','webrtc':'This device could not set up a direct connection.','browser-incompatible':'This browser cannot make live connections.'}[e.type]||('Network error: '+e.type);return base+(['network','server-error','socket-error','socket-closed','webrtc'].indexOf(e.type)>=0?' School or work Wi-Fi often blocks this. Try a phone hotspot or home Wi-Fi.':'')}
 function host(fixed){
   nm=$('nm').value.trim()||'Player';room=fixed||mkCode();isHost=true;net(fixed?'Opening the public room...':'Opening a room...');peer=new Peer('bbash-'+room,{config:ICE});
-  peer.on('open',id=>{net('');me=id;ROOM_SETTINGS={...DEFAULT_ROOM_SETTINGS};G={ph:'lobby',settings:{...ROOM_SETTINGS},players:[{id,name:nm,lives:ROOM_SETTINGS.startingLives,lostLives:0,score:0,alive:true,nl:LIFE0,pv:0,seg:[]}],turn:0,cat:-1,last:null,msg:'',used:{},n:0};push()});
+  peer.on('open',id=>{net('');me=id;ROOM_SETTINGS={...DEFAULT_ROOM_SETTINGS};G={ph:'lobby',settings:{...ROOM_SETTINGS},players:[{id,name:nm,lives:ROOM_SETTINGS.startingLives,lostLives:0,score:0,alive:true,nl:LIFE0,pv:0,seg:[]}],turn:0,cat:-1,last:null,msg:'',used:{},n:0,chat:[]};push()});
   peer.on('error',e=>{if(e.type==='unavailable-id'){peer.destroy();isHost=false;if(fixed)setTimeout(()=>pubRoom(pubN),400);else host()}else net(NETERR(e),1)});
   peer.on('connection',c=>{c.on('data',d=>hostMsg(c,d));c.on('close',()=>drop(c.peer))});
 }
@@ -931,10 +949,34 @@ function hostMsg(c,d){
     if(conns[c.peer])return;
     if(G.ph!=='lobby'||G.players.length>=5){c.send({t:'full'});setTimeout(()=>c.close(),400);return}
     conns[c.peer]=c;G.players.push({id:c.peer,name:String(d.n||'Player').slice(0,12),lives:ROOM_SETTINGS.startingLives,lostLives:0,score:0,alive:true,nl:LIFE0,pv:0,seg:[]});push();
+  }else if(d.t==='chat'){
+    if(G.ph!=='lobby'||!conns[c.peer]||!G.players.some(p=>p.id===c.peer))return;
+    const now=Date.now();if(now-(chatLast[c.peer]||0)<650)return;chatLast[c.peer]=now;
+    addLobbyChat(c.peer,String(d.x||''));
   }else if(d.t==='ans')answer(c.peer,String(d.x||''));else if(d.t==='typ'){const cp=G.players[G.turn];if(G.ph==='play'&&!G.pause&&cp&&cp.id===c.peer)bcastTyp(c.peer,String(d.x||'').slice(0,30))}
 }
+let chatLast={};
+function addLobbyChat(id,raw){
+  if(!G||G.ph!=='lobby')return;
+  const x=String(raw||'').replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,180);if(!x)return;
+  const p=G.players.find(q=>q.id===id);if(!p)return;
+  G.chat=G.chat||[];G.chat.push({id,name:p.name,text:x,at:Date.now()});if(G.chat.length>60)G.chat.splice(0,G.chat.length-60);push();
+}
+function sendLobbyChat(){
+  if(!S||S.ph!=='lobby')return;
+  const x=$('lobbyChatInput').value.trim();if(!x)return;
+  if(isHost){const now=Date.now();if(now-(chatLast[me]||0)<350)return;chatLast[me]=now;addLobbyChat(me,x)}
+  else if(conn&&conn.open)conn.send({t:'chat',x:x.slice(0,180)});
+  $('lobbyChatInput').value='';$('lobbyChatInput').focus();
+}
+function renderLobbyChat(messages){
+  const log=$('lobbyChatLog');if(!log)return;
+  const rows=Array.isArray(messages)?messages:[];
+  log.innerHTML=rows.length?rows.map(m=>'<div class="chat-line"><b>'+esc(m.name||'Player')+':</b> '+esc(m.text||'')+'</div>').join(''):'<div class="chat-empty">No messages yet. Say hello!</div>';
+  log.scrollTop=log.scrollHeight;
+}
 function push(){
-  const s={ph:G.ph,settings:G.settings||DEFAULT_ROOM_SETTINGS,players:G.players,turn:G.turn,cat:G.cat>=0?CATS[G.cat][0]:'',left:deadline?Math.max(0,deadline-Date.now()):0,tot:G.tot||1,msg:G.msg,pause:G.pause,np:G.np,win:G.win,n:G.n,pn:G.pn,say:G.say,lf:G.lf,miss:G.ph==='over'?G.miss:undefined,room};
+  const s={ph:G.ph,settings:G.settings||DEFAULT_ROOM_SETTINGS,players:G.players,chat:G.chat||[],turn:G.turn,cat:G.cat>=0?CATS[G.cat][0]:'',left:deadline?Math.max(0,deadline-Date.now()):0,tot:G.tot||1,msg:G.msg,pause:G.pause,np:G.np,win:G.win,n:G.n,pn:G.pn,say:G.say,lf:G.lf,miss:G.ph==='over'?G.miss:undefined,room};
   Object.values(conns).forEach(c=>c.open&&c.send({t:'s',s}));render(s);
 }
 const lim=()=>G.players.length>1?1:0;
@@ -982,7 +1024,7 @@ function answer(id,x){
   G.say={id:p.id,x:dn.trim().slice(0,22),p:pts,t:tier};G.same=(G.same||0)+1;G.msg=m;after();
 }
 function drop(id){
-  delete conns[id];if(!G)return;
+  delete conns[id];delete chatLast[id];if(!G)return;
   const i=G.players.findIndex(p=>p.id===id);if(i<0)return;
   if(G.ph==='lobby'){G.players.splice(i,1);push();return}
   const p=G.players[i];p.alive=false;p.lives=0;
@@ -1150,7 +1192,8 @@ function render(s){
   document.body.style.setProperty('--d',s.ph==='lobby'?0:Math.min(1,tt/400));
   if(s.ph==='lobby'){
     // The lobby is a shared room view: render it for hosts and every connected guest.
-    missOpen=false;show('lobby');$('rc2').textContent=s.room;$('rcm').textContent=/^PUBLIC/.test(s.room)?'Public room. Anyone can join it from the home screen.':'Room code. Share it with your friends.';pl('pl1',s);lobbyArena(s);
+    missOpen=false;show('lobby');$('rc2').textContent=s.room;$('rcm').textContent=/^PUBLIC/.test(s.room)?'Public room. Anyone can join it from the home screen.':'Room code. Share it with your friends.';pl('pl1',s);lobbyArena(s);renderLobbyChat(s.chat);
+    $('lobbyChatInput').disabled=false;$('lobbyChatSend').disabled=false;
     $('st').classList.toggle('hid',!isHost);$('st').disabled=!isHost;
     ['settingStarting','settingMax','settingCountdown','resetSettings'].forEach(id=>$(id).disabled=!isHost);
     $('settingsStatus').textContent=isHost?'Only the room host can change these settings.':'Room settings are controlled by the host.';
@@ -1211,6 +1254,7 @@ document.body.prepend(bb);
 function setSettingsOpen(open){$('settingsBackdrop').classList.toggle('hid',!open);$('openSettings').setAttribute('aria-expanded',String(open));if(open){$('closeSettings').focus() }else{$('openSettings').focus()}}
 $('openSettings').onclick=()=>setSettingsOpen(true);$('closeSettings').onclick=()=>setSettingsOpen(false);$('settingsBackdrop').addEventListener('click',e=>{if(e.target===$('settingsBackdrop'))setSettingsOpen(false)});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('settingsBackdrop').classList.contains('hid'))setSettingsOpen(false)});
 $('leaveLobby').onclick=leaveRoom;$('leaveGame').onclick=leaveRoom;
+$('lobbyChatSend').onclick=sendLobbyChat;$('lobbyChatInput').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();sendLobbyChat()}};
 $('mk').onclick=()=>host();$('jn').onclick=()=>joinRoom();$('pub').onclick=openPubList;$('pubBack').onclick=()=>{stopPubScan();show('home')};$('pubRefresh').onclick=scanPub;$('pubNew').onclick=()=>{stopPubScan();show('home');pubTry=0;pubN=pubFree;if(pubFree>PUB_SLOTS)return net('All public rooms are in use. Try again in a moment.',1);host(pubName(pubFree))};$('tn').onclick=()=>testNet();
 $('showmiss').onclick=()=>{missOpen=!missOpen;if(S)render(S)};$('st').onclick=start;$('again').onclick=()=>{G.ph='lobby';push()};
 $('ans').oninput=()=>{const n=Date.now();clearTimeout(sendTyp.t);if(n-typT>70){typT=n;sendTyp()}else sendTyp.t=setTimeout(sendTyp,80)};
