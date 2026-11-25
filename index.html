@@ -371,7 +371,32 @@ h1{font-size:clamp(42px,7vw,58px);margin:2px 0 0}
 </style>
 <style>.say .rarity-pop{position:absolute;left:100%;right:auto;bottom:calc(100% + 7px);white-space:nowrap;color:var(--c);font-size:22px;line-height:1;font-weight:400;text-shadow:2px 2px 0 #02060d;pointer-events:none;animation:gain 1s steps(10) forwards}@media(max-width:600px){.say .rarity-pop{font-size:19px}}@media(prefers-reduced-motion:reduce){.say .rarity-pop{animation:none}}</style>
 <style>.say.country-full{width:max-content}.say.country-full span{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}</style>
-</head>
+<style id="local-profile-css">
+#profileBackdrop{position:fixed;inset:0;z-index:30;background:rgba(0,5,14,.86);display:flex;align-items:center;justify-content:center;padding:12px}
+#profileBackdrop.hid{display:none!important}
+#profilePanel{width:min(100%,480px);max-height:88vh;max-height:88dvh;overflow:auto;margin:0;border:3px solid var(--glow);padding:14px;box-shadow:6px 6px 0 #02060d}
+#profilePanel h2{margin:0;color:var(--glow);font-size:32px;font-weight:400}
+#profilePanel .profile-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#profileClose{width:auto;font-size:23px;margin:0;padding:3px 10px}
+#profilePanel select,#profilePanel textarea{font:inherit;color:var(--ink);background:#02070f;border:2px solid var(--line);width:100%;border-radius:0;padding:6px}
+#profilePanel select{margin:5px 0;font-size:21px}
+#profilePanel .profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:10px 0}
+#profilePanel .profile-stat{background:#071426;border:2px solid var(--line);padding:5px 8px;min-width:0}
+#profilePanel .profile-stat small{display:block;color:var(--mut);font-size:17px;line-height:1.05}
+#profilePanel .profile-stat b{display:block;font-size:29px;font-weight:400;color:var(--sun);overflow-wrap:anywhere}
+#profilePanel .profile-rarity{display:flex;align-items:center;justify-content:space-between;color:var(--c);border-bottom:1px solid var(--line);padding:3px 0;font-size:21px}
+#profilePanel h3{font-weight:400;color:var(--glow);font-size:24px;margin:12px 0 3px}
+#profilePanel .profile-note{color:var(--mut);font-size:17px;line-height:1.15;margin:6px 0}
+#profilePanel button:not(#profileClose){font-size:22px;padding:5px 8px;min-height:40px}
+#profilePanel textarea{font-size:16px;min-height:85px;resize:vertical}
+#profileResult{font-size:19px;color:var(--ok);margin:8px 0;text-align:center;line-height:1.15}
+</style><style id="global-leaderboard-css">
+#lbBackdrop{position:fixed;inset:0;z-index:35;background:rgba(0,5,14,.86);display:flex;align-items:center;justify-content:center;padding:12px}
+#lbBackdrop.hid{display:none!important}#lbPanel{width:min(100%,500px);max-height:88vh;max-height:88dvh;overflow:auto;margin:0;border:3px solid var(--glow);padding:14px;box-shadow:6px 6px 0 #02060d}
+#lbPanel h2{margin:0;color:var(--glow);font-size:30px;font-weight:400}#lbPanel .lb-head{display:flex;align-items:center;justify-content:space-between;gap:8px}#lbClose{width:auto;font-size:23px;padding:3px 10px;margin:0}
+#lbPanel select{font:inherit;color:var(--ink);background:#02070f;border:2px solid var(--line);width:100%;padding:6px;border-radius:0;margin:6px 0}#lbPanel .lb-note{font-size:18px;color:var(--mut);line-height:1.15;margin:6px 0}
+#lbPanel .lb-row{display:flex;align-items:center;gap:8px;background:#071426;border:2px solid var(--line);padding:6px 8px;margin:4px 0;font-size:23px}#lbPanel .lb-rank{width:42px;flex:none;font-weight:400;color:var(--mut)}#lbPanel .lb-row:nth-child(1) .lb-rank{color:var(--sun)}#lbPanel .lb-row:nth-child(2) .lb-rank{color:#c4d1dd}#lbPanel .lb-row:nth-child(3) .lb-rank{color:#cd9160}#lbPanel .lb-name{flex:1;overflow-wrap:anywhere;min-width:0}#lbPanel .lb-value{color:var(--glow);font-weight:400;white-space:nowrap}#lbPanel input[type=checkbox]{width:20px;height:20px;vertical-align:middle;accent-color:var(--glow);margin:0 6px 0 0}#lbPanel label{font-size:21px}#lbPanel #lbRefresh{font-size:21px;padding:5px 8px;min-height:40px}#lbOverStatus{font-size:17px;color:var(--mut);text-align:center}
+</style></head>
 <body><main>
 <h1>Puffer party</h1>
 <p class="sub">Answer before the puffer pops. Rarer answers score more.</p>
@@ -382,6 +407,8 @@ h1{font-size:clamp(42px,7vw,58px);margin:2px 0 0}
  <input id="rc" maxlength="4" placeholder="Room code" autocomplete="off" style="text-transform:uppercase">
  <button id="jn" class="alt">Join room</button>
  <button id="pub" class="alt">Join public room</button>
+ <button id="openProfile" type="button" class="alt">Player profile</button>
+ <button id="openLeaderboard" type="button" class="alt">Global leaderboard</button>
  <button id="tn" class="alt" style="opacity:.75">Test my connection</button>
  <div class="msg" style="font-size:13px;opacity:.6">Version: 18 Nov 2026 · public rooms</div>
 </div>
@@ -443,9 +470,31 @@ h1{font-size:clamp(42px,7vw,58px);margin:2px 0 0}
  <div class="prompt" id="win"></div>
  <div id="pl3"></div>
  <button id="showmiss" class="hid">Show rejected answers</button><div class="msg hid" id="misslist" style="text-align:left;max-height:34vh;overflow:auto;line-height:1.5"></div><button id="again">Back to lobby</button>
+ <div id="profileResult" role="status"></div>
+ <button id="overProfile" type="button" class="alt">View my profile</button>
+ <button id="overLeaderboard" type="button" class="alt">Global leaderboard</button><div id="lbOverStatus" role="status"></div>
  <div class="msg" id="wt2"></div>
 </div>
-</main>
+<div id="profileBackdrop" class="hid">
+ <section id="profilePanel" class="card" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
+  <div class="profile-head"><h2 id="profileTitle">Player profile</h2><button id="profileClose" class="alt" type="button" aria-label="Close profile">×</button></div>
+  <div id="profileManage"><label for="profileSelect">Saved players</label><select id="profileSelect"></select><div class="profile-note">To make another profile, enter a new name on the main menu and start or join a room.</div></div>
+  <h3 id="profileName"></h3><div id="profileStats" class="profile-grid"></div>
+  <h3>Lifetime rarity totals</h3><div id="profileRarities"></div>
+  <div class="profile-note">Completed games only. Accuracy = accepted answers / submitted answers. A rejected answer or timeout breaks your streak. Survival ends at elimination or match end.</div>
+  <div id="profileBackup"><h3>Backup / transfer</h3><div class="profile-note">Copy the backup text somewhere safe. Paste a backup here to restore all profiles on this device.</div><button id="profileExport" class="alt" type="button">Generate backup</button><textarea id="profileBackupText" aria-label="Profile backup text" placeholder="Backup text"></textarea><button id="profileImport" class="alt" type="button">Restore backup</button></div>
+  <div id="profileStatus" class="profile-note" role="status"></div>
+ </section>
+</div>
+<div id="lbBackdrop" class="hid"><section id="lbPanel" class="card" role="dialog" aria-modal="true" aria-labelledby="lbTitle">
+<div class="lb-head"><h2 id="lbTitle">Global leaderboard</h2><button id="lbClose" class="alt" type="button" aria-label="Close leaderboard">×</button></div>
+<div class="lb-note">All-time rankings · Top 50 · No account registration needed.</div>
+<label><input id="lbShare" type="checkbox">Share future match results from this device</label>
+<div class="lb-note">Your player name and summary scores will be public. Local profile history stays on this device. Turning sharing off pauses future uploads; published scores remain visible.</div>
+<div id="lbSyncStatus" class="lb-note" role="status"></div>
+<select id="lbMetric" aria-label="Ranking category"><option value="best_xp">Best run (XP)</option><option value="wins">Multiplayer wins</option><option value="best_survival">Longest survival</option><option value="best_streak">Longest streak</option><option value="krillions">One in a Krillion</option></select>
+<button id="lbRefresh" type="button" class="alt">Refresh rankings / retry uploads</button><div id="lbStatus" class="lb-note" role="status"></div><div id="lbRows"></div>
+</section></div></main>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
 // Each entry: [prompt, plankton, too clever, schooler] (points are set by PTS below)
@@ -1388,6 +1437,29 @@ for(const [ci,forms,found] of REGIONAL_ANSWER_AUDIT.conflicts){
  CATEGORY_REJECTED[ci].add(k);
 }
 
+
+// Seven additional constrained prompts (November 2026). Existing indexes and answer banks unchanged.
+// Countries: total area of the Republic of Ireland (70,273 km²); national flags include official state variants and heraldic animals.
+// No-land-border list follows the standard geography quiz convention (overseas military bases excluded).
+// Equator: includes territorial waters. Element names may have established indirect geographical etymologies.
+const NEW_COUNTRY_PROMPTS = {"Name a country with no land borders": ["Australia", "Antigua and Barbuda", "Bahamas", "Bahrain", "Barbados", "Cabo Verde", "Comoros", "Cuba", "Cyprus", "Dominica", "Fiji", "Grenada", "Iceland", "Jamaica", "Japan", "Kiribati", "Madagascar", "Maldives", "Malta", "Marshall Islands", "Mauritius", "Micronesia", "Nauru", "New Zealand", "Palau", "Philippines", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "São Tomé and Príncipe", "Seychelles", "Singapore", "Solomon Islands", "Sri Lanka", "Taiwan", "Tonga", "Trinidad and Tobago", "Tuvalu", "Vanuatu"], "Name a country crossed by the Equator (land or waters)": ["Brazil", "Colombia", "Ecuador", "São Tomé and Príncipe", "Gabon", "Republic of the Congo", "Democratic Republic of the Congo", "Uganda", "Kenya", "Somalia", "Indonesia", "Maldives", "Kiribati"], "Name a country smaller than Ireland (by area)": ["Georgia", "Sri Lanka", "Lithuania", "Latvia", "Togo", "Croatia", "Bosnia and Herzegovina", "Costa Rica", "Slovakia", "Dominican Republic", "Estonia", "Denmark", "Netherlands", "Switzerland", "Bhutan", "Guinea-Bissau", "Moldova", "Belgium", "Lesotho", "Armenia", "Solomon Islands", "Albania", "Equatorial Guinea", "Burundi", "Haiti", "Rwanda", "North Macedonia", "Djibouti", "Belize", "El Salvador", "Israel", "Slovenia", "Fiji", "Kuwait", "Eswatini", "Timor-Leste", "Bahamas", "Montenegro", "Vanuatu", "Qatar", "Jamaica", "Gambia", "Lebanon", "Cyprus", "Palestine", "Brunei", "Trinidad and Tobago", "Cabo Verde", "Samoa", "Luxembourg", "Mauritius", "Comoros", "São Tomé and Príncipe", "Kiribati", "Bahrain", "Dominica", "Tonga", "Singapore", "Micronesia", "Saint Lucia", "Andorra", "Palau", "Seychelles", "Antigua and Barbuda", "Barbados", "Saint Vincent and the Grenadines", "Grenada", "Malta", "Maldives", "Saint Kitts and Nevis", "Marshall Islands", "Liechtenstein", "San Marino", "Tuvalu", "Nauru", "Monaco", "Vatican City", "Taiwan", "Kosovo"], "Name a country with an animal on its flag (including arms)": ["Albania", "Andorra", "Bhutan", "Croatia", "Dominica", "Ecuador", "Egypt", "Fiji", "Guatemala", "Kazakhstan", "Kiribati", "Mexico", "Moldova", "Montenegro", "Papua New Guinea", "Serbia", "Spain", "Sri Lanka", "Uganda", "Zambia", "Zimbabwe", "Austria", "Bolivia", "Peru", "Paraguay", "Malta"]};
+const NEW_CONSTRAINED_PROMPTS = {"Name an element named after a place on Earth": [["Magnesium", 2, ["Mg"]], ["Copper", 2, ["Cu"]], ["Scandium", 3, ["Sc"]], ["Gallium", 3, ["Ga"]], ["Germanium", 2, ["Ge"]], ["Strontium", 3, ["Sr"]], ["Yttrium", 4, ["Y"]], ["Ruthenium", 4, ["Ru"]], ["Europium", 2, ["Eu"]], ["Terbium", 4, ["Tb"]], ["Holmium", 5, ["Ho"]], ["Erbium", 4, ["Er"]], ["Thulium", 5, ["Tm"]], ["Ytterbium", 5, ["Yb"]], ["Lutetium", 5, ["Lu"]], ["Hafnium", 5, ["Hf"]], ["Rhenium", 5, ["Re"]], ["Polonium", 2, ["Po"]], ["Francium", 1, ["Fr"]], ["Americium", 2, ["Am"]], ["Berkelium", 4, ["Bk"]], ["Californium", 2, ["Cf"]], ["Dubnium", 5, ["Db"]], ["Hassium", 5, ["Hs"]], ["Darmstadtium", 5, ["Ds"]], ["Nihonium", 4, ["Nh"]], ["Moscovium", 4, ["Mc"]], ["Livermorium", 5, ["Lv"]], ["Tennessine", 4, ["Ts"]], ["Manganese", 4, ["Mn"]]], "Name an animal beginning with S": [["sheep", 1, []], ["squirrel", 1, []], ["shark", 1, []], ["spider", 1, []], ["snail", 3, []], ["sea turtle", 3, []], ["sloth", 4, []], ["serval", 3, []], ["Snake", 2, []], ["seal", 3, []], ["swan", 3, []], ["sparrow", 3, []], ["seagull", 3, ["sea gull"]], ["stork", 3, []], ["salamander", 3, []], ["stingray", 3, []], ["salmon", 3, []], ["swordfish", 3, []], ["starfish", 3, ["sea star"]], ["squid", 3, []], ["shrimp", 3, []], ["slug", 3, []], ["scorpion", 3, []], ["shrew", 3, []], ["stoat", 3, []], ["sable", 3, []], ["skunk", 3, []], ["sperm whale", 3, []], ["sea lion", 3, []], ["sun bear", 3, []], ["springbok", 3, []], ["skylark", 3, []], ["starling", 3, []], ["swallow", 3, []], ["swift", 3, []], ["spoonbill", 3, []], ["sandpiper", 3, []], ["skink", 3, []], ["sand cat", 3, []], ["sambar", 3, []], ["sardine", 3, []], ["sailfish", 3, []], ["snapper", 3, []], ["skate", 3, []], ["siamang", 3, []], ["sea anemone", 3, []], ["sponge", 3, []], ["sea cucumber", 3, []], ["sand dollar", 3, []], ["scallop", 3, []], ["snow leopard", 3, []], ["sea otter", 3, []], ["striped hyena", 3, []], ["snowy owl", 3, []], ["spinner dolphin", 3, []], ["snapping turtle", 3, []], ["stick insect", 1, []], ["springhare", 3, []], ["stag beetle", 4, []], ["steenbok", 4, []], ["snow crab", 4, []], ["spider crab", 4, []], ["sea urchin", 4, []], ["seahorse", 4, ["sea horse"]], ["sitatunga", 4, []], ["sea snake", 4, []], ["sloth bear", 4, []], ["spectacled bear", 4, []], ["snowshoe hare", 4, []], ["sable antelope", 4, []], ["spider monkey", 4, []], ["squirrel monkey", 4, []], ["sugar glider", 4, ["sugar glider"]], ["sandhill crane", 4, []], ["scarlet macaw", 4, []], ["saola", 4, []], ["saiga", 5, ["saiga antelope"]], ["solenodon", 5, []], ["sunfish", 4, []], ["shoebill", 4, ["shoebill stork"]], ["secretarybird", 4, []], ["saki", 4, []], ["sifaka", 4, []], ["sportive lemur", 4, []], ["slow loris", 4, []], ["skua", 4, []], ["siberian tiger", 5, []], ["siberian musk deer", 5, []], ["siberian chipmunk", 5, []], ["sapsaree", 5, ["sapsali", "sapsal dog"]], ["sika deer", 5, []], ["sea angel", 5, []], ["sea butterfly", 5, []], ["spotted eagle ray", 5, []], ["sumatran rhinoceros", 5, []], ["sea eagle", 5, []], ["snub-nosed monkey", 5, []], ["spiny anteater", 5, []], ["serow", 5, []], ["steller sea lion", 5, []], ["Siberian crane", 5, []], ["Siberian husky", 4, []], ["Siamese cat", 4, []], ["Shetland pony", 4, []], ["Shetland sheepdog", 5, []], ["Scottish terrier", 4, []], ["Scottish fold", 5, []], ["Suffolk sheep", 5, []], ["Spanish ibex", 5, []], ["Spanish mackerel", 5, []], ["Sockeye salmon", 5, []], ["Silver salmon", 5, []], ["Spotted hyena", 5, []], ["Striped skunk", 5, []], ["Striped dolphin", 5, []], ["Shortfin mako", 5, []], ["Sand tiger shark", 5, []], ["Sawfish", 4, []], ["Sawshark", 4, []], ["Sixgill shark", 5, []], ["Silky shark", 5, []], ["Spiny dogfish", 5, []], ["Smalltooth sawfish", 5, []], ["Sailfin lizard", 5, []], ["Saltwater crocodile", 4, []], ["Spectacled caiman", 5, []], ["Smooth newt", 5, []], ["Spotted salamander", 5, []], ["Spotted turtle", 5, []], ["Softshell turtle", 5, []], ["Spiny lobster", 5, []], ["Sand crab", 5, []], ["Sand flea", 5, []], ["Silverfish", 4, []], ["Silkworm", 4, []], ["Swallowtail butterfly", 5, []], ["Sulphur butterfly", 5, []], ["Stink bug", 4, ["shield bug"]], ["Sandfly", 5, ["sand fly"]], ["Stonefly", 5, []], ["Sawfly", 5, []], ["Soldier beetle", 5, []], ["Scarab beetle", 5, []], ["Snail kite", 5, []], ["Snow goose", 4, []], ["Snow bunting", 5, []], ["Song thrush", 5, []], ["Sooty tern", 5, []], ["Sooty shearwater", 5, []], ["Snow petrel", 5, []], ["Storm petrel", 5, []], ["Sand martin", 5, []], ["Sedge warbler", 5, []], ["Sparrowhawk", 4, []], ["Saker falcon", 5, []], ["Sharp-shinned hawk", 5, []], ["Steller’s sea eagle", 5, []], ["Scarlet ibis", 5, []], ["Superb lyrebird", 5, []], ["Superb fairywren", 5, []], ["Southern cassowary", 5, []], ["Sandgrouse", 5, []], ["Snipe", 4, []], ["Sora", 5, []], ["Sapsucker", 5, []], ["Spotted dove", 5, []], ["Satin bowerbird", 5, []], ["Screech owl", 5, []], ["Short-eared owl", 5, []], ["Spotted owl", 5, []], ["Southern right whale", 5, []], ["Sei whale", 5, []], ["Sowerby’s beaked whale", 5, []], ["South American fur seal", 5, []], ["Southern elephant seal", 5, []], ["Saimaa ringed seal", 5, []], ["Sunda pangolin", 5, []], ["Sunda colugo", 5, []], ["Southern tamandua", 5, []], ["Southern pudu", 5, []], ["Sunda clouded leopard", 5, []], ["Sumatran tiger", 5, []], ["Striped polecat", 5, []], ["Southern flying squirrel", 5, []], ["Spotted-necked otter", 5, []], ["Sand gazelle", 5, []], ["Speke’s gazelle", 5, []], ["Short-tailed chinchilla", 5, []], ["Spotted cuscus", 5, []], ["Swamp wallaby", 5, []], ["Swamp rabbit", 5, []], ["Sea lamprey", 5, []], ["Stonefish", 4, []], ["Scorpionfish", 5, []], ["Squirrelfish", 5, []], ["Surgeonfish", 5, []], ["Sculpin", 5, []], ["Smelt", 4, []], ["Sole", 4, []], ["Sturgeon", 4, []], ["Seabass", 4, ["sea bass"]], ["Striped bass", 5, []], ["Sand eel", 5, []], ["Sablefish", 5, []], ["Silver carp", 5, []], ["Siamese fighting fish", 5, []], ["Spotted gar", 5, []], ["Spotted seatrout", 5, []], ["Siamese algae eater", 5, []], ["Spotted garden eel", 5, []], ["Sea hare", 5, []], ["Sea slug", 4, []], ["Sea spider", 5, []], ["Sea walnut", 5, []], ["Spaghetti worm", 5, []], ["Serpent star", 5, []], ["Slipper lobster", 5, []], ["Squat lobster", 5, []], ["Skeleton shrimp", 5, []], ["Sponge crab", 5, []], ["Sand octopus", 5, []], ["Splendid fairywren", 5, []], ["Spanish slug", 5, []], ["Spotted lanternfly", 5, []], ["Scolopendra", 5, []], ["Sacred ibis", 5, []], ["Snowcock", 5, []], ["Shelduck", 5, []], ["Scoter", 5, []], ["Smew", 5, []], ["Shoveler", 5, []], ["Sea duck", 5, []], ["Silkie", 5, []], ["Swainson’s hawk", 5, []]], "Name a language that uses a right-to-left script": [["Arabic", 1, ["Standard Arabic"]], ["Hebrew", 1, ["Modern Hebrew"]], ["Persian", 1, ["Farsi"]], ["Urdu", 1, []], ["Pashto", 2, ["Pushto", "Pakhto"]], ["Yiddish", 2, []], ["Sindhi", 3, []], ["Kashmiri", 3, ["Koshur"]], ["Uyghur", 3, ["Uighur", "Uygur"]], ["Kurdish", 3, ["Sorani", "Central Kurdish"]], ["Aramaic", 3, []], ["Syriac", 4, ["Classical Syriac"]], ["Dari", 3, []], ["Balochi", 4, ["Baluchi"]], ["Dhivehi", 4, ["Divehi", "Maldivian"]], ["Azerbaijani", 4, ["Azeri", "South Azerbaijani"]], ["Punjabi", 3, ["Panjabi", "Western Punjabi"]], ["Rohingya", 4, []], ["Malay", 3, ["Bahasa Melayu"]], ["Hausa", 3, []], ["Fulani", 4, ["Fula", "Fulah", "Fulfulde", "Pulaar"]], ["Bambara", 4, ["Bamanankan"]], ["Mandinka", 4, ["Mandingo"]], ["Dyula", 5, ["Jula", "Dioula"]], ["N’Ko", 5, ["Nko"]], ["Mende", 5, []], ["Wolof", 4, []], ["Turoyo", 5, ["Surayt"]], ["Neo-Mandaic", 5, ["Mandaic"]], ["Balti", 5, []], ["Brahui", 5, []], ["Burushaski", 5, []], ["Gilaki", 5, []], ["Mazanderani", 5, ["Mazandarani", "Tabari"]], ["Luri", 5, ["Lori"]], ["Saraiki", 5, ["Seraiki"]], ["Shina", 5, []], ["Khowar", 5, []], ["Kazakh", 3, []], ["Kyrgyz", 4, ["Kirghiz"]], ["Uzbek", 4, []], ["Samaritan Aramaic", 5, []], ["Judeo-Persian", 5, []], ["Judeo-Tat", 5, ["Juhuri"]], ["Bukharian", 5, ["Bukhori", "Bukharic"]], ["Judeo-Arabic", 5, []], ["Assyrian Neo-Aramaic", 5, ["Sureth"]], ["Chaldean Neo-Aramaic", 5, []], ["Ladino", 4, ["Judeo-Spanish", "Judezmo"]], ["Javanese", 3, []], ["Sundanese", 4, []], ["Acehnese", 5, []], ["Banjar", 5, ["Banjarese"]], ["Minangkabau", 5, []], ["Tausug", 5, []], ["Cham", 5, []], ["Dogri", 5, []], ["Gojri", 5, ["Gujari"]], ["Hindko", 5, []], ["Pahari-Pothwari", 5, ["Pothwari", "Pothohari"]]]};
+const NEW_EXACT_KEYS=Object.create(null);
+function addConstrainedPrompt(title,entries,exact){
+ const ci=CATS.length,m=Object.create(null),d=Object.create(null),f=Object.create(null),r=Object.create(null),a=Object.create(null),bands=[[],[],[]];
+ for(const [name,tier,aliases] of entries){const k=norm(name);if(!k||Object.hasOwn(m,k))continue;m[k]=[0,1,2,3,4.4,5.4][tier];d[k]=name;f[k]=name;r[k]=tier;bands[tier<=2?0:tier===3?1:2].push(name);for(const alias of aliases){const ak=norm(alias);if(ak&&ak!==k&&!Object.hasOwn(a,ak))a[ak]=k;}}
+ for(const ak of Object.keys(a))if(Object.hasOwn(m,ak))delete a[ak];
+ CATS.push([title,...bands.map(b=>b.join(','))]);MAP.push(m);DISP.push(d);FULLD.push(f);FINAL_RARITY.push(r);CATEGORY_REJECTED.push(new Set());KRP.push([]);
+ if(exact)NEW_EXACT_KEYS[ci]=a;
+ return ci;
+}
+for(const [title,names] of Object.entries(NEW_COUNTRY_PROMPTS)){
+ addConstrainedPrompt(title,names.map(name=>{const k=norm(name);let tier;for(let i=GEO_FIRST;i<CATS.length;i++){if(Object.hasOwn(FINAL_RARITY[i],k)){tier=FINAL_RARITY[i][k];break;}}return [name,tier??FINAL_RARITY[1][k]??3,[]];}),false);
+}
+const NEW_NON_COUNTRY_FIRST=CATS.length;
+for(const [title,entries] of Object.entries(NEW_CONSTRAINED_PROMPTS))addConstrainedPrompt(title,entries,true);
+function isCountryQuestion(ci){return COUNTRY_PROMPTS.has(ci)||(ci>=GEO_FIRST&&ci<NEW_NON_COUNTRY_FIRST)}
+
 // One in a Krillion: select only among answers that are genuinely classified Deep Cut.
 // A prompt with no Deep Cut answers has no jackpot, rather than promoting an obvious answer.
 for(let ci=0;ci<MAP.length;ci++){
@@ -1412,7 +1484,7 @@ function editDist(a,b,limit){
   }
   return prev[b.length];
 }
-function look(ci,txt){const m=MAP[ci];let k=norm(txt);if(COUNTRY_LOCAL_KEYS[ci]&&Object.hasOwn(COUNTRY_LOCAL_KEYS[ci],k)){const w=COUNTRY_LOCAL_KEYS[ci][k];return[w,m[w],FULLD[ci][w],DISP[ci][w]];}if(ci>=GEO_FIRST){k=GEO_ALIAS_KEYS[k]||k;if(m[k])return[k,m[k],FULLD[ci][k],DISP[ci][k]];if(GEO_COUNTRY_KEYS.has(k))return null; // Reject real countries that do not meet this prompt.
+function look(ci,txt){const m=MAP[ci];let k=norm(txt);if(Object.hasOwn(NEW_EXACT_KEYS,ci)){const a=NEW_EXACT_KEYS[ci];let target=Object.hasOwn(a,k)?a[k]:k;if(Object.hasOwn(m,target))return[target,m[target],FULLD[ci][target],DISP[ci][target]];if(CATS[ci][0]==='Name an animal beginning with S'&&k.startsWith('s')){for(const v of [k.replace(/ies$/,'y'),k.replace(/es$/,''),k.replace(/s$/,'')]){target=Object.hasOwn(a,v)?a[v]:v;if(Object.hasOwn(m,target))return[target,m[target],FULLD[ci][target],DISP[ci][target]];}}return null;}if(COUNTRY_LOCAL_KEYS[ci]&&Object.hasOwn(COUNTRY_LOCAL_KEYS[ci],k)){const w=COUNTRY_LOCAL_KEYS[ci][k];return[w,m[w],FULLD[ci][w],DISP[ci][w]];}if(ci>=GEO_FIRST){k=GEO_ALIAS_KEYS[k]||k;if(m[k])return[k,m[k],FULLD[ci][k],DISP[ci][k]];if(GEO_COUNTRY_KEYS.has(k))return null; // Reject real countries that do not meet this prompt.
  // Allow only a uniquely closest typo across all countries, never a closer invalid country.
  if(k.length>=4){const limit=k.length>=8?2:1;let best=limit+1,match=[];for(const w of GEO_COUNTRY_KEYS){const d=editDist(k,w,limit);if(d<best){best=d;match=[w]}else if(d===best)match.push(w);}if(best<=limit&&match.length===1&&m[match[0]]){const w=match[0];return[w,m[w],FULLD[ci][w],DISP[ci][w]];}}return null;}if(CATEGORY_REJECTED[ci]&&CATEGORY_REJECTED[ci].has(k))return null;const exactExtra=extraAliasKey(ci,k);if(exactExtra!==k&&Object.hasOwn(m,exactExtra))return[exactExtra,m[exactExtra],FULLD[ci][exactExtra]||DISP[ci][exactExtra],DISP[ci][exactExtra]];if(ci===GAME_CAT&&window.__pufferGameAliasKeys&&window.__pufferGameAliasKeys[k])k=window.__pufferGameAliasKeys[k];if(window.__pufferAnswerAliasKeys&&window.__pufferAnswerAliasKeys[ci]&&window.__pufferAnswerAliasKeys[ci][k])k=window.__pufferAnswerAliasKeys[ci][k];
   k=extraAliasKey(ci,k);
@@ -1444,6 +1516,66 @@ function resetRoomSettings(){if(!isHost||!G||G.ph!=='lobby')return;ROOM_SETTINGS
 
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let missOpen=false,peer,conn,conns={},me,isHost=false,G,S,room,nm,timer,deadline=0,dl=0,tot=1;
+/* Local profiles: room-authoritative counters; each device stores only its own results. */
+const PROFILE_KEY='puffer-party-local-profiles-v1';
+const profileFields=['games','wins','competitiveGames','bestXP','bestSurvival','correct','submitted','bestStreak','livesEarned','totalXP'];
+const profileNumber=n=>Number.isSafeInteger(n)&&n>=0?n:0;
+const profileId=name=>String(name||'Player').trim().slice(0,12).toLowerCase()||'player';
+function blankProfile(name){return {name:String(name||'Player').trim().slice(0,12)||'Player',...Object.fromEntries(profileFields.map(k=>[k,0])),rarities:[0,0,0,0,0,0],seen:[]}}
+function cleanProfileData(raw){
+ const out={version:1,active:'',profiles:Object.create(null)};
+ if(!raw||raw.version!==1||!raw.profiles||typeof raw.profiles!=='object'||Array.isArray(raw.profiles))return out;
+ for(const [key,value] of Object.entries(raw.profiles)){
+  if(!value||typeof value.name!=='string'||!value.name.trim())continue;
+  const p=blankProfile(value.name),id=profileId(p.name);if(key!==id)continue;
+  for(const k of profileFields)p[k]=profileNumber(value[k]);
+  p.wins=Math.min(p.wins,p.competitiveGames,p.games);p.competitiveGames=Math.min(p.competitiveGames,p.games);p.correct=Math.min(p.correct,p.submitted);
+  p.rarities=p.rarities.map((_,i)=>profileNumber(value.rarities&&value.rarities[i]));
+  p.seen=Array.isArray(value.seen)?[...new Set(value.seen.filter(x=>typeof x==='string'&&x.length<=120))]:[];
+  out.profiles[id]=p;
+ }
+ if(Object.hasOwn(out.profiles,raw.active))out.active=raw.active;else out.active=Object.keys(out.profiles)[0]||'';
+ return out;
+}
+let profileStorageOK=true,profileData=cleanProfileData(null),profileMatchStatus='',profileFocus=null;
+try{const raw=localStorage.getItem(PROFILE_KEY);if(raw)profileData=cleanProfileData(JSON.parse(raw))}catch(e){profileStorageOK=false}
+function persistProfiles(){try{localStorage.setItem(PROFILE_KEY,JSON.stringify(profileData));profileStorageOK=true;return true}catch(e){profileStorageOK=false;return false}}
+function ensureProfile(name){const id=profileId(name);if(!Object.hasOwn(profileData.profiles,id))profileData.profiles[id]=blankProfile(name);profileData.active=id;return profileData.profiles[id]}
+function rememberProfile(name){const p=ensureProfile(name);persistProfiles();return p}
+function newRunStats(){return {submitted:0,correct:0,streak:0,bestStreak:0,livesEarned:0,rarities:[0,0,0,0,0,0],survivalMs:null}}
+function finishSurvival(p){if(p.runStats&&p.runStats.survivalMs===null)p.runStats.survivalMs=Math.max(0,Date.now()-G.runStarted)}
+function recordProfileResult(s){
+ if(s.ph!=='over')return;
+ const p=s.players.find(p=>p.id===me);
+ if(!p||!p.runStats||typeof s.runId!=='string'||!s.runId){profileMatchStatus='This match has no compatible profile statistics.';return}
+ const id=profileId(p.name),a=Object.hasOwn(profileData.profiles,id)?profileData.profiles[id]:ensureProfile(p.name),r=p.runStats;
+ if(a.seen.includes(s.runId)){profileMatchStatus=profileStorageOK?'Match saved to your profile.':'Match recorded in memory only — storage unavailable.';return}
+ const competitive=s.players.length>1;
+ a.games++;if(competitive)a.competitiveGames++;if(competitive&&s.winnerId===me)a.wins++;
+ a.bestXP=Math.max(a.bestXP,profileNumber(p.score));a.totalXP+=profileNumber(p.score);
+ a.bestSurvival=Math.max(a.bestSurvival,profileNumber(r.survivalMs));a.correct+=profileNumber(r.correct);a.submitted+=profileNumber(r.submitted);
+ a.bestStreak=Math.max(a.bestStreak,profileNumber(r.bestStreak));a.livesEarned+=profileNumber(r.livesEarned);
+ a.rarities=a.rarities.map((n,i)=>n+profileNumber(r.rarities&&r.rarities[i]));a.seen.push(s.runId);
+ profileData.active=id;profileMatchStatus=persistProfiles()?'Match saved to your profile.':'Match recorded in memory only — storage unavailable.';
+ try{lbQueueResult(s,p,r)}catch(e){console.warn('Leaderboard queue:',e)}
+}
+function profileDuration(ms){const sec=Math.floor(ms/1000);return Math.floor(sec/60)+'m '+String(sec%60).padStart(2,'0')+'s'}
+function displayProfile(){
+ const inRoom=!!S&&S.ph!=='lobby';const p=(profileData.profiles[profileData.active])||blankProfile($('nm').value);
+ $('profileManage').classList.toggle('hid',inRoom);$('profileBackup').classList.toggle('hid',inRoom);
+ $('profileSelect').replaceChildren();for(const [id,record] of Object.entries(profileData.profiles)){const o=document.createElement('option');o.value=id;o.textContent=record.name;$('profileSelect').appendChild(o)}
+ $('profileSelect').value=profileData.active;$('profileName').textContent=p.name;
+ const stats=[['Games played',p.games],['Wins',p.wins],['Multiplayer win rate',p.competitiveGames?(100*p.wins/p.competitiveGames).toFixed(1)+'%':'—'],['Best run',p.bestXP+' XP'],['Lifetime XP',p.totalXP],['Longest survival',profileDuration(p.bestSurvival)],['Correct answers',p.correct],['Accuracy',p.submitted?(100*p.correct/p.submitted).toFixed(1)+'%':'—'],['Longest streak',p.bestStreak],['Extra lives earned',p.livesEarned]];
+ $('profileStats').innerHTML=stats.map(([k,v])=>'<div class="profile-stat"><small>'+esc(k)+'</small><b>'+esc(String(v))+'</b></div>').join('');
+ $('profileRarities').innerHTML=['Plankton','Too Clever','Schooler','Rare','Deep Cut','One in a Krillion'].map((k,i)=>'<div class="profile-rarity t'+(i+1)+'"><span>'+k+'</span><span>'+p.rarities[i]+'</span></div>').join('');
+ $('profileStatus').textContent=profileStorageOK?'Saved on this device only.':'Browser storage unavailable. Export a backup before closing.';
+}
+function openLocalProfile(){if(!S){const name=$('nm').value.trim();if(name)rememberProfile(name)}profileFocus=document.activeElement;displayProfile();$('profileBackdrop').classList.remove('hid');$('profileClose').focus()}
+function closeLocalProfile(){$('profileBackdrop').classList.add('hid');$('profileBackupText').value='';if(profileFocus&&profileFocus.isConnected)profileFocus.focus()}
+function restoreProfileBackup(){
+ try{const raw=JSON.parse($('profileBackupText').value);if(!raw||raw.version!==1||!raw.profiles||Array.isArray(raw.profiles)||typeof raw.profiles!=='object')throw Error('Invalid profile backup');const data=cleanProfileData(raw);if(!Object.keys(data.profiles).length||Object.keys(data.profiles).length!==Object.keys(raw.profiles).length)throw Error('Invalid profile entries');if(!confirm('Replace all local player profiles with this backup?'))return;profileData=data;const ok=persistProfiles();$('nm').value=profileData.profiles[profileData.active]?.name||'';displayProfile();$('profileStatus').textContent=ok?'Backup restored.':'Restored in memory only — storage unavailable.'}catch(e){$('profileStatus').textContent='Invalid backup. No saved profiles were changed.'}
+}
+
 
 /* ---------- host (runs the game) ---------- */
 const mkCode=()=>Array.from({length:4},()=>"ABCDEFGHJKMNPQRSTUVWXYZ"[Math.random()*23|0]).join('');
@@ -1478,7 +1610,7 @@ function leaveRoom(){
 }
 function NETERR(e){const base={'peer-unavailable':'Room not found. Check the code.','network':'Cannot reach the connection server.','server-error':'Cannot reach the connection server.','socket-error':'Cannot reach the connection server.','socket-closed':'Lost the connection to the server.','webrtc':'This device could not set up a direct connection.','browser-incompatible':'This browser cannot make live connections.'}[e.type]||('Network error: '+e.type);return base+(['network','server-error','socket-error','socket-closed','webrtc'].indexOf(e.type)>=0?' School or work Wi-Fi often blocks this. Try a phone hotspot or home Wi-Fi.':'')}
 function host(fixed){
-  nm=$('nm').value.trim()||'Player';room=fixed||mkCode();isHost=true;net(fixed?'Opening the public room...':'Opening a room...');peer=new Peer('bbash-'+room,{config:ICE});
+  nm=$('nm').value.trim()||'Player';rememberProfile(nm);room=fixed||mkCode();isHost=true;net(fixed?'Opening the public room...':'Opening a room...');peer=new Peer('bbash-'+room,{config:ICE});
   peer.on('open',id=>{net('');me=id;ROOM_SETTINGS={...DEFAULT_ROOM_SETTINGS};G={ph:'lobby',settings:{...ROOM_SETTINGS},players:[{id,name:nm,lives:ROOM_SETTINGS.startingLives,lostLives:0,score:0,alive:true,nl:LIFE0,pv:0,seg:[]}],turn:0,cat:-1,last:null,msg:'',used:{},n:0,chat:[]};push()});
   peer.on('error',e=>{if(e.type==='unavailable-id'){peer.destroy();isHost=false;if(fixed)setTimeout(()=>pubRoom(pubN),400);else host()}else net(NETERR(e),1)});
   peer.on('connection',c=>{c.on('data',d=>hostMsg(c,d));c.on('close',()=>drop(c.peer))});
@@ -1516,14 +1648,15 @@ function renderLobbyChat(messages){
   log.scrollTop=log.scrollHeight;
 }
 function push(){
-  const s={ph:G.ph,settings:G.settings||DEFAULT_ROOM_SETTINGS,players:G.players,chat:G.chat||[],turn:G.turn,cat:G.cat>=0?CATS[G.cat][0]:'',used:G.used||{},left:deadline?Math.max(0,deadline-Date.now()):0,tot:G.tot||1,msg:G.msg,pause:G.pause,np:G.np,cleared:!!G.cleared,win:G.win,n:G.n,pn:G.pn,say:G.say,lf:G.lf,miss:G.ph==='over'?G.miss:undefined,room};
+  const s={runId:G.runId,winnerId:G.winnerId,ph:G.ph,settings:G.settings||DEFAULT_ROOM_SETTINGS,players:G.players,chat:G.chat||[],turn:G.turn,cat:G.cat>=0?CATS[G.cat][0]:'',used:G.used||{},left:deadline?Math.max(0,deadline-Date.now()):0,tot:G.tot||1,msg:G.msg,pause:G.pause,np:G.np,cleared:!!G.cleared,win:G.win,n:G.n,pn:G.pn,say:G.say,lf:G.lf,miss:G.ph==='over'?G.miss:undefined,room};
   Object.values(conns).forEach(c=>c.open&&c.send({t:'s',s}));render(s);
 }
 const lim=()=>G.players.length>1?1:0;
 const ended=()=>G.players.filter(p=>p.alive).length<=lim();
 function nextAlive(){let i=G.turn;do{i=(i+1)%G.players.length}while(!G.players[i].alive);return i}
 function start(){
-  G.players.forEach(p=>{p.lives=ROOM_SETTINGS.startingLives;p.lostLives=0;p.score=0;p.alive=true;p.nl=LIFE0;p.pv=0;p.seg=[]});
+  G.runId=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)+'-'+Math.random().toString(36).slice(2);G.runStarted=Date.now();G.winnerId=null;
+  G.players.forEach(p=>{p.lives=ROOM_SETTINGS.startingLives;p.lostLives=0;p.score=0;p.alive=true;p.nl=LIFE0;p.pv=0;p.seg=[];p.runStats=newRunStats()});
   G.used={};G.miss=[];G.say=null;G.lf=null;G.deck=null;G.played=[];G.fresh=true;G.same=0;G.pn=0;G.n=0;G.ph='play';G.win=null;G.msg='';G.turn=Math.random()*G.players.length|0;turn();
 }
 function turn(){
@@ -1542,32 +1675,33 @@ function after(){
 }
 function end(){
   clearTimeout(timer);deadline=0;G.ph='over';G.pause=false;
-  const a=G.players.find(p=>p.alive);G.win=a?a.name:null;push();
+  G.players.forEach(finishSurvival);const a=G.players.find(p=>p.alive);G.win=a?a.name:null;G.winnerId=a?a.id:null;push();
 }
 function pop(){
-  const p=G.players[G.turn];p.lives--;p.lostLives=(p.lostLives||0)+1;G.say=null;G.pops=(G.pops||0)+1;if(G.pops>=2)G.fresh=true;else G.popped=p.id;if(p.lives<=0)p.alive=false;
+  const p=G.players[G.turn];p.lives--;p.lostLives=(p.lostLives||0)+1;G.say=null;G.pops=(G.pops||0)+1;if(G.pops>=2)G.fresh=true;else G.popped=p.id;if(p.runStats)p.runStats.streak=0;if(p.lives<=0){p.alive=false;finishSurvival(p)}
   G.msg='💥 POP! '+p.name+' lost a life'+(p.alive?'':' and is out!');after();
 }
 function answer(id,x){
   const p=G.players[G.turn];
   if(G.ph!=='play'||G.pause||!p||p.id!==id)return;
-  const bad=m=>{if(id===me)flash(m);else if(conns[id])conns[id].send({t:'bad',m});const k=(G.sk=(G.sk||0)+1);G.say={id:p.id,x:x.trim().slice(0,22),p:0,t:0,bad:1,m:m.indexOf('Already')===0?'already used':'not on the list',k};push();setTimeout(()=>{if(G.say&&G.say.k===k){G.say=null;push()}},2000)};
+  if(p.runStats)p.runStats.submitted++;
+  const bad=m=>{if(p.runStats)p.runStats.streak=0;if(id===me)flash(m);else if(conns[id])conns[id].send({t:'bad',m});const k=(G.sk=(G.sk||0)+1);G.say={id:p.id,x:x.trim().slice(0,22),p:0,t:0,bad:1,m:m.indexOf('Already')===0?'already used':'not on the list',k};push();setTimeout(()=>{if(G.say&&G.say.k===k){G.say=null;push()}},2000)};
   const r=look(G.cat,x);
   if(!r){const q=CATS[G.cat][0].replace(/^Name an? /,'')+': '+x.trim().slice(0,25);G.miss=G.miss||[];if(G.miss.indexOf(q)<0&&G.miss.length<40)G.miss.push(q);return bad('Not on my list. Try another!')}
   const key=G.cat+'|'+r[0];
-  const sepN=t=>(t.match(/[\s\-]/g)||[]).length,tc=t=>t.split(/([\s\-]+)/).map((w,i)=>i%2?w:(i>0&&/^(of|and|the|in|on|at|to|for|a)$/.test(w))?w:/^(i{1,3}|iv|vi{0,3}|ix|x)$/.test(w)&&i>0?w.toUpperCase():w==='bbq'?'BBQ':w.replace(/^[a-z]/,c=>c.toUpperCase())).join(''),spacedCanonical=(r[2]&&/[\s-]/.test(r[2])?r[2]:r[3]&&/[\s-]/.test(r[3])?r[3]:null),dn=(COUNTRY_PROMPTS.has(G.cat)||G.cat>=GEO_FIRST)&&r[2]?r[2]:spacedCanonical?TC(spacedCanonical):FULLD[G.cat][r[0]]||(r[2]?TC(r[2]):(t=>{const d=r[3];if(d)return TC(d);return /[A-Z]/.test(t)?t:TC(t)})(x.trim()));
+  const sepN=t=>(t.match(/[\s\-]/g)||[]).length,tc=t=>t.split(/([\s\-]+)/).map((w,i)=>i%2?w:(i>0&&/^(of|and|the|in|on|at|to|for|a)$/.test(w))?w:/^(i{1,3}|iv|vi{0,3}|ix|x)$/.test(w)&&i>0?w.toUpperCase():w==='bbq'?'BBQ':w.replace(/^[a-z]/,c=>c.toUpperCase())).join(''),spacedCanonical=(r[2]&&/[\s-]/.test(r[2])?r[2]:r[3]&&/[\s-]/.test(r[3])?r[3]:null),dn=(isCountryQuestion(G.cat))&&r[2]?r[2]:spacedCanonical?TC(spacedCanonical):FULLD[G.cat][r[0]]||(r[2]?TC(r[2]):(t=>{const d=r[3];if(d)return TC(d);return /[A-Z]/.test(t)?t:TC(t)})(x.trim()));
   if(G.used[key])return bad('Already used this game!');
   G.used[key]=1;clearTimeout(timer);deadline=0;
-  const tier=rate(G.cat,r[0],r[1],G.kr),pts=PTS[tier];p.score+=pts;(p.seg=p.seg||[]).push([pts,tier]);
+  const tier=rate(G.cat,r[0],r[1],G.kr),pts=PTS[tier];p.score+=pts;(p.seg=p.seg||[]).push([pts,tier]);if(p.runStats){const r=p.runStats;r.correct++;r.streak++;r.bestStreak=Math.max(r.bestStreak,r.streak);r.rarities[tier-1]++}
   let m=p.name+': '+dn.trim().slice(0,30);
-  while(p.score>=p.nl){p.pv=p.nl;p.nl+=LIFE;p.seg=p.score>p.pv?[[Math.min(pts,p.score-p.pv),tier]]:[];if(p.lives<ROOM_SETTINGS.maxLives){p.lives++;if(p.lostLives>0)p.lostLives--;m+=' +1 life!';G.lf={id:p.id,k:(G.lfk=(G.lfk||0)+1)}}}
-  G.say={id:p.id,x:(COUNTRY_PROMPTS.has(G.cat)||G.cat>=GEO_FIRST)?dn.trim():dn.trim().slice(0,22),p:pts,t:tier,country:COUNTRY_PROMPTS.has(G.cat)||G.cat>=GEO_FIRST};G.same=(G.same||0)+1;G.msg=m;after();
+  while(p.score>=p.nl){p.pv=p.nl;p.nl+=LIFE;p.seg=p.score>p.pv?[[Math.min(pts,p.score-p.pv),tier]]:[];if(p.lives<ROOM_SETTINGS.maxLives){p.lives++;if(p.runStats)p.runStats.livesEarned++;if(p.lostLives>0)p.lostLives--;m+=' +1 life!';G.lf={id:p.id,k:(G.lfk=(G.lfk||0)+1)}}}
+  G.say={id:p.id,x:(isCountryQuestion(G.cat))?dn.trim():dn.trim().slice(0,22),p:pts,t:tier,country:isCountryQuestion(G.cat)};G.same=(G.same||0)+1;G.msg=m;after();
 }
 function drop(id){
   delete conns[id];delete chatLast[id];if(!G)return;
   const i=G.players.findIndex(p=>p.id===id);if(i<0)return;
   if(G.ph==='lobby'){G.players.splice(i,1);push();return}
-  const p=G.players[i];p.alive=false;p.lives=0;
+  const p=G.players[i];p.alive=false;p.lives=0;if(G.ph==='play')finishSurvival(p);
   if(G.ph!=='play')return push();
   if(i===G.turn&&!G.pause){clearTimeout(timer);after()}
   else if(ended())end();else push();
@@ -1580,7 +1714,7 @@ function pubRoom(n){pubN=n||1;if(++pubTry>25)return net('Could not find an open 
 function joinRoom(fixed){
   intentionalLeave=false;
   const pub=typeof fixed==='string';
-  nm=$('nm').value.trim()||'Player';room=pub?fixed:$('rc').value.trim().toUpperCase();
+  nm=$('nm').value.trim()||'Player';rememberProfile(nm);room=pub?fixed:$('rc').value.trim().toUpperCase();
   if(!pub&&room.length!==4)return net('Enter the 4-letter room code.',1);
   let got=false,moved=false;net(pub?'Looking for a public room...':'Connecting to the server...');
   const openIt=()=>{if(moved||got)return;moved=true;try{peer.destroy()}catch(e){}host(room)};
@@ -1727,7 +1861,7 @@ function lobbyArena(s){
   $('lcount').textContent=n+'/5';$('llives').textContent=st;$('lmax').textContent=(s.settings&&s.settings.maxLives)||ROOM_SETTINGS.maxLives;
 }
 function render(s){
-  S=s;applyRoomSettings(s.settings||DEFAULT_ROOM_SETTINGS);tot=s.tot;if(render.d!==s){render.d=s;dl=s.left?Date.now()+s.left:0}
+  S=s;recordProfileResult(s);if(s.ph!=='over'&&!$('profileBackdrop').classList.contains('hid'))closeLocalProfile();applyRoomSettings(s.settings||DEFAULT_ROOM_SETTINGS);tot=s.tot;if(render.d!==s){render.d=s;dl=s.left?Date.now()+s.left:0}
   if(TYP&&(s.pause||!s.players[s.turn]||s.players[s.turn].id!==TYP.id))TYP=null;
   if(s.lf&&s.lf.k>lfK){lfK=s.lf.k;lfAt[s.lf.id]=Date.now();setTimeout(()=>S&&render(S),1100)}
   const tt=Math.round(s.players.reduce((a,p)=>a+p.score,0)*.4);
@@ -1753,7 +1887,7 @@ function render(s){
     if(mine)$('ans').focus();
   }else{
     show('over');{const ms=s.miss||[],by={};ms.forEach(q=>{const i=q.indexOf(': ');(by[q.slice(0,i)]=by[q.slice(0,i)]||[]).push(q.slice(i+2))});$('misslist').innerHTML=Object.keys(by).map(k=>'<b>'+esc(k)+'</b>: '+by[k].map(esc).join(', ')).join('<br>');$('showmiss').classList.toggle('hid',!ms.length);$('showmiss').textContent=(missOpen?'Hide':'Show')+' rejected answers ('+ms.length+')';$('misslist').classList.toggle('hid',!missOpen||!ms.length)}pl('pl3',{...s,players:[...s.players].sort((a,b)=>b.score-a.score)});
-    $('win').textContent=s.win?'🏆 '+s.win+' wins!':'Game over';
+    $('profileResult').textContent=profileMatchStatus;$('win').textContent=s.win?'🏆 '+s.win+' wins!':'Game over';
     $('again').classList.toggle('hid',!isHost);$('wt2').textContent=isHost?'':'Waiting for the host...';
   }
 }
@@ -1802,4 +1936,66 @@ $('mk').onclick=()=>host();$('jn').onclick=()=>joinRoom();$('pub').onclick=openP
 $('showmiss').onclick=()=>{missOpen=!missOpen;if(S)render(S)};$('st').onclick=start;$('again').onclick=()=>{G.ph='lobby';push()};
 $('ans').oninput=()=>{const n=Date.now();clearTimeout(sendTyp.t);if(n-typT>70){typT=n;sendTyp()}else sendTyp.t=setTimeout(sendTyp,80)};
 $('go').onclick=send;$('ans').onkeydown=e=>{if(e.key==='Enter')send()};
+if(profileData.active)$('nm').value=profileData.profiles[profileData.active].name;
+$('nm').addEventListener('change',()=>{const name=$('nm').value.trim();if(name)rememberProfile(name)});
+$('openProfile').onclick=openLocalProfile;$('overProfile').onclick=openLocalProfile;$('profileClose').onclick=closeLocalProfile;
+$('profileBackdrop').addEventListener('click',e=>{if(e.target===$('profileBackdrop'))closeLocalProfile()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('profileBackdrop').classList.contains('hid'))closeLocalProfile()});
+$('profileSelect').onchange=()=>{const id=$('profileSelect').value;if(Object.hasOwn(profileData.profiles,id)){profileData.active=id;$('nm').value=profileData.profiles[id].name;persistProfiles();displayProfile()}};
+$('profileExport').onclick=()=>{$('profileBackupText').value=JSON.stringify(profileData);$('profileBackupText').focus();$('profileBackupText').select();$('profileStatus').textContent='Copy the selected backup text and keep it somewhere safe.'};
+$('profileImport').onclick=restoreProfileBackup;
+/* Global leaderboard: independent of PeerJS gameplay and local profiles. */
+const LB_URL='https://pqqcxqospurnlgrigckx.supabase.co';
+const LB_KEY='sb_publishable_GSAGxwWWj5n4W0Ya2MYCvw_c9F0_ZJL';
+const LB_STORAGE='puffer-party-leaderboard-v1';
+let lbState={enabled:false,queue:[]},lbClient=null,lbLoading=null,lbSync=null,lbRequest=0,lbFocus=null;
+try{const a=JSON.parse(localStorage.getItem(LB_STORAGE)||'null');if(a&&Array.isArray(a.queue))lbState={enabled:a.enabled===true,queue:a.queue.filter(x=>x&&typeof x.p_name==='string'&&typeof x.p_run_id==='string')}}catch(e){}
+function lbPersist(){try{localStorage.setItem(LB_STORAGE,JSON.stringify(lbState));return true}catch(e){return false}}
+function lbStatus(t){$('lbStatus').textContent=t}
+function lbSyncStatus(t){$('lbSyncStatus').textContent=t;if(!$('over').classList.contains('hid'))$('lbOverStatus').textContent=t}
+function lbGetClient(){
+ if(lbClient)return Promise.resolve(lbClient);
+ if(!lbLoading){lbLoading=new Promise((resolve,reject)=>{
+  const make=()=>{try{lbClient=window.supabase.createClient(LB_URL,LB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'puffer-party-supabase-session'}});resolve(lbClient)}catch(e){reject(e)}};
+  if(window.supabase&&window.supabase.createClient){make();return}
+  const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';script.async=true;
+  const timeout=setTimeout(()=>{script.remove();reject(Error('Leaderboard service could not load'))},12000);
+  script.onload=()=>{clearTimeout(timeout);make()};script.onerror=()=>{clearTimeout(timeout);script.remove();reject(Error('Leaderboard service could not load'))};document.head.appendChild(script);
+ }).catch(e=>{lbLoading=null;throw e})}return lbLoading;
+}
+function lbQueueResult(s,p,r){
+ if(!lbState.enabled)return;
+ const record={p_name:p.name.trim().slice(0,12)||'Player',p_run_id:s.runId,p_xp:profileNumber(p.score),p_survival:profileNumber(r.survivalMs),p_streak:profileNumber(r.bestStreak),p_krillions:profileNumber(r.rarities&&r.rarities[5]),p_won:s.players.length>1&&s.winnerId===me};
+ if(!lbState.queue.some(x=>x.p_run_id===record.p_run_id&&profileId(x.p_name)===profileId(record.p_name))){lbState.queue.push(record);lbPersist()}
+ // Defer network operations so profile saving/rendering never waits on them.
+ setTimeout(()=>lbFlush(),0);
+}
+function lbFlush(){
+ if(lbSync)return lbSync;
+ if(!lbState.enabled||!lbState.queue.length)return Promise.resolve(true);
+ lbSync=(async()=>{
+  try{lbSyncStatus('Uploading leaderboard results…');const c=await lbGetClient();
+   const session=await c.auth.getSession();if(session.error)throw session.error;
+   if(!session.data.session){const login=await c.auth.signInAnonymously();if(login.error)throw login.error;if(!login.data.session)throw Error('Anonymous sign-in unavailable')}
+   while(lbState.enabled&&lbState.queue.length){const x=lbState.queue[0];const {error}=await c.rpc('puffer_submit_match',x);if(error)throw error;lbState.queue.shift();lbPersist()}
+   lbSyncStatus(lbState.enabled?'Leaderboard results synced.':'Leaderboard sharing paused.');return true;
+  }catch(e){lbSyncStatus('Leaderboard upload pending. Retry from the leaderboard.');console.warn('Puffer leaderboard sync:',e.message||e);return false}
+ })().finally(()=>{lbSync=null});return lbSync;
+}
+const LB_METRICS={best_xp:'Best run (XP)',wins:'Multiplayer wins',best_survival:'Longest survival',best_streak:'Longest streak',krillions:'One in a Krillion'};
+async function lbRefresh(){
+ const ticket=++lbRequest,metric=$('lbMetric').value;$('lbRows').replaceChildren();lbStatus('Loading rankings…');
+ try{const c=await lbGetClient();const {data,error}=await c.rpc('puffer_leaderboard',{p_metric:metric});if(error)throw error;if(ticket!==lbRequest)return;
+  for(const [i,x] of (data||[]).entries()){const row=document.createElement('div');row.className='lb-row';const rank=document.createElement('b');rank.className='lb-rank';rank.textContent='#'+(i+1);const name=document.createElement('span');name.className='lb-name';name.textContent=x.display_name;const val=document.createElement('b');val.className='lb-value';val.textContent=metric==='best_survival'?profileDuration(Number(x[metric])):Number(x[metric]).toLocaleString();row.append(rank,name,val);$('lbRows').appendChild(row)}
+  lbStatus(data&&data.length?'Top '+data.length+' · '+LB_METRICS[metric]:'No scores yet. Finish a game with sharing enabled!');
+ }catch(e){if(ticket===lbRequest)lbStatus('Could not load leaderboard: '+(e.message||'connection error'));}
+}
+function lbOpen(){lbFocus=document.activeElement;$('lbBackdrop').classList.remove('hid');$('lbShare').checked=lbState.enabled;lbSyncStatus(lbState.queue.length?lbState.queue.length+' result(s) waiting to upload.':lbState.enabled?'Automatic uploads enabled.':'Sharing is off. You can still view rankings.');$('lbClose').focus();lbRefresh();if(lbState.enabled&&lbState.queue.length)lbFlush().then(()=>{if(!$('lbBackdrop').classList.contains('hid'))lbRefresh()})}
+function lbClose(){$('lbBackdrop').classList.add('hid');lbRequest++;if(lbFocus&&lbFocus.isConnected)lbFocus.focus()}
+$('openLeaderboard').onclick=lbOpen;$('overLeaderboard').onclick=lbOpen;$('lbClose').onclick=lbClose;
+$('lbBackdrop').addEventListener('click',e=>{if(e.target===$('lbBackdrop'))lbClose()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('lbBackdrop').classList.contains('hid'))lbClose()});
+$('lbMetric').onchange=lbRefresh;$('lbRefresh').onclick=async()=>{await lbFlush();lbRefresh()};
+$('lbShare').onchange=()=>{lbState.enabled=$('lbShare').checked;const saved=lbPersist();lbSyncStatus(!saved?'Storage unavailable; sharing preference may not persist.':lbState.enabled?'Automatic uploads enabled for future completed games.':'Sharing paused. Previously published records remain visible.');if(lbState.enabled&&lbState.queue.length)lbFlush().then(lbRefresh)};
+window.addEventListener('online',()=>lbFlush());if(lbState.enabled&&lbState.queue.length)setTimeout(()=>lbFlush(),1000);
+
 </script></body></html>
