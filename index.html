@@ -534,7 +534,7 @@ body.dd-fullscreen{overflow:hidden}
 #achToast .ach-toast-icon{width:35px;height:35px;flex:0 0 35px;display:grid;place-items:center;border:1px solid var(--c,var(--sun));background:#10263a;color:var(--c,var(--sun))}#achToast .ach-toast-icon svg{width:23px;height:23px}#achToast .ach-toast-copy{min-width:0;flex:1}#achToast strong{font-size:23px;display:block;font-weight:400;color:var(--c,var(--sun));overflow-wrap:anywhere;margin:3px 0}#achToast small{display:block;color:var(--mut);font-size:15px}#achToast .ach-toast-label{color:var(--sun);font-size:15px;letter-spacing:.2px}
 @keyframes ach-toast-in{from{opacity:0;transform:translateY(-9px)}to{opacity:1;transform:translateY(0)}}@media(prefers-reduced-motion:reduce){#achToast{animation:none}}@media(max-width:600px){#achToast{width:208px;padding:7px 8px;gap:7px}#achToast strong{font-size:20px}#achToast small,#achToast .ach-toast-label{font-size:14px}}
 @media(max-width:600px){.seat .ach-player-title{font-size:13px}.ach-info b{font-size:20px}.ach-card button{font-size:18px;min-width:65px}}
-</style></head>
+</style><style>.ach-secret-heading{margin:16px 0 2px;color:var(--glow);font-size:23px;font-weight:400;text-align:left}</style></head>
 <body><main>
 <nav id="homeNav" aria-label="Player navigation">
  <button id="homeMenuToggle" type="button" class="alt" aria-expanded="false" aria-controls="homeMenuPopup">☰ Menu<span id="pcMenuUnread" class="pc-unread-badge hid" aria-label="Unread updates">!</span></button>
@@ -1901,8 +1901,20 @@ let achievementPlayer='', achievementVisitNew=[];
 function renderAchievementGallery(){const p=profileData.profiles[achievementPlayer];if(!p)return;const a=p.achievement;const current=localEquippedTitle(p.name);$('achPlayer').textContent='Achievements for '+p.name;$('achSummary').textContent=a.unlocked.length+' / '+ACHIEVEMENTS.length+' achievements unlocked. Equip one title to show in your profile and multiplayer.';$('achEquipped').innerHTML=current?'Equipped: '+titleMarkup(current):'No title equipped';$('achNone').disabled=!a.selected;
  const card=x=>{const admin=x.id==='admin',owned=admin?pcAdmin:a.unlocked.includes(x.id),secret=x.kind==='secret'&&!owned,v=admin?1:Math.min(x.goal,achievementValue(p,x.metric));return '<div class="ach-card '+(current===x.id?'active':owned?'':'locked')+'"><div class="ach-info"><b class="'+(secret?'':admin?'ach-admin':'t'+x.tier)+'">'+esc(secret?'???':x.name)+(achievementVisitNew.includes(x.id)?' <span class="pc-unread-badge" style="font-size:16px">NEW!</span>':'')+'</b><small>'+esc(secret?'Secret achievement — discover it by playing.':x.desc)+'</small>'+(!secret&&!admin?'<div class="ach-progress t'+x.tier+'"><i style="width:'+Math.round(100*v/x.goal)+'%"></i></div><small>'+v.toLocaleString()+' / '+x.goal.toLocaleString()+'</small>':'')+'</div><button type="button" data-title="'+x.id+'" '+(!owned||current===x.id?'disabled':'')+'>'+ (current===x.id?'Equipped':owned?'Equip':'Locked')+'</button></div>'};
  const newly=achievementVisitNew.map(id=>ACH_BY_ID[id]).filter(x=>x&&a.unlocked.includes(x.id));
- const sections=[['milestone','Milestones'],['skill','Single-match feats'],['secret','Secret achievements']].map(([k,label])=>{const entries=ACHIEVEMENTS.filter(x=>x.kind===k&&!achievementVisitNew.includes(x.id));return entries.length?'<h3>'+label+'</h3>'+entries.map(card).join(''):''}).join('');
- $('achList').innerHTML=(newly.length?'<h3>Newly unlocked</h3>'+newly.map(card).join(''):'')+(pcAdmin?'<h3>Admin exclusive</h3>'+card(ADMIN_TITLE):'')+sections}
+ const groups=[
+  ['Matches played',['competitiveGames']],
+  ['Wins',['wins','perfectWin']],
+  ['Correct answers',['correct','runCorrect']],
+  ['Answer streaks',['bestStreak']],
+  ['Bonus lives',['livesEarned','runLives']],
+  ['XP earned',['totalXP']],
+  ['Rare answers',['deep','jackpot']],
+  ['Daily Dive',['dailyDepth','dailyStreak']]
+ ];
+ const remaining=ACHIEVEMENTS.filter(x=>!achievementVisitNew.includes(x.id)),section=(label,entries)=>(label==='Secret achievements'&&entries.length?'<h3 class="ach-secret-heading">Secret achievements</h3>':'')+entries.map(card).join('');
+ const grouped=new Set(groups.flatMap(g=>g[1]));
+ const sections=groups.map(([label,metrics])=>section(label,metrics.flatMap(metric=>remaining.filter(x=>x.kind!=='secret'&&x.metric===metric).sort((a,b)=>a.goal-b.goal)))).join('')+section('Other achievements',remaining.filter(x=>x.kind!=='secret'&&!grouped.has(x.metric)))+section('Secret achievements',remaining.filter(x=>x.kind==='secret'));
+ $('achList').innerHTML=newly.map(card).join('')+(pcAdmin?card(ADMIN_TITLE):'')+sections}
 async function openAchievementGallery(){const name=$('nm').value.trim();if(!name){net('Enter your nickname to view achievements.',1);$('nm').focus();return}const p=rememberProfile(name);achievementPlayer=profileId(p.name);achievementRefresh(p);achievementVisitNew=[...p.achievement.unread].reverse();p.achievement.unread=[];persistProfiles();$('achStatus').textContent='';show('achievements');renderAchievementGallery();try{if(pcAdmin||localStorage.getItem(PC_ADMIN_STORAGE)){const c=await pcGetAdmin();const {data}=await c.auth.getSession();if(data.session)await pcIsAdmin(c);else pcSetAdmin(false);if(!$('achievements').classList.contains('hid'))renderAchievementGallery()}}catch(e){pcSetAdmin(false);if(!$('achievements').classList.contains('hid'))renderAchievementGallery()}}
 async function equipAchievement(id){const p=profileData.profiles[achievementPlayer];if(!p)return;if(id==='admin'){try{if(!await pcIsAdmin(await pcGetAdmin()))throw Error('Admin required')}catch(e){$('achStatus').textContent='Verified admin sign-in required.';return}if($('achievements').classList.contains('hid')||achievementPlayer!==profileId(p.name))return}else if(id!==''&&(!ordinaryTitle(id)||!p.achievement.unlocked.includes(id)))return;p.achievement.selected=id;const saved=persistProfiles();renderAchievementGallery();$('achStatus').textContent=saved?(id?'Title equipped! It will appear in your next room.':'Title unequipped.'):'Saved in memory only — browser storage unavailable.'}
 // A narrowly scoped, non-authentication ticket proves the ADMIN cosmetic in a room.
