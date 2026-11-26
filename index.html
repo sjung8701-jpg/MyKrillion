@@ -426,7 +426,8 @@ h1{font-size:clamp(42px,7vw,58px);margin:2px 0 0}
 <div id="home" class="card">
  <div id="pcHomeAnnouncement" class="hid" role="status"></div>
  <p id="nameNote" style="font-size:17px;line-height:1.2;color:var(--mut);margin:0 0 7px;text-align:left">Please type in your real name or a recognizable nickname so we know who is who. Changing your name creates or switches to a different profile, so your previous records will not carry over.</p>
- <input id="nm" maxlength="12" placeholder="Your name" autocomplete="off" aria-describedby="nameNote">
+ <input id="nm" maxlength="12" placeholder="Your name" autocomplete="off" aria-describedby="nameNote nicknameNote">
+  <p id="nicknameNote" style="font-size:16px;color:var(--mut);margin:0 0 6px;text-align:left">Nicknames are reserved to the first device using them. Use your own saved nickname.</p>
  <button id="mk">Create room</button>
  <input id="rc" maxlength="4" placeholder="Room code" autocomplete="off" style="text-transform:uppercase">
  <button id="jn" class="alt">Join room</button>
@@ -522,7 +523,8 @@ h1{font-size:clamp(42px,7vw,58px);margin:2px 0 0}
 <div id="pc-about" class="hid"><div id="pcPublicAnnouncement" class="hid"></div><div id="pcAboutText" class="pc-copy"></div><hr class="pc-divider"><h3>How to play</h3><div class="pc-copy">Take turns answering the current question before the puffer pops. Rarer answers earn more XP. Earn enough XP for extra lives and try to be the last player standing.</div><h3 style="margin-top:12px">Rarity and XP</h3><div style="line-height:1.3"><span class="t1" style="color:var(--c)">Plankton · 10</span><br><span class="t2" style="color:var(--c)">Too Clever · 15</span><br><span class="t3" style="color:var(--c)">Schooler · 30</span><br><span class="t4" style="color:var(--c)">Rare · 60</span><br><span class="t5" style="color:var(--c)">Deep Cut · 85</span><br><span class="t6" style="color:var(--c)">One in a Krillion · 100</span></div><div id="pcCreditsBlock" class="hid"><hr class="pc-divider"><h3>Credits</h3><div id="pcCreditsText" class="pc-copy"></div></div><div class="pc-privacy pc-note">Player profiles and lifetime stats are stored on this device. If leaderboard sharing is enabled, player names and summary scores are published online.</div><button id="pcLoginLink" type="button" class="alt">Admin sign in</button></div>
 <div id="pc-changes" class="hid"><div id="pcChangeList"></div></div>
 <div id="pc-login" class="hid"><p class="pc-note">Enter your private admin nickname. This is separate from your player name and records.</p><form id="pcLoginForm"><label for="pcSecret">Secret nickname</label><input id="pcSecret" type="password" autocomplete="current-password" autocapitalize="none" spellcheck="false" required><button id="pcLoginSubmit" type="submit">Sign in</button></form></div>
-<div id="pc-editor" class="hid"><p class="pc-note">Changes are drafts until you press Publish changes. Published text is visible to everyone.</p><label for="pcAboutEdit">About the game</label><textarea id="pcAboutEdit" maxlength="8000" rows="4"></textarea><label for="pcTaglineEdit">Main menu description</label><textarea id="pcTaglineEdit" maxlength="250" rows="2"></textarea><label for="pcNameEdit">Name field description</label><textarea id="pcNameEdit" maxlength="1000" rows="3"></textarea><label for="pcCreditsEdit">Credits</label><textarea id="pcCreditsEdit" maxlength="2000" rows="3"></textarea><label for="pcAnnouncementEdit">Announcement (leave empty to hide)</label><textarea id="pcAnnouncementEdit" maxlength="2000" rows="3"></textarea><hr class="pc-divider"><h3>Changelog</h3><button id="pcAddChange" type="button" class="alt">+ Add update</button><div id="pcEditChanges"></div><button id="pcPublish" type="button">Publish changes</button><button id="pcLogout" type="button" class="alt">Sign out of admin</button></div>
+<div id="pc-editor" class="hid"><button id="pmOpen" type="button" class="alt">Manage players &amp; leaderboard</button><p class="pc-note">Changes are drafts until you press Publish changes. Published text is visible to everyone.</p><label for="pcAboutEdit">About the game</label><textarea id="pcAboutEdit" maxlength="8000" rows="4"></textarea><label for="pcTaglineEdit">Main menu description</label><textarea id="pcTaglineEdit" maxlength="250" rows="2"></textarea><label for="pcNameEdit">Name field description</label><textarea id="pcNameEdit" maxlength="1000" rows="3"></textarea><label for="pcCreditsEdit">Credits</label><textarea id="pcCreditsEdit" maxlength="2000" rows="3"></textarea><label for="pcAnnouncementEdit">Announcement (leave empty to hide)</label><textarea id="pcAnnouncementEdit" maxlength="2000" rows="3"></textarea><hr class="pc-divider"><h3>Changelog</h3><button id="pcAddChange" type="button" class="alt">+ Add update</button><div id="pcEditChanges"></div><button id="pcPublish" type="button">Publish changes</button><button id="pcLogout" type="button" class="alt">Sign out of admin</button></div>
+<div id="pc-players" class="hid"><button id="pmBack" type="button" class="alt">← Back to content editor</button><p class="pc-note">Manage reserved nicknames and global scores. Local resets require the owning device to reconnect. Old matches lack individual score details.</p><label for="pmSearch">Search players</label><input id="pmSearch" maxlength="12" placeholder="Nickname"><button id="pmRefresh" type="button" class="alt">Search / refresh</button><div id="pmMatches"></div><div id="pmList"></div><hr class="pc-divider"><h3>Nickname bans</h3><input id="pmBanName" maxlength="12" placeholder="Nickname to ban"><button id="pmBan" type="button" class="alt">Ban nickname</button><div id="pmBans"></div><hr class="pc-divider"><h3 style="color:var(--coral)">Danger zone</h3><p class="pc-note">Clears all global rankings. Keeps names, local profiles, changelogs and admin access.</p><button id="pmResetAll" type="button" class="alt" style="color:var(--coral)">Reset entire global leaderboard</button></div>
 </section></div></main>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
@@ -1641,11 +1643,12 @@ function leaveRoom(fromResults=false){
  show('home');net('');$('rc').value='';$('ans').value='';leavingRoom=false;
 }
 function NETERR(e){const base={'peer-unavailable':'Room not found. Check the code.','network':'Cannot reach the connection server.','server-error':'Cannot reach the connection server.','socket-error':'Cannot reach the connection server.','socket-closed':'Lost the connection to the server.','webrtc':'This device could not set up a direct connection.','browser-incompatible':'This browser cannot make live connections.'}[e.type]||('Network error: '+e.type);return base+(['network','server-error','socket-error','socket-closed','webrtc'].indexOf(e.type)>=0?' School or work Wi-Fi often blocks this. Try a phone hotspot or home Wi-Fi.':'')}
-function host(fixed){
+function host(fixed){return withReservedName(name=>hostReserved(fixed,name))}
+function hostReserved(fixed,name){
   intentionalLeave=false;resultHold=null;dismissedRun=null;
-  nm=$('nm').value.trim()||'Player';rememberProfile(nm);room=fixed||mkCode();isHost=true;net(fixed?'Opening the public room...':'Opening a room...');peer=new Peer('bbash-'+room,{config:ICE});
+  nm=name;rememberProfile(nm);room=fixed||mkCode();isHost=true;net(fixed?'Opening the public room...':'Opening a room...');peer=new Peer('bbash-'+room,{config:ICE});
   peer.on('open',id=>{net('');me=id;ROOM_SETTINGS={...DEFAULT_ROOM_SETTINGS};G={ph:'lobby',settings:{...ROOM_SETTINGS},players:[{id,name:nm,lives:ROOM_SETTINGS.startingLives,lostLives:0,score:0,alive:true,nl:LIFE0,pv:0,seg:[]}],turn:0,cat:-1,last:null,msg:'',used:{},n:0,chat:[]};push()});
-  peer.on('error',e=>{if(e.type==='unavailable-id'){peer.destroy();isHost=false;if(fixed)setTimeout(()=>pubRoom(pubN),400);else host()}else net(NETERR(e),1)});
+  peer.on('error',e=>{if(e.type==='unavailable-id'){peer.destroy();isHost=false;if(fixed)setTimeout(()=>pubRoom(pubN,name),400);else hostReserved(undefined,name)}else net(NETERR(e),1)});
   peer.on('connection',c=>{c.on('data',d=>hostMsg(c,d));c.on('close',()=>drop(c.peer))});
 }
 function hostMsg(c,d){
@@ -1654,7 +1657,9 @@ function hostMsg(c,d){
   if(d.t==='join'){
     if(conns[c.peer])return;
     if(G.ph!=='lobby'||G.players.length>=5){c.send({t:'full'});setTimeout(()=>c.close(),400);return}
-    conns[c.peer]=c;G.players.push({id:c.peer,name:String(d.n||'Player').slice(0,12),lives:ROOM_SETTINGS.startingLives,lostLives:0,score:0,alive:true,nl:LIFE0,pv:0,seg:[]});push();
+    const joiningName=String(d.n||'').trim().slice(0,12);
+    if(!joiningName||G.players.some(p=>profileId(p.name)===profileId(joiningName))){c.send({t:'nameTaken'});setTimeout(()=>c.close(),400);return}
+    conns[c.peer]=c;G.players.push({id:c.peer,name:joiningName,lives:ROOM_SETTINGS.startingLives,lostLives:0,score:0,alive:true,nl:LIFE0,pv:0,seg:[]});push();
   }else if(d.t==='backLobby'){
     if(conns[c.peer]===c&&G.players.some(p=>p.id===c.peer)&&G.ph==='over'&&d.runId===G.runId)openRematchLobby();
   }else if(d.t==='chat'){
@@ -1763,15 +1768,19 @@ function drop(id){
 /* ---------- client ---------- */
 let pubN=1,pubTry=0;
 // public rooms: PUBLIC, PUBLIC2, PUBLIC3... Nobody has to share a code. If nobody is hosting a slot, you open it; if it is full or already playing, you try the next one.
-function pubRoom(n){pubN=n||1;if(++pubTry>25)return net('Could not find an open public room. Try again in a moment.',1);joinRoom('PUBLIC'+(pubN>1?pubN:''))}
+function pubRoom(n,name){pubN=n||1;if(++pubTry>25)return net('Could not find an open public room. Try again in a moment.',1);joinRoomReserved('PUBLIC'+(pubN>1?pubN:''),name)}
 function joinRoom(fixed){
+  if(typeof fixed!=='string'&&$('rc').value.trim().length!==4)return net('Enter the 4-letter room code.',1);
+  return withReservedName(name=>joinRoomReserved(fixed,name));
+}
+function joinRoomReserved(fixed,name){
   intentionalLeave=false;resultHold=null;dismissedRun=null;
   const pub=typeof fixed==='string';
-  nm=$('nm').value.trim()||'Player';rememberProfile(nm);room=pub?fixed:$('rc').value.trim().toUpperCase();
+  nm=name;rememberProfile(nm);room=pub?fixed:$('rc').value.trim().toUpperCase();
   if(!pub&&room.length!==4)return net('Enter the 4-letter room code.',1);
   let got=false,moved=false;net(pub?'Looking for a public room...':'Connecting to the server...');
-  const openIt=()=>{if(moved||got)return;moved=true;try{peer.destroy()}catch(e){}host(room)};
-  const nextOne=()=>{if(moved)return;moved=true;try{peer.destroy()}catch(e){}pubRoom(pubN+1)};
+  const openIt=()=>{if(moved||got)return;moved=true;try{peer.destroy()}catch(e){}hostReserved(room,name)};
+  const nextOne=()=>{if(moved)return;moved=true;try{peer.destroy()}catch(e){}pubRoom(pubN+1,name)};
   peer=new Peer(undefined,{config:ICE});
   peer.on('open',id=>{
     me=id;net(pub?'Looking for a public room...':'Looking for room '+room+'...');conn=peer.connect('bbash-'+room,{reliable:true});
@@ -1782,6 +1791,7 @@ function joinRoom(fixed){
     conn.on('data',d=>{
       if(d.t==='s'){got=true;clearTimeout(to);net('');render(d.s)}
       else if(d.t==='bad')flash(d.m);else if(d.t==='typ')onTyp(d.id,d.x);
+      else if(d.t==='nameTaken'){moved=true;clearTimeout(to);try{peer.destroy()}catch(e){}net('That nickname is already in this room. Choose a different name.',1)}
       else if(d.t==='full'){if(pub){clearTimeout(to);nextOne()}else{alert('That room is full or already started.');location.reload()}}
     });
     conn.on('close',()=>{if(moved||intentionalLeave)return;if(got){alert('Disconnected from the room.');location.reload()}else if(pub){clearTimeout(to);openIt()}else net('The host closed the connection.',1)});
@@ -2031,6 +2041,25 @@ function lbGetClient(){
   script.onload=()=>{clearTimeout(timeout);make()};script.onerror=()=>{clearTimeout(timeout);script.remove();reject(Error('Leaderboard service could not load'))};document.head.appendChild(script);
  }).catch(e=>{lbLoading=null;throw e})}return lbLoading;
 }
+let lbAuthPending=null,nicknameBusy=false;
+function lbAuthenticatedClient(){
+ if(lbAuthPending)return lbAuthPending;
+ lbAuthPending=(async()=>{const c=await lbGetClient();const session=await c.auth.getSession();if(session.error)throw session.error;
+  if(!session.data.session){const login=await c.auth.signInAnonymously();if(login.error)throw login.error;if(!login.data.session)throw Error('Anonymous sign-in unavailable')}
+  return c;
+ })().finally(()=>{lbAuthPending=null});return lbAuthPending;
+}
+async function withReservedName(action){
+ if(nicknameBusy)return;
+ let name=$('nm').value.trim();if(!name||name.length>12||/[\x00-\x1f\x7f]/.test(name)){net('Enter a valid nickname of 1–12 characters.',1);return}
+ nicknameBusy=true;const controls=['nm','mk','jn','pub','pubNew'];const old=controls.map(id=>$(id).disabled);
+ controls.forEach(id=>$(id).disabled=true);net('Checking nickname…');let accepted=false;
+ try{const c=await lbAuthenticatedClient();await pmSyncEvents(c);name=$('nm').value.trim();const {data,error}=await c.rpc('puffer_claim_nickname',{p_name:name});if(error)throw error;
+  if(data===true){accepted=true;net('')}else net('That nickname is unavailable, banned, or reserved on another device. Please choose another name.',1);
+ }catch(e){console.warn('Nickname check:',e.message||e);net('Could not verify your nickname. Check your connection and try again.',1)}
+ finally{nicknameBusy=false;controls.forEach((id,i)=>$(id).disabled=old[i])}
+ if(accepted)action(name);
+}
 function lbQueueResult(s,p,r){
  if(!lbState.enabled)return;
  const record={p_name:p.name.trim().slice(0,12)||'Player',p_run_id:s.runId,p_xp:profileNumber(p.score),p_survival:profileNumber(r.survivalMs),p_streak:profileNumber(r.bestStreak),p_krillions:profileNumber(r.rarities&&r.rarities[5]),p_won:s.players.length>1&&s.winnerId===me};
@@ -2042,11 +2071,11 @@ function lbFlush(){
  if(lbSync)return lbSync;
  if(!lbState.enabled||!lbState.queue.length)return Promise.resolve(true);
  lbSync=(async()=>{
-  try{lbSyncStatus('Uploading leaderboard results…');const c=await lbGetClient();
-   const session=await c.auth.getSession();if(session.error)throw session.error;
-   if(!session.data.session){const login=await c.auth.signInAnonymously();if(login.error)throw login.error;if(!login.data.session)throw Error('Anonymous sign-in unavailable')}
-   while(lbState.enabled&&lbState.queue.length){const x=lbState.queue[0];const {error}=await c.rpc('puffer_submit_match',x);if(error)throw error;lbState.queue.shift();lbPersist()}
-   lbSyncStatus(lbState.enabled?'Leaderboard results synced.':'Leaderboard sharing paused.');return true;
+  try{lbSyncStatus('Uploading leaderboard results…');const c=await lbAuthenticatedClient();if(!S)await pmSyncEvents(c);let blocked=0;
+    for(const x of lbState.queue.slice()){if(!lbState.enabled)break;const {error}=await c.rpc('puffer_submit_match',x);
+      if(error){if(error.message==='Nickname already reserved on another device'||error.message==='Nickname unavailable or reserved on another device'){blocked++;continue}throw error}
+      const i=lbState.queue.indexOf(x);if(i>=0)lbState.queue.splice(i,1);lbPersist();}
+    lbSyncStatus(!lbState.enabled?'Leaderboard sharing paused.':blocked?blocked+' result(s) kept locally: nickname unavailable or reserved on another device.':lbState.queue.length?'More results waiting to upload.':'Leaderboard results synced.');return blocked===0;
   }catch(e){lbSyncStatus('Leaderboard upload pending. Retry from the leaderboard.');console.warn('Puffer leaderboard sync:',e.message||e);return false}
  })().finally(()=>{lbSync=null});return lbSync;
 }
@@ -2099,7 +2128,7 @@ function pcRenderPublic(){
  if(!v.changes.length){const p=document.createElement('p');p.className='pc-note';p.textContent='No updates published yet.';list.append(p)}
  for(const entry of v.changes){const box=document.createElement('article');box.className='pc-entry';const h=document.createElement('h3');h.textContent=entry.title;const date=document.createElement('div');date.className='pc-note';date.textContent=entry.date;const body=document.createElement('div');body.className='pc-copy';body.textContent=entry.body;box.append(h,date,body);list.append(box)}
 }
-function pcSwitch(mode){pcMode=mode;for(const name of ['about','changes','login','editor'])$('pc-'+name).classList.toggle('hid',mode!==name);pcText('pcTitle',({about:'About Puffer Party',changes:'Changelog',login:'Admin sign in',editor:'Admin panel'})[mode]);pcStatus('')}
+function pcSwitch(mode){pcMode=mode;for(const name of ['about','changes','login','editor','players'])$('pc-'+name).classList.toggle('hid',mode!==name);pcText('pcTitle',({about:'About Puffer Party',changes:'Changelog',login:'Admin sign in',editor:'Admin panel',players:'Manage players'})[mode]);pcStatus('')}
 function pcOpen(mode){if(pcBusy)return;setHomeMenuOpen(false,true);if($('pcBackdrop').classList.contains('hid'))pcFocus=document.activeElement;$('pcBackdrop').classList.remove('hid');pcSwitch(mode);$('pcClose').focus();if(mode==='about'||mode==='changes'){pcRenderPublic();pcRefresh().catch(()=>{if(pcMode==='about'||pcMode==='changes')pcStatus('Could not refresh online content. Showing available information.')})}}
 function pcClose(){if(pcBusy)return;if(pcMode==='editor'&&pcDraft&&!confirm('Close the editor? Unpublished changes will be discarded.'))return;$('pcBackdrop').classList.add('hid');$('pcSecret').value='';pcDraft=null;pcMode='';if(pcFocus&&pcFocus.isConnected)pcFocus.focus()}
 function pcLock(locked){pcBusy=locked;for(const id of ['pcClose','pcLoginSubmit','pcPublish','pcLogout','pcAddChange'])$(id).disabled=locked;for(const el of $('pc-editor').querySelectorAll('input,textarea,button'))el.disabled=locked; $('pcSecret').disabled=locked; $('pcLoginLink').disabled=locked}
@@ -2114,5 +2143,50 @@ $('pcAboutMenu').onclick=()=>pcOpen('about');$('pcChangesMenu').onclick=()=>pcOp
 // Keep public text available even without an admin session. No player authentication changes.
 setTimeout(()=>{pcRefresh().catch(()=>{});try{if(localStorage.getItem(PC_ADMIN_STORAGE))pcGetAdmin().then(async c=>{const {data}=await c.auth.getSession();if(data.session)await pcIsAdmin(c)}).catch(()=>{})}catch(e){}},500);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)pcRefresh().catch(()=>{})});
+
+/* Admin player management. RPCs independently verify admin membership. */
+let pmPlayers=[],pmSelected=null;
+function pmButton(text,fn,parent,danger=false){const b=document.createElement('button');b.type='button';b.className='alt';b.textContent=text;if(danger)b.style.color='var(--coral)';b.onclick=fn;parent.appendChild(b);return b}
+function pmLine(parent,text,cls='pc-note'){const e=document.createElement('div');e.className=cls;e.textContent=text;parent.appendChild(e);return e}
+function pmLock(on){pcLock(on);for(const e of $('pc-players').querySelectorAll('button,input,select'))e.disabled=on}
+async function pmRPC(name,args){const c=await pcGetAdmin();const {data,error}=await c.rpc(name,args);if(error)throw error;return data}
+function pmRender(data){
+ pmPlayers=data.players||[];const list=$('pmList');list.replaceChildren();$('pmMatches').replaceChildren();pmSelected=null;
+ if(!pmPlayers.length)pmLine(list,'No matching reserved nicknames.');
+ for(const p of pmPlayers){const row=document.createElement('section');row.className='pc-entry';pmLine(row,p.display_name+(p.banned?' · BANNED':''),'pc-copy');pmLine(row,p.games+' games · '+p.wins+' wins · '+p.best_xp+' best XP');pmButton('Manage '+p.display_name,()=>pmSelect(p),row);list.append(row)}
+ const bans=$('pmBans');bans.replaceChildren();for(const name of data.banned||[]){const row=document.createElement('div');row.className='pc-entry';pmLine(row,name);pmButton('Unban',()=>pmAction('unban',null,name,'',null,'Unban '+name+'?'),row);bans.append(row)}
+}
+async function pmRefresh(){if(pcBusy)return;pmLock(true);pcStatus('Loading players…');try{pmRender(await pmRPC('puffer_manage_list',{p_search:$('pmSearch').value.trim()}));pcStatus('Showing up to 200 reserved names. Search to find others.')}catch(e){pcStatus('Could not load players: '+(e.message||'Connection error'))}finally{pmLock(false)}}
+function pmSelect(p){if(pcBusy)return;pmSelected=p;const box=$('pmMatches');box.replaceChildren();pmLine(box,'Manage '+p.display_name,'pc-copy');
+ pmButton('Rename (keep records)',()=>{const name=prompt('New nickname (1–12 characters):',p.display_name);if(name!==null){const n=name.trim();if(!n||n.length>12){pcStatus('Enter a nickname of 1–12 characters.');return}pmAction('rename',p,p.nickname_key,n,null,'Rename '+p.display_name+' to '+n+' and preserve global records?')}},box);
+ pmButton('Release nickname',()=>pmAction('release',p,p.nickname_key,'',null,'Release this nickname? Its former device can no longer claim it. Old global records will be hidden, not transferred.'),box,true);
+ pmButton('Reset global stats',()=>pmAction('reset',p,p.nickname_key,'',null,'Permanently reset all global records for '+p.display_name+'? Local stats stay intact.'),box,true);
+ pmButton('Reset global + local stats',()=>pmAction('reset_local',p,p.nickname_key,'',null,'Permanently reset global records and request a reset of local stats on the owning device?'),box,true);
+ pmButton('Remove player from rankings',()=>pmAction('remove',p,p.nickname_key,'',null,'Delete this player’s global stats and release their nickname? Local profiles are not deleted.'),box,true);
+ pmButton(p.banned?'Unban nickname':'Ban nickname',()=>pmAction(p.banned?'unban':'ban',null,p.nickname_key,'',null,(p.banned?'Unban ':'Ban ')+p.display_name+'? Banning hides scores and prevents new use.'),box,!p.banned);
+ pmButton('View recent matches',()=>pmLoadMatches(p),box);const m=document.createElement('div');m.id='pmMatchRows';box.append(m);box.scrollIntoView({block:'nearest'});
+}
+async function pmLoadMatches(p){if(pcBusy)return;pmLock(true);pcStatus('Loading matches…');try{const rows=await pmRPC('puffer_manage_matches',{p_player:p.player_id,p_key:p.nickname_key});const m=$('pmMatchRows');m.replaceChildren();pmLine(m,'Up to 100 recent tracked matches. Earlier matches have only aggregate totals and cannot be deleted individually.');for(const x of rows){const row=document.createElement('section');row.className='pc-entry';pmLine(row,new Date(x.created_at).toLocaleString()+' · '+x.xp+' XP'+(x.won?' · Win':''));pmLine(row,profileDuration(Number(x.survival))+' · Streak '+x.streak+' · Krillions '+x.krillions);pmButton('Delete match',()=>pmAction('delete_match',p,p.nickname_key,'',x.run_id,'Delete this match from global statistics? This cannot be undone.'),row,true);m.append(row)}pcStatus(rows.length?'Matches loaded.':'No individually tracked matches yet.')}catch(e){pcStatus('Could not load matches: '+(e.message||'Connection error'))}finally{pmLock(false)}}
+async function pmAction(action,p,key,value,run,question){if(pcBusy||!confirm(question))return;pmLock(true);pcStatus('Applying change…');let success=false;try{await pmRPC('puffer_manage_action',{p_action:action,p_player:p?p.player_id:null,p_key:key||null,p_value:value||null,p_run_id:run||null});success=true;pmRender(await pmRPC('puffer_manage_list',{p_search:$('pmSearch').value.trim()}));pcStatus('Change applied. Rankings will update on refresh.')}catch(e){pcStatus((success?'Change applied, but refresh failed: ':'Change not confirmed: ')+(e.message||'Connection error'))}finally{pmLock(false)}}
+$('pmOpen').onclick=()=>{if(pcBusy)return;if(!confirm('Open player management? Unpublished content edits will be discarded.'))return;pcDraft=null;pcSwitch('players');pmRefresh()};
+$('pmBack').onclick=()=>{if(!pcBusy)pcOpenEditor()};$('pmRefresh').onclick=pmRefresh;$('pmSearch').onkeydown=e=>{if(e.key==='Enter')pmRefresh()};
+$('pmBan').onclick=()=>{const name=$('pmBanName').value.trim();if(!name||name.length>12){pcStatus('Enter a nickname of 1–12 characters.');return}pmAction('ban',null,name,'',null,'Ban '+name+' from new games and global rankings?')};
+$('pmResetAll').onclick=()=>{if(pcBusy)return;if(prompt('This permanently clears EVERY global leaderboard record, but keeps local profiles and reserved nicknames. Type RESET to continue.')!=='RESET')return;pmAction('reset_all',null,null,null,null,'Confirm: reset the entire global leaderboard?')};
+/* Device-local changes only apply while outside a room. The server remains authoritative for rankings. */
+let pmEventSync=null;
+function pmSyncEvents(c){
+ if(S)return Promise.resolve();if(pmEventSync)return pmEventSync;
+ pmEventSync=(async()=>{const {data:session,error:se}=await c.auth.getSession();if(se)throw se;if(!session.session)return;
+ const uid=session.session.user.id,key='puffer-player-events-'+uid;let cursor=0;try{cursor=Number(localStorage.getItem(key))||0}catch(e){}
+ const {data,error}=await c.rpc('puffer_player_events',{p_after:cursor});if(error)throw error;if(S)return;
+ for(const event of data||[]){const id=event.profile_key,p=profileData.profiles[id];if(event.action==='reset'){
+  if(p){const fresh=blankProfile(p.name);fresh.seen=p.seen.slice();profileData.profiles[id]=fresh;}
+ }else if(event.action==='rename'&&event.new_name){const target=profileId(event.new_name);if(p){if(target===id)p.name=event.new_name;else if(!hasOwn(profileData.profiles,target)){p.name=event.new_name;profileData.profiles[target]=p;delete profileData.profiles[id];}else{net('Your nickname was changed. Existing local profiles were kept separate to avoid losing records.',1);}if(profileData.active===id)profileData.active=target;}if(profileId($('nm').value)===id)$('nm').value=event.new_name;for(const x of lbState.queue)if(profileId(x.p_name)===id)x.p_name=event.new_name;lbPersist();}
+ if(!persistProfiles())throw Error('Local profile storage unavailable');cursor=Number(event.id);localStorage.setItem(key,String(cursor));
+ }if(data&&data.length&&!$('profileBackdrop').classList.contains('hid'))displayProfile();
+ })().finally(()=>{pmEventSync=null});return pmEventSync;
+}
+function pmSyncExisting(){if(S)return;lbGetClient().then(c=>pmSyncEvents(c)).catch(()=>{});}
+setTimeout(pmSyncExisting,900);window.addEventListener('online',pmSyncExisting);document.addEventListener('visibilitychange',()=>{if(!document.hidden)pmSyncExisting()});
 
 </script></body></html>
