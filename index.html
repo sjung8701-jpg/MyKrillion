@@ -529,6 +529,11 @@ body.dd-fullscreen{overflow:hidden}
 #home #dailyOpen:active{box-shadow:0 0 10px #5ee7ff38;transform:translate(1px,1px)}
 @media(max-width:360px){#home #dailyOpen{gap:8px;padding:9px}#dailyOpen .daily-home-icon{width:38px;height:38px;flex-basis:38px}#dailyOpen .daily-home-title{font-size:30px}}
 @media(prefers-reduced-motion:reduce){#home #dailyOpen{transition:none}}
+</style><style id="achievement-css">
+#achievements h2{font-weight:400;color:var(--glow);font-size:31px;margin:8px 0}#achList{text-align:left}#achList h3{color:var(--glow);font-weight:400;margin:18px 0 5px;font-size:23px}.ach-card{border:2px solid var(--line);background:#081a2d;margin:7px 0;padding:9px 10px;display:flex;align-items:center;gap:10px;box-shadow:3px 3px 0 #02060d}.ach-card.active{border-color:var(--sun)}.ach-card.locked{opacity:.8}.ach-info{flex:1;min-width:0}.ach-info b{font-weight:400;font-size:23px;display:block;overflow-wrap:anywhere}.ach-info small{display:block;font-size:17px;color:var(--mut);line-height:1.2}.ach-card button{flex:none;width:auto;min-width:76px;margin:0;font-size:19px;padding:5px 8px}.ach-card button:disabled{opacity:.65}.ach-progress{height:5px;background:#02070f;margin:5px 0 3px;overflow:hidden}.ach-progress i{height:100%;display:block;background:currentColor}.ach-equipped{padding:8px;background:#071426;border:2px solid var(--line);font-size:22px}.ach-player-title{display:block;font-size:15px;line-height:1.04;white-space:normal;overflow-wrap:anywhere;font-weight:400;text-shadow:1px 1px #02050b}.seat .ach-player-title{max-width:100%;margin:2px 0}.pl .ach-player-title{font-size:16px;text-align:left}.ach-profile-title{font-size:22px;margin:-3px 0 9px;text-align:center}.ach-admin{color:#ff72b6!important;text-shadow:0 0 5px #a83767}.ach-profile-title:empty{display:none}#achToast{position:fixed;z-index:110;top:12px;right:12px;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));width:232px;max-width:calc(100vw - 24px);box-sizing:border-box;pointer-events:none;border:2px solid var(--c,var(--sun));background:#071426;box-shadow:4px 4px 0 #02060d;padding:9px 10px;display:flex;align-items:center;gap:9px;text-align:left;line-height:1.1;animation:ach-toast-in .22s ease-out both}
+#achToast .ach-toast-icon{width:35px;height:35px;flex:0 0 35px;display:grid;place-items:center;border:1px solid var(--c,var(--sun));background:#10263a;color:var(--c,var(--sun))}#achToast .ach-toast-icon svg{width:23px;height:23px}#achToast .ach-toast-copy{min-width:0;flex:1}#achToast strong{font-size:23px;display:block;font-weight:400;color:var(--c,var(--sun));overflow-wrap:anywhere;margin:3px 0}#achToast small{display:block;color:var(--mut);font-size:15px}#achToast .ach-toast-label{color:var(--sun);font-size:15px;letter-spacing:.2px}
+@keyframes ach-toast-in{from{opacity:0;transform:translateY(-9px)}to{opacity:1;transform:translateY(0)}}@media(prefers-reduced-motion:reduce){#achToast{animation:none}}@media(max-width:600px){#achToast{width:208px;padding:7px 8px;gap:7px}#achToast strong{font-size:20px}#achToast small,#achToast .ach-toast-label{font-size:14px}}
+@media(max-width:600px){.seat .ach-player-title{font-size:13px}.ach-info b{font-size:20px}.ach-card button{font-size:18px;min-width:65px}}
 </style></head>
 <body><main>
 <nav id="homeNav" aria-label="Player navigation">
@@ -560,7 +565,16 @@ body.dd-fullscreen{overflow:hidden}
  <button id="jn" class="alt">Join room</button>
  <button id="pub" class="alt">Join public room</button>
  <button id="skinsOpen" class="alt" type="button">Player skins<span id="skinsUnread" class="pc-unread-badge hid" aria-label="New skin unlocked" style="margin-left:7px">!</span></button>
- <div class="msg" style="font-size:13px;opacity:.6">Version: 26 Nov 2026 · Daily Dive testing</div>
+ <button id="achOpen" class="alt" type="button">Achievements &amp; titles<span id="achUnread" class="pc-unread-badge hid" aria-label="New achievement unlocked" style="margin-left:7px">!</span></button>
+ <div class="msg" style="font-size:13px;opacity:.6">Version: 26 Nov 2026 · Achievements &amp; titles</div>
+</div>
+
+<div id="achievements" class="card hid">
+ <button id="achBack" type="button" class="alt">← Back</button>
+ <h2>Achievements &amp; titles</h2><div id="achPlayer" class="msg"></div>
+ <div id="achSummary" class="profile-note"></div><div id="achEquipped" class="ach-equipped"></div>
+ <button id="achNone" class="alt" type="button">Unequip title</button>
+ <div id="achList"></div><div id="achStatus" class="msg" role="status"></div>
 </div>
 
 <div id="skinGallery" class="card hid">
@@ -666,7 +680,7 @@ body.dd-fullscreen{overflow:hidden}
  <section id="profilePanel" class="card" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
   <div class="profile-head"><h2 id="profileTitle">Player profile</h2><button id="profileClose" class="alt" type="button" aria-label="Close profile">×</button></div>
   <div id="profileManage"><label for="profileSelect">Saved players</label><select id="profileSelect"></select><div class="profile-note">To make another profile, enter a new name on the main menu and start or join a room.</div></div>
-  <h3 id="profileName"></h3><div id="profileStats" class="profile-grid"></div>
+  <h3 id="profileName"></h3><div id="profileTitle" class="ach-profile-title"></div><div id="profileStats" class="profile-grid"></div>
   <h3>Daily Dive</h3><div id="profileDailyDive" class="profile-grid"></div>
   <h3>Lifetime rarity totals</h3><div id="profileRarities"></div>
   <div class="profile-note">Completed games only. Accuracy = accepted answers / submitted answers. A rejected answer or timeout breaks your streak. Survival ends at elimination or match end.</div>
@@ -688,7 +702,7 @@ body.dd-fullscreen{overflow:hidden}
 <div id="pc-about" class="hid"><div id="pcAboutText" class="pc-copy"></div><hr class="pc-divider"><h3>How to play</h3><div class="pc-copy">Take turns answering the current question before the puffer pops. Rarer answers earn more XP. Earn enough XP for extra lives and try to be the last player standing.</div><h3 style="margin-top:12px">Rarity and XP</h3><div style="line-height:1.3"><span class="t1" style="color:var(--c)">Plankton · 10</span><br><span class="t2" style="color:var(--c)">Too Clever · 15</span><br><span class="t3" style="color:var(--c)">Schooler · 30</span><br><span class="t4" style="color:var(--c)">Rare · 60</span><br><span class="t5" style="color:var(--c)">Deep Cut · 85</span><br><span class="t6" style="color:var(--c)">One in a Krillion · 100</span></div><div id="pcCreditsBlock" class="hid"><hr class="pc-divider"><h3>Credits</h3><div id="pcCreditsText" class="pc-copy"></div></div><div class="pc-privacy pc-note">Player profiles and lifetime stats are stored on this device. If leaderboard sharing is enabled, player names and summary scores are published online.</div><button id="pcLoginLink" type="button" class="alt">Admin sign in</button></div>
 <div id="pc-changes" class="hid"><div id="pcUpdateTabs" role="group" aria-label="Update type"><button id="pcChangesTab" type="button" class="alt" aria-pressed="true" aria-controls="pcChangeList">Changelog<span id="pcChangesTabUnread" class="pc-unread-badge hid" aria-label="Unread changelog">!</span></button><button id="pcAnnouncementTab" type="button" class="alt" aria-pressed="false" aria-controls="pcAnnouncementPane">Announcement<span id="pcAnnouncementTabUnread" class="pc-unread-badge hid" aria-label="Unread announcement">!</span></button></div><div id="pcChangeList"></div><div id="pcAnnouncementPane" class="hid"><article id="pcTabAnnouncementCard" class="pc-entry hid"><h3>Announcement</h3><div id="pcTabAnnouncementText" class="pc-copy"></div></article><p id="pcTabAnnouncementEmpty" class="pc-note">No announcement at the moment.</p></div></div>
 <div id="pc-login" class="hid"><p class="pc-note">Enter your private admin nickname. This is separate from your player name and records.</p><form id="pcLoginForm"><label for="pcSecret">Secret nickname</label><input id="pcSecret" type="password" autocomplete="current-password" autocapitalize="none" spellcheck="false" required><button id="pcLoginSubmit" type="submit">Sign in</button></form></div>
-<div id="pc-editor" class="hid"><button id="feedbackInboxOpen" type="button" class="alt">Player feedback inbox <span id="feedbackUnread" class="pc-unread-badge hid">!</span></button><button id="qlOpen" type="button" class="alt">Question library</button><button id="dailyTestOpen" type="button" class="alt">Daily Dive testing</button><button id="pmOpen" type="button" class="alt">Manage players &amp; leaderboard</button><p class="pc-note">Changes are drafts until you press Publish changes. Published text is visible to everyone.</p><label for="pcAboutEdit">About the game</label><textarea id="pcAboutEdit" maxlength="8000" rows="4"></textarea><label for="pcTaglineEdit">Main menu description</label><textarea id="pcTaglineEdit" maxlength="250" rows="2"></textarea><label for="pcNameEdit">Name field description</label><textarea id="pcNameEdit" maxlength="1000" rows="3"></textarea><label for="pcCreditsEdit">Credits</label><textarea id="pcCreditsEdit" maxlength="2000" rows="3"></textarea><label for="pcAnnouncementEdit">Announcement (leave empty to hide)</label><textarea id="pcAnnouncementEdit" maxlength="2000" rows="3"></textarea><hr class="pc-divider"><h3>Changelog</h3><button id="pcAddChange" type="button" class="alt">+ Add update</button><div id="pcEditChanges"></div><div id="pcPublishBar"><div id="pcPublishStatus" role="status" aria-live="polite">Edit your content, then publish your changes.</div><button id="pcPublish" type="button">Publish changes</button></div><button id="pcLogout" type="button" class="alt">Sign out of admin</button></div>
+<div id="pc-editor" class="hid"><button id="feedbackInboxOpen" type="button" class="alt">Player feedback inbox <span id="feedbackUnread" class="pc-unread-badge hid">!</span></button><button id="qlOpen" type="button" class="alt">Question library</button><button id="dailyTestOpen" type="button" class="alt">Daily Dive testing</button><button id="pmOpen" type="button" class="alt">Manage players &amp; leaderboard</button><p class="pc-note">Changes are drafts until you press Publish changes. Published text is visible to everyone.</p><label for="pcAboutEdit">About the game</label><textarea id="pcAboutEdit" maxlength="8000" rows="4"></textarea><label for="pcTaglineEdit">Main menu description</label><textarea id="pcTaglineEdit" maxlength="250" rows="2"></textarea><label for="pcNameEdit">Name field description</label><textarea id="pcNameEdit" maxlength="1000" rows="3"></textarea><label for="pcCreditsEdit">Credits</label><textarea id="pcCreditsEdit" maxlength="2000" rows="3"></textarea><label for="pcAnnouncementEdit">Announcement (leave empty to hide)</label><textarea id="pcAnnouncementEdit" maxlength="2000" rows="3"></textarea><hr class="pc-divider"><h3>Changelog</h3><p class="pc-note">Published changelogs automatically expire after 48 hours. Editing an entry restarts its timer. Announcements stay until you change or remove them.</p><button id="pcAddChange" type="button" class="alt">+ Add update</button><div id="pcEditChanges"></div><div id="pcPublishBar"><div id="pcPublishStatus" role="status" aria-live="polite">Edit your content, then publish your changes.</div><button id="pcPublish" type="button">Publish changes</button></div><button id="pcLogout" type="button" class="alt">Sign out of admin</button></div>
 <div id="pc-divetest" class="hid">
  <button id="dailyTestBack" type="button" class="alt">← Back to admin panel</button>
  <p class="pc-note">Practice only. Test dives are never saved to player profiles or leaderboards. Returning here discards the practice run.</p>
@@ -713,6 +727,7 @@ body.dd-fullscreen{overflow:hidden}
 <div id="ql-detail" class="hid"><button id="qlList" type="button" class="alt">← Question list</button><label for="qlTitle">Question wording</label><input id="qlTitle" maxlength="250"><label><input id="qlEnabled" type="checkbox" style="width:auto;margin-right:7px"> Enabled in gameplay</label><div class="pc-note" id="qlAnswerCount"></div><input id="qlAnswerSearch" placeholder="Search answers or aliases…"><button id="qlAddAnswer" type="button" class="alt">+ Add answer</button><label for="qlBulk">Bulk add (one answer per line; optional tier 1–5 after |)</label><textarea id="qlBulk" rows="3" placeholder="Answer name | 4"></textarea><button id="qlImport" type="button" class="alt">Import answers</button><div id="qlAnswerRows"></div><div style="display:flex;gap:6px"><button id="qlPrev" type="button" class="alt">Previous</button><button id="qlNext" type="button" class="alt">Next</button></div><button id="qlRestore" type="button" class="alt">Restore original question / answers</button><button id="qlRemove" type="button" class="alt" style="color:var(--coral)">Disable question</button></div>
 <div id="qlPublishBar"><div id="qlPublishStatus" role="status" aria-live="polite">Edit questions, then publish your changes.</div><button id="qlPublish" type="button">Publish library changes</button></div><hr class="pc-divider"><button id="qlDiscard" type="button" class="alt">Discard unpublished edits</button><button id="qlUndo" type="button" class="alt">Undo last published library update</button>
 </div></section></div><div id="adminActionBackdrop" class="hid"><section id="adminActionPanel" class="card" role="dialog" aria-modal="true" aria-labelledby="adminActionTitle"><h2 id="adminActionTitle"></h2><div id="adminActionMessage"></div><form id="adminActionForm"><div id="adminActionFields"></div><div id="adminActionError" role="status"></div><div id="adminActionButtons"><button id="adminActionCancel" type="button" class="alt">Cancel</button><button id="adminActionSave" type="submit">Continue</button></div></form></section></div></main>
+<div id="achToast" class="hid" role="status" aria-live="polite" aria-atomic="true"></div>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
 const hasOwn=(obj,key)=>Object.prototype.hasOwnProperty.call(obj,key);
@@ -895,19 +910,20 @@ Object.keys(MORE16).forEach(i=>MORE16[i].forEach((s,t)=>{if(s)CATS[i][t+1]+=","+
 function markSeen(i){}
 // Retired open-ended prompts: retain indexed answer data for compatibility, but never deal these.
 const RETIRED_PROMPTS=new Set(["name a city", "name a us city", "name a river", "name a landmark", "name a singer or rapper", "name a tv show", "name a movie", "name an actor or actress", "name a novel or book", "name an author or writer", "name a cartoon character", "name a country in south america", "name a country in oceania", "name a country starting with b", "name a canadian province or territory", "name a traditional county on the island of ireland", "name a korean dish", "name a six-letter english word starting and ending with the same letter", "name a five-letter english word containing exactly three vowels (a e i o u)", "name a four-letter english word with a as the second letter and e as the last", "name an english word that rhymes with light (not light itself)"]);
-function newDeck(last,played){
+function newDeck(last,played,available=()=>true){
   played=Array.isArray(played)?played:[];
   const used=new Set(played);
   // Treat duplicate prompt titles as the same prompt, so they cannot appear twice in one cycle.
   const titles=new Set();
   let ids=CATS.map((c,i)=>({i,title:qlTitle(i).trim().toLowerCase()}))
-    .filter(x=>qlEnabled(x.i)&&!used.has(x.i)&&!titles.has(x.title)&&titles.add(x.title))
+    .filter(x=>qlEnabled(x.i)&&available(x.i)&&!used.has(x.i)&&!titles.has(x.title)&&titles.add(x.title))
     .map(x=>x.i);
   // Only start a fresh cycle after every distinct prompt has been played.
   if(!ids.length){
     played.length=0;
     ids=CATS.map((c,i)=>({i,title:qlTitle(i).trim().toLowerCase()}))
-      .filter((x,j,a)=>qlEnabled(x.i)&&a.findIndex(y=>y.title===x.title)===j)
+      .filter(x=>qlEnabled(x.i)&&available(x.i))
+      .filter((x,j,a)=>a.findIndex(y=>y.title===x.title)===j)
       .map(x=>x.i);
   }
   for(let i=ids.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[ids[i],ids[j]]=[ids[j],ids[i]]}
@@ -1810,7 +1826,95 @@ function seedFromString(str){let h=2166136261>>>0;for(let i=0;i<str.length;i++){
 function dailyBlank(){return {currentStreak:0,bestStreak:0,divesPlayed:0,bestDepth:0,lastCompleted:'',skins:['krill'],unreadSkins:[],selectedSkin:'krill',session:null,recent:[]}}
 function cleanDaily(raw){const d=dailyBlank();if(!raw||typeof raw!=='object')return d;d.currentStreak=profileNumber(raw.currentStreak);d.bestStreak=profileNumber(raw.bestStreak);d.divesPlayed=profileNumber(raw.divesPlayed);d.bestDepth=profileNumber(raw.bestDepth);d.lastCompleted=typeof raw.lastCompleted==='string'?raw.lastCompleted:'';const earned=Math.max(d.currentStreak,d.bestStreak);const skins=Array.isArray(raw.skins)?raw.skins.filter(x=>DAILY_SKINS.some(s=>s.id===x&&(!['schooler','squid'].includes(x)||earned>=s.unlock))):[];d.skins=[...new Set(['krill',...skins,...DAILY_SKINS.filter(s=>s.unlock<=earned).map(s=>s.id)])];d.unreadSkins=Array.isArray(raw.unreadSkins)?[...new Set(raw.unreadSkins.filter(id=>id!=='krill'&&d.skins.includes(id)))]:[];d.selectedSkin=d.skins.includes(raw.selectedSkin)?raw.selectedSkin:'krill';if(raw.session&&typeof raw.session==='object'){const s=raw.session;if(typeof s.date==='string'&&Array.isArray(s.questions)){d.session={date:s.date,index:Math.max(0,Math.min(profileNumber(s.index),7)),depth:profileNumber(s.depth),questions:s.questions.filter(q=>q&&Number.isSafeInteger(q.ci)&&q.ci>=0&&typeof q.kr!=='undefined').slice(0,7),answers:Array.isArray(s.answers)?s.answers.filter(a=>a&&typeof a==='object').slice(0,7):[],complete:s.complete===true,reward:typeof s.reward==='string'?s.reward:'',zone:typeof s.zone==='string'?s.zone:'',finishedAt:profileNumber(s.finishedAt)}}}
  d.recent=Array.isArray(raw.recent)?raw.recent.filter(x=>x&&typeof x.date==='string').slice(0,20):[];return d}
-function blankProfile(name){return {name:String(name||'Player').trim().slice(0,12)||'Player',...Object.fromEntries(profileFields.map(k=>[k,0])),rarities:[0,0,0,0,0,0],seen:[],dailyDive:dailyBlank()}}
+// Achievements are device-local, like existing profile statistics. Admin is never a normal unlock.
+const ACHIEVEMENTS=[
+ ['first_splash','First Splash','Complete your first multiplayer match','competitiveGames',1,1],
+ ['survivor','Survivor','Win your first multiplayer match','wins',1,1],
+ ['regular','Regular Diver','Complete 25 multiplayer matches','competitiveGames',25,2],
+ ['veteran','Puffer Veteran','Complete 100 multiplayer matches','competitiveGames',100,3],
+ ['ocean_regular','Ocean Dweller','Complete 250 multiplayer matches','competitiveGames',250,5],
+ ['contender','Contender','Win 10 multiplayer matches','wins',10,2],
+ ['apex','Apex Predator','Win 25 multiplayer matches','wins',25,3],
+ ['king','King of the Ocean','Win 100 multiplayer matches','wins',100,6],
+ ['quick','Quick Thinker','Submit 100 correct answers','correct',100,2],
+ ['encyclopedia','Walking Encyclopedia','Submit 1,000 correct answers','correct',1000,4],
+ ['oracle','Ocean Oracle','Submit 5,000 correct answers','correct',5000,6],
+ ['unsinkable','Unsinkable','Earn 50 bonus lives','livesEarned',50,3],
+ ['xp5k','Treasure Hunter','Earn 5,000 lifetime XP','totalXP',5000,2],
+ ['xp50k','XP Hoarder','Earn 50,000 lifetime XP','totalXP',50000,5],
+ ['deep','Deep Thinker','Submit 100 Deep Cut answers','deep',100,5],
+ ['jackpot','Lucky Krill','Submit your first One in a Krillion answer','jackpot',1,3],
+ ['krillion','One in a Krillion','Submit 25 One in a Krillion answers','jackpot',25,6],
+ ['streak10','On a Roll','Answer correctly 10 times in a row','bestStreak',10,3],
+ ['streak25','Unstoppable','Answer correctly 25 times in a row','bestStreak',25,5],
+ ['run25','Long Haul','Give 25 correct answers in one multiplayer match','runCorrect',25,3,'skill'],
+ ['marathon','Marathon Diver','Give 100 correct answers in one multiplayer match','runCorrect',100,5,'skill'],
+ ['bonus3','Second Wind','Earn 3 bonus lives in one multiplayer match','runLives',3,4,'skill'],
+ ['perfect','Perfectionist','Win a multiplayer match without getting popped','perfectWin',1,4,'skill'],
+ ['abyss','Into the Abyss','Reach 6,000 m in a real Daily Dive','dailyDepth',6000,6],
+ ['daily30','Deep Sea Regular','Complete a 30-day Daily Dive streak','dailyStreak',30,5],
+ ['comeback','Back from the Brink','Earn a bonus life while on your last life','comeback',1,4,'secret'],
+ ['rainbow','Full Spectrum','Find an answer of every rarity in one multiplayer match','rainbow',1,5,'secret'],
+ ['lastsecond','Last Second Legend','Give a correct answer with less than one second remaining','lastSecond',1,4,'secret'],
+ ['oneheart','Against All Odds','Win a multiplayer match with exactly one life left','oneLifeWin',1,5,'secret'],
+ ['retry','Never Give Up','Recover from a rejected answer and answer correctly in the same turn','retry',1,2,'secret']
+].map(([id,name,desc,metric,goal,tier,kind='milestone'])=>({id,name,desc,metric,goal,tier,kind}));
+const ADMIN_TITLE={id:'admin',name:'ADMIN',desc:'Verified Puffer Party administrator',tier:6,kind:'admin'};
+const ACH_BY_ID=Object.fromEntries(ACHIEVEMENTS.map(a=>[a.id,a]));
+const ACH_SKILL_METRICS=['runCorrect','runLives','perfectWin','comeback','rainbow','lastSecond','oneLifeWin','retry'];
+function achievementBlank(){return {unlocked:[],unread:[],selected:'',best:{}}}
+function achievementValue(p,k){if(k==='deep')return profileNumber(p.rarities&&p.rarities[4]);if(k==='jackpot')return profileNumber(p.rarities&&p.rarities[5]);if(k==='dailyDepth')return profileNumber(p.dailyDive&&p.dailyDive.bestDepth);if(k==='dailyStreak')return profileNumber(p.dailyDive&&p.dailyDive.bestStreak);return ACH_SKILL_METRICS.includes(k)?profileNumber(p.achievement.best[k]):profileNumber(p[k])}
+function achievementRefresh(p){const a=p.achievement,newly=[];for(const x of ACHIEVEMENTS){if(!a.unlocked.includes(x.id)&&achievementValue(p,x.metric)>=x.goal){a.unlocked.push(x.id);a.unread.push(x.id);newly.push(x)}}return newly}
+function cleanAchievement(raw){const a=achievementBlank();if(!raw||typeof raw!=='object')return a;a.unlocked=Array.isArray(raw.unlocked)?[...new Set(raw.unlocked.filter(id=>typeof id==='string'&&hasOwn(ACH_BY_ID,id)))]:[];a.unread=Array.isArray(raw.unread)?[...new Set(raw.unread.filter(id=>a.unlocked.includes(id)))]:[];a.selected=raw.selected==='admin'||a.unlocked.includes(raw.selected)?raw.selected:'';for(const k of ACH_SKILL_METRICS)a.best[k]=profileNumber(raw.best&&raw.best[k]);return a}
+function achievementUpdateUnread(){const name=$('nm').value.trim(),p=name&&profileData.profiles[profileId(name)];$('achUnread').classList.toggle('hid',!(p&&p.achievement.unread.length))}
+let achievementToastTimer=0;
+const achievementToastQueue=[];
+function achievementToastNext(){
+ const el=$('achToast');if(!achievementToastQueue.length){el.classList.add('hid');el.textContent='';achievementToastTimer=0;return}
+ const x=achievementToastQueue.shift();el.className='hid t'+x.tier;
+ el.innerHTML='<span class="ach-toast-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 3h8v6c0 4-2 6-4 6S8 13 8 9V3ZM8 5H3v3c0 3 2 4 5 4M16 5h5v3c0 3-2 4-5 4M12 15v5M7 21h10"/></svg></span><div class="ach-toast-copy"><small class="ach-toast-label">ACHIEVEMENT UNLOCKED!</small><strong>'+esc(x.name)+'</strong><small>New title unlocked</small></div>';
+ void el.offsetWidth;el.classList.remove('hid');achievementToastTimer=setTimeout(achievementToastNext,4000);
+}
+function achievementToast(list){if(!list.length)return;achievementToastQueue.push(...list);if(!achievementToastTimer)achievementToastNext()}
+// Evaluate live answer milestones against saved totals plus this unsaved run.
+// Keep lifetime statistics unchanged until recordProfileResult commits the match.
+function achievementObserve(s){
+ if(!s||!['play','over'].includes(s.ph)||!s.runId||!Array.isArray(s.players))return;
+ const q=s.players.find(x=>x.id===me);if(!q||!q.runStats)return;
+ const p=ensureProfile(q.name),a=p.achievement,r=q.runStats;
+ if(p.seen.includes(s.runId))return;
+ let dirty=false;
+ if(s.players.length>=2){
+  const won=s.ph==='over'&&s.winnerId===me;
+  const values={runCorrect:r.correct,runLives:r.livesEarned,perfectWin:won&&r.pops===0?1:0,comeback:r.comeback,rainbow:Array.isArray(r.rarities)&&r.rarities.length===6&&r.rarities.every(n=>n>0)?1:0,lastSecond:r.lastSecond,oneLifeWin:won&&q.lives===1?1:0,retry:r.retry};
+  for(const k of ACH_SKILL_METRICS){const n=profileNumber(values[k]);if(n>profileNumber(a.best[k])){a.best[k]=n;dirty=true}}
+ }
+ // Share only the achievement object with the real profile; totals below are a temporary projection.
+ const progress=s.ph==='play'?{...p,correct:p.correct+profileNumber(r.correct),totalXP:p.totalXP+profileNumber(q.score),bestStreak:Math.max(p.bestStreak,profileNumber(r.bestStreak)),livesEarned:p.livesEarned+profileNumber(r.livesEarned),rarities:p.rarities.map((n,i)=>n+profileNumber(r.rarities&&r.rarities[i]))}:p;
+ const newly=achievementRefresh(progress);
+ if(dirty||newly.length){persistProfiles();achievementToast(newly)}
+}
+function localEquippedTitle(name){const p=profileData.profiles[profileId(name)],a=p&&p.achievement;if(!a)return '';if(a.selected==='admin')return pcAdmin?'admin':'';return a.unlocked.includes(a.selected)&&hasOwn(ACH_BY_ID,a.selected)?a.selected:''}
+function ordinaryTitle(value){return typeof value==='string'&&hasOwn(ACH_BY_ID,value)?value:''}
+function titleMarkup(id){const a=id==='admin'?ADMIN_TITLE:ACH_BY_ID[ordinaryTitle(id)];return a?'<span class="ach-player-title '+(a.id==='admin'?'ach-admin':'t'+a.tier)+'">'+esc(a.name.toUpperCase())+'</span>':''}
+let achievementPlayer='', achievementVisitNew=[];
+function renderAchievementGallery(){const p=profileData.profiles[achievementPlayer];if(!p)return;const a=p.achievement;const current=localEquippedTitle(p.name);$('achPlayer').textContent='Achievements for '+p.name;$('achSummary').textContent=a.unlocked.length+' / '+ACHIEVEMENTS.length+' achievements unlocked. Equip one title to show in your profile and multiplayer.';$('achEquipped').innerHTML=current?'Equipped: '+titleMarkup(current):'No title equipped';$('achNone').disabled=!a.selected;
+ const card=x=>{const admin=x.id==='admin',owned=admin?pcAdmin:a.unlocked.includes(x.id),secret=x.kind==='secret'&&!owned,v=admin?1:Math.min(x.goal,achievementValue(p,x.metric));return '<div class="ach-card '+(current===x.id?'active':owned?'':'locked')+'"><div class="ach-info"><b class="'+(secret?'':admin?'ach-admin':'t'+x.tier)+'">'+esc(secret?'???':x.name)+(achievementVisitNew.includes(x.id)?' <span class="pc-unread-badge" style="font-size:16px">NEW!</span>':'')+'</b><small>'+esc(secret?'Secret achievement — discover it by playing.':x.desc)+'</small>'+(!secret&&!admin?'<div class="ach-progress t'+x.tier+'"><i style="width:'+Math.round(100*v/x.goal)+'%"></i></div><small>'+v.toLocaleString()+' / '+x.goal.toLocaleString()+'</small>':'')+'</div><button type="button" data-title="'+x.id+'" '+(!owned||current===x.id?'disabled':'')+'>'+ (current===x.id?'Equipped':owned?'Equip':'Locked')+'</button></div>'};
+ const newly=achievementVisitNew.map(id=>ACH_BY_ID[id]).filter(x=>x&&a.unlocked.includes(x.id));
+ const sections=[['milestone','Milestones'],['skill','Single-match feats'],['secret','Secret achievements']].map(([k,label])=>{const entries=ACHIEVEMENTS.filter(x=>x.kind===k&&!achievementVisitNew.includes(x.id));return entries.length?'<h3>'+label+'</h3>'+entries.map(card).join(''):''}).join('');
+ $('achList').innerHTML=(newly.length?'<h3>Newly unlocked</h3>'+newly.map(card).join(''):'')+(pcAdmin?'<h3>Admin exclusive</h3>'+card(ADMIN_TITLE):'')+sections}
+async function openAchievementGallery(){const name=$('nm').value.trim();if(!name){net('Enter your nickname to view achievements.',1);$('nm').focus();return}const p=rememberProfile(name);achievementPlayer=profileId(p.name);achievementRefresh(p);achievementVisitNew=[...p.achievement.unread].reverse();p.achievement.unread=[];persistProfiles();$('achStatus').textContent='';show('achievements');renderAchievementGallery();try{if(pcAdmin||localStorage.getItem(PC_ADMIN_STORAGE)){const c=await pcGetAdmin();const {data}=await c.auth.getSession();if(data.session)await pcIsAdmin(c);else pcSetAdmin(false);if(!$('achievements').classList.contains('hid'))renderAchievementGallery()}}catch(e){pcSetAdmin(false);if(!$('achievements').classList.contains('hid'))renderAchievementGallery()}}
+async function equipAchievement(id){const p=profileData.profiles[achievementPlayer];if(!p)return;if(id==='admin'){try{if(!await pcIsAdmin(await pcGetAdmin()))throw Error('Admin required')}catch(e){$('achStatus').textContent='Verified admin sign-in required.';return}if($('achievements').classList.contains('hid')||achievementPlayer!==profileId(p.name))return}else if(id!==''&&(!ordinaryTitle(id)||!p.achievement.unlocked.includes(id)))return;p.achievement.selected=id;const saved=persistProfiles();renderAchievementGallery();$('achStatus').textContent=saved?(id?'Title equipped! It will appear in your next room.':'Title unequipped.'):'Saved in memory only — browser storage unavailable.'}
+// A narrowly scoped, non-authentication ticket proves the ADMIN cosmetic in a room.
+function titleTicket(value){return typeof value==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)?value:''}
+async function issueAdminTitle(name,roomCode,peerId){if(localEquippedTitle(name)!=='admin')return '';try{const c=await pcGetAdmin();if(!await pcIsAdmin(c))return '';const {data,error}=await c.rpc('puffer_admin_title_issue',{p_name:name,p_room:roomCode,p_peer:peerId});if(error)throw error;return titleTicket(data)}catch(e){console.warn('Admin title verification unavailable');return ''}}
+const titleVerification=new Map();
+function titleProofKey(p,roomCode){const t=titleTicket(p.titleProof);return t&&typeof p.id==='string'&&typeof p.name==='string'&&typeof roomCode==='string'?JSON.stringify([t,p.name,roomCode,p.id]):''}
+function playerTitle(p,roomCode){if(p.title==='admin'){const key=titleProofKey(p,roomCode),v=titleVerification.get(key);return v&&v.ok&&v.until>Date.now()?'admin':''}return ordinaryTitle(p.title)}
+function verifyRoomTitles(s){if(!s||!s.room||!Array.isArray(s.players))return;for(const p of s.players){if(p.title!=='admin')continue;const key=titleProofKey(p,s.room);if(!key)continue;const old=titleVerification.get(key);if(old&&(old.pending||old.until>Date.now()))continue;titleVerification.set(key,{pending:true});const [ticket,name,roomCode,peerId]=JSON.parse(key);(async()=>{let ok=false;try{const c=await lbGetClient();const {data,error}=await c.rpc('puffer_admin_title_verify',{p_ticket:ticket,p_name:name,p_room:roomCode,p_peer:peerId});ok=!error&&data===true}catch(e){}if(titleVerification.size>100)titleVerification.clear();titleVerification.set(key,{ok,until:Date.now()+(ok?60000:15000)});if(S&&S.room===roomCode&&S.players.some(x=>titleProofKey(x,roomCode)===key))render(S)})()}}
+function attachHostAdminTitle(g,p){if(localEquippedTitle(p.name)!=='admin')return;const roomCode=room;issueAdminTitle(p.name,roomCode,p.id).then(ticket=>{if(ticket&&G===g&&room===roomCode&&g.players.includes(p)){p.title='admin';p.titleProof=ticket;push()}})}
+function sendGuestAdminTitle(c,name,roomCode,peerId){if(localEquippedTitle(name)!=='admin')return;issueAdminTitle(name,roomCode,peerId).then(ticket=>{if(ticket&&conn===c&&c.open&&room===roomCode&&me===peerId)c.send({t:'titleProof',ticket})})}
+function blankProfile(name){return {name:String(name||'Player').trim().slice(0,12)||'Player',...Object.fromEntries(profileFields.map(k=>[k,0])),rarities:[0,0,0,0,0,0],seen:[],dailyDive:dailyBlank(),achievement:achievementBlank()}}
 function cleanProfileData(raw){
  const out={version:1,active:'',profiles:Object.create(null)};
  if(!raw||raw.version!==1||!raw.profiles||typeof raw.profiles!=='object'||Array.isArray(raw.profiles))return out;
@@ -1821,7 +1925,7 @@ function cleanProfileData(raw){
   p.wins=Math.min(p.wins,p.competitiveGames,p.games);p.competitiveGames=Math.min(p.competitiveGames,p.games);p.correct=Math.min(p.correct,p.submitted);
   p.rarities=p.rarities.map((_,i)=>profileNumber(value.rarities&&value.rarities[i]));
   p.seen=Array.isArray(value.seen)?[...new Set(value.seen.filter(x=>typeof x==='string'&&x.length<=120))]:[];
-  p.dailyDive=cleanDaily(value.dailyDive);
+  p.dailyDive=cleanDaily(value.dailyDive);p.achievement=cleanAchievement(value.achievement);achievementRefresh(p);
   out.profiles[id]=p;
  }
  if(hasOwn(out.profiles,raw.active))out.active=raw.active;else out.active=Object.keys(out.profiles)[0]||'';
@@ -1829,10 +1933,10 @@ function cleanProfileData(raw){
 }
 let profileStorageOK=true,profileData=cleanProfileData(null),profileMatchStatus='',profileFocus=null;
 try{const raw=localStorage.getItem(PROFILE_KEY);if(raw)profileData=cleanProfileData(JSON.parse(raw))}catch(e){profileStorageOK=false}
-function persistProfiles(){skinUpdateUnread();try{localStorage.setItem(PROFILE_KEY,JSON.stringify(profileData));profileStorageOK=true;return true}catch(e){profileStorageOK=false;return false}}
+function persistProfiles(){skinUpdateUnread();achievementUpdateUnread();try{localStorage.setItem(PROFILE_KEY,JSON.stringify(profileData));profileStorageOK=true;return true}catch(e){profileStorageOK=false;return false}}
 function ensureProfile(name){const id=profileId(name);if(!hasOwn(profileData.profiles,id))profileData.profiles[id]=blankProfile(name);profileData.active=id;return profileData.profiles[id]}
 function rememberProfile(name){const p=ensureProfile(name);persistProfiles();return p}
-function newRunStats(){return {submitted:0,correct:0,streak:0,bestStreak:0,livesEarned:0,rarities:[0,0,0,0,0,0],survivalMs:null}}
+function newRunStats(){return {submitted:0,correct:0,streak:0,bestStreak:0,livesEarned:0,rarities:[0,0,0,0,0,0],survivalMs:null,pops:0,comeback:0,lastSecond:0,retry:0,hadBad:false}}
 function finishSurvival(p){if(p.runStats&&p.runStats.survivalMs===null)p.runStats.survivalMs=Math.max(0,Date.now()-G.runStarted)}
 function recordProfileResult(s){
  if(s.ph!=='over')return;
@@ -1846,7 +1950,7 @@ function recordProfileResult(s){
  a.bestSurvival=Math.max(a.bestSurvival,profileNumber(r.survivalMs));a.correct+=profileNumber(r.correct);a.submitted+=profileNumber(r.submitted);
  a.bestStreak=Math.max(a.bestStreak,profileNumber(r.bestStreak));a.livesEarned+=profileNumber(r.livesEarned);
  a.rarities=a.rarities.map((n,i)=>n+profileNumber(r.rarities&&r.rarities[i]));a.seen.push(s.runId);
- profileData.active=id;profileMatchStatus=persistProfiles()?'Match saved to your profile.':'Match recorded in memory only — storage unavailable.';
+ const newly=achievementRefresh(a);achievementToast(newly);profileData.active=id;profileMatchStatus=persistProfiles()?'Match saved to your profile.':'Match recorded in memory only — storage unavailable.';
  try{lbQueueResult(s,p,r)}catch(e){console.warn('Leaderboard queue:',e)}
 }
 function profileDuration(ms){const sec=Math.floor(ms/1000);return Math.floor(sec/60)+'m '+String(sec%60).padStart(2,'0')+'s'}
@@ -1854,7 +1958,7 @@ function displayProfile(){
  const inRoom=!!S&&(S.ph!=='lobby'||!$('over').classList.contains('hid'));const p=(profileData.profiles[profileData.active])||blankProfile($('nm').value);
  $('profileManage').classList.toggle('hid',inRoom);$('profileBackup').classList.toggle('hid',inRoom);
  $('profileSelect').replaceChildren();for(const [id,record] of Object.entries(profileData.profiles)){const o=document.createElement('option');o.value=id;o.textContent=record.name;$('profileSelect').appendChild(o)}
- $('profileSelect').value=profileData.active;$('profileName').textContent=p.name;
+ $('profileSelect').value=profileData.active;$('profileName').textContent=p.name;$('profileTitle').innerHTML=titleMarkup(localEquippedTitle(p.name));
  const stats=[['Games played',p.games],['Wins',p.wins],['Multiplayer win rate',p.competitiveGames?(100*p.wins/p.competitiveGames).toFixed(1)+'%':'—'],['Best run',p.bestXP+' XP'],['Lifetime XP',p.totalXP],['Longest survival',profileDuration(p.bestSurvival)],['Correct answers',p.correct],['Accuracy',p.submitted?(100*p.correct/p.submitted).toFixed(1)+'%':'—'],['Longest streak',p.bestStreak],['Extra lives earned',p.livesEarned]];
  $('profileStats').innerHTML=stats.map(([k,v])=>'<div class="profile-stat"><small>'+esc(k)+'</small><b>'+esc(String(v))+'</b></div>').join('');
  const dd=p.dailyDive||dailyBlank();$('profileDailyDive').innerHTML=dailyStatsMarkup(dd,false);
@@ -1874,7 +1978,7 @@ function dailyQuestionsFor(dateKey){const ids=CATS.map((_,i)=>i).filter(i=>qlEna
 function dailyEnsureSession(p){if(p===dailyTestProfile)return p.dailyDive.session;const d=p.dailyDive||dailyBlank();p.dailyDive=d;const today=localDayKey();if(d.session&&d.session.date===today)return d.session;const questions=dailyQuestionsFor(today);d.session={date:today,index:0,depth:0,questions,answers:[],complete:false,reward:'',zone:''};persistProfiles();return d.session}
 function dailyCanonical(ci,r,raw){const spacedCanonical=(r[2]&&/[\s-]/.test(r[2])?r[2]:r[3]&&/[\s-]/.test(r[3])?r[3]:null);return (qlRuntime[ci]&&qlRuntime[ci].rows&&qlRuntime[ci].rows[r[0]])?r[2]:(isCountryQuestion(ci)&&r[2]?r[2]:spacedCanonical?TC(spacedCanonical):FULLD[ci][r[0]]||(r[2]?TC(r[2]):(r[3]?TC(r[3]):TC(raw.trim()))))}
 function dailyUnlock(p){const d=p.dailyDive;let unlocked='';const eligible=DAILY_SKINS.filter(s=>d.currentStreak>=s.unlock&&!d.skins.includes(s.id));if(eligible.length){for(const skin of eligible){d.skins.push(skin.id);if(p!==dailyTestProfile&&skin.unlock>0){if(!Array.isArray(d.unreadSkins))d.unreadSkins=[];if(!d.unreadSkins.includes(skin.id))d.unreadSkins.push(skin.id)}unlocked=skin.name}if(!d.selectedSkin||!d.skins.includes(d.selectedSkin))d.selectedSkin=d.skins[d.skins.length-1]}return unlocked}
-function dailyFinish(p){const d=p.dailyDive,s=d.session;if(!s||s.complete)return;d.divesPlayed++;d.bestDepth=Math.max(d.bestDepth,s.depth);d.currentStreak=(d.lastCompleted&&previousDayKey(s.date)===d.lastCompleted)?d.currentStreak+1:1;d.bestStreak=Math.max(d.bestStreak,d.currentStreak);d.lastCompleted=s.date;s.complete=true;s.zone=depthZone(s.depth);const unlocked=dailyUnlock(p);s.reward=unlocked;d.recent.unshift({date:s.date,depth:s.depth,zone:s.zone,streak:d.currentStreak});d.recent=d.recent.slice(0,20);if(p!==dailyTestProfile){persistProfiles();skinSyncProfile(p.name)}}
+function dailyFinish(p){const d=p.dailyDive,s=d.session;if(!s||s.complete)return;d.divesPlayed++;d.bestDepth=Math.max(d.bestDepth,s.depth);d.currentStreak=(d.lastCompleted&&previousDayKey(s.date)===d.lastCompleted)?d.currentStreak+1:1;d.bestStreak=Math.max(d.bestStreak,d.currentStreak);d.lastCompleted=s.date;s.complete=true;s.zone=depthZone(s.depth);const unlocked=dailyUnlock(p);s.reward=unlocked;d.recent.unshift({date:s.date,depth:s.depth,zone:s.zone,streak:d.currentStreak});d.recent=d.recent.slice(0,20);if(p!==dailyTestProfile){achievementToast(achievementRefresh(p));persistProfiles();skinSyncProfile(p.name)}}
 function dailyStatsMarkup(d,showRewards=true){const next=DAILY_SKINS.find(s=>!d.skins.includes(s.id));const progress=next?Math.max(0,next.unlock-d.currentStreak)+' day'+(Math.max(0,next.unlock-d.currentStreak)===1?'':'s'):'All skins unlocked';return [['Current streak',d.currentStreak],['Best streak',d.bestStreak],['Best depth',d.bestDepth+' m'],['Dives played',d.divesPlayed],...(showRewards?[['Next skin',next?next.name:'Complete'],['To unlock',progress]]:[])].map(([k,v])=>'<div class="profile-stat"><small>'+esc(k)+'</small><b>'+esc(String(v))+'</b></div>').join('')}
 const DAILY_RARITY_NAMES=['Incorrect','Plankton','Too Clever','Schooler','Rare','Deep Cut','One in a Krillion'];
 let dailyBusy=false,dailyOpenToken=0,dailyAdvanceTimer=0;
@@ -2022,7 +2126,7 @@ function host(fixed){return withReservedName(name=>hostReserved(fixed,name))}
 function hostReserved(fixed,name){
   intentionalLeave=false;resultHold=null;dismissedRun=null;
   nm=name;rememberProfile(nm);room=fixed||mkCode();isHost=true;net(fixed?'Opening the public room...':'Opening a room...');peer=new Peer('bbash-'+room,{config:ICE});
-  peer.on('open',id=>{net('');me=id;ROOM_SETTINGS={...DEFAULT_ROOM_SETTINGS};G={ph:'lobby',settings:{...ROOM_SETTINGS},players:[{id,name:nm,skin:equippedPlayerSkin(nm),lives:ROOM_SETTINGS.startingLives,lostLives:0,score:0,alive:true,nl:LIFE0,pv:0,seg:[]}],turn:0,cat:-1,last:null,msg:'',used:{},n:0,chat:[]};push()});
+  peer.on('open',id=>{net('');me=id;ROOM_SETTINGS={...DEFAULT_ROOM_SETTINGS};G={ph:'lobby',settings:{...ROOM_SETTINGS},players:[{id,name:nm,skin:equippedPlayerSkin(nm),title:ordinaryTitle(localEquippedTitle(nm)),lives:ROOM_SETTINGS.startingLives,lostLives:0,score:0,alive:true,nl:LIFE0,pv:0,seg:[]}],turn:0,cat:-1,last:null,msg:'',used:{},n:0,chat:[]};push();attachHostAdminTitle(G,G.players[0])});
   peer.on('error',e=>{if(e.type==='unavailable-id'){peer.destroy();isHost=false;if(fixed)setTimeout(()=>pubRoom(pubN,name),400);else hostReserved(undefined,name)}else net(NETERR(e),1)});
   peer.on('connection',c=>{c.on('data',d=>hostMsg(c,d));c.on('close',()=>drop(c.peer))});
 }
@@ -2034,7 +2138,9 @@ function hostMsg(c,d){
     if(G.ph!=='lobby'||G.players.length>=5){c.send({t:'full'});setTimeout(()=>c.close(),400);return}
     const joiningName=String(d.n||'').trim().slice(0,12);
     if(!joiningName||G.players.some(p=>profileId(p.name)===profileId(joiningName))){c.send({t:'nameTaken'});setTimeout(()=>c.close(),400);return}
-    conns[c.peer]=c;G.players.push({id:c.peer,name:joiningName,skin:playerSkinId(d.skin),lives:ROOM_SETTINGS.startingLives,lostLives:0,score:0,alive:true,nl:LIFE0,pv:0,seg:[]});push();
+    conns[c.peer]=c;G.players.push({id:c.peer,name:joiningName,skin:playerSkinId(d.skin),title:ordinaryTitle(d.title),lives:ROOM_SETTINGS.startingLives,lostLives:0,score:0,alive:true,nl:LIFE0,pv:0,seg:[]});push();
+  }else if(d.t==='titleProof'){
+    const p=conns[c.peer]===c&&G.players.find(x=>x.id===c.peer),ticket=titleTicket(d.ticket);if(p&&ticket&&!p.titleProof){p.title='admin';p.titleProof=ticket;push()}
   }else if(d.t==='backLobby'){
     if(conns[c.peer]===c&&G.players.some(p=>p.id===c.peer)&&G.ph==='over'&&d.runId===G.runId)openRematchLobby();
   }else if(d.t==='chat'){
@@ -2091,14 +2197,38 @@ async function start(){
   if(!CATS.some((c,i)=>qlEnabled(i))){$('wt').textContent='No enabled questions. Enable at least one in the Question Library.';return;}
   G.runId=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)+'-'+Math.random().toString(36).slice(2);G.runStarted=Date.now();G.winnerId=null;
   G.players.forEach(p=>{p.lives=ROOM_SETTINGS.startingLives;p.lostLives=0;p.score=0;p.alive=true;p.nl=LIFE0;p.pv=0;p.seg=[];p.runStats=newRunStats()});
-  G.used={};G.miss=[];G.say=null;G.lf=null;G.deck=null;G.played=[];G.fresh=true;G.same=0;G.pn=0;G.n=0;G.ph='play';G.win=null;G.msg='';G.turn=Math.random()*G.players.length|0;turn();
+  G.used={};G.miss=[];G.say=null;G.lf=null;G.deck=null;G.played=[];G.fresh=true;G.same=0;G.questionTarget=0;G.pn=0;G.n=0;G.ph='play';G.win=null;G.msg='';G.turn=Math.random()*G.players.length|0;turn();
+}
+// Choose a fixed inclusive answer target for each prompt, not just whole rotations.
+function randomQuestionTarget(alive,multiplayer,rng=Math.random){const count=Math.max(1,alive);const min=(multiplayer?2:1)*count,max=(multiplayer?5:4)*count;return min+Math.floor(rng()*(max-min+1))}
+// Built-in answers and published overrides use their distinct canonical scoring IDs.
+function questionHasUnused(ci,used){
+  const rows=qlRuntime[ci]?.rows||qlBase(ci).rows,prefix=ci+'|';
+  return Object.keys(rows).some(key=>!used[prefix+key]);
+}
+function nextPlayableQuestion(){
+  const available=ci=>questionHasUnused(ci,G.used);
+  // A question might be exhausted by answers given earlier in this match.
+  while(G.deck&&G.deck.length){const ci=G.deck.pop();if(qlEnabled(ci)&&available(ci))return ci;}
+  G.deck=newDeck(G.cat,G.played,available);
+  return G.deck.length?G.deck.pop():null;
 }
 function turn(){
   if(!G||G.ph!=='play')return;
   if(ended())return end();
   if(!G.players[G.turn].alive)G.turn=nextAlive();
   let intro=false;
-  G.pause=false;G.msg='';G.say=null;G.lf=null;if(G.fresh||G.cat<0||(G.popped&&G.players[G.turn].id===G.popped)||(G.same||0)>=(G.per||2)*G.players.filter(p=>p.alive).length){G.cleared=!(G.fresh||G.cat<0||(G.popped&&G.players[G.turn].id===G.popped))&&(G.same||0)>=(G.per||2)*G.players.filter(p=>p.alive).length?1:0;if(!G.deck||!G.deck.length)G.deck=newDeck(G.cat,G.played);G.cat=G.deck.pop();markSeen(G.cat);(G.played=G.played||[]).push(G.cat);{const pool=qlPool(G.cat).filter(k=>!G.used[G.cat+'|'+k]);G.kr=pool.length?pool[Math.random()*pool.length|0]:null}G.same=0;G.n=0;G.pops=0;G.popped=null;G.per=(G.players.length>1?2:1)+(Math.random()*4|0);G.fresh=false;G.pn=(G.pn||0)+1;intro=true}
+  G.pause=false;G.msg='';G.say=null;G.lf=null;
+  const exhausted=!G.fresh&&G.cat>=0&&!questionHasUnused(G.cat,G.used);
+  const targetReached=(G.same||0)>=G.questionTarget;
+  if(G.fresh||G.cat<0||(G.popped&&G.players[G.turn].id===G.popped)||targetReached||exhausted){
+    G.cleared=exhausted||(!(G.fresh||G.cat<0||(G.popped&&G.players[G.turn].id===G.popped))&&targetReached)?1:0;
+    const next=nextPlayableQuestion();
+    if(next===null)return end(true);
+    G.cat=next;markSeen(G.cat);(G.played=G.played||[]).push(G.cat);
+    {const pool=qlPool(G.cat).filter(k=>!G.used[G.cat+'|'+k]);G.kr=pool.length?pool[Math.random()*pool.length|0]:null}
+    G.same=0;G.n=0;G.pops=0;G.popped=null;G.questionTarget=randomQuestionTarget(G.players.filter(p=>p.alive).length,G.players.length>1);G.fresh=false;G.pn=(G.pn||0)+1;intro=true;
+  }
   if(intro){const k=G.ik=(G.ik||0)+1;G.np=1;G.pause=true;deadline=0;clearTimeout(timer);push();setTimeout(()=>{if(!G||G.ik!==k||G.ph!=='play')return;G.np=0;if(ended())return end();if(!G.players[G.turn].alive)G.turn=nextAlive();G.pause=false;go()},1000);return}
   go();
   function go(){G.tot=Math.max(ROOM_SETTINGS.minCountdown*1000,11000-G.n*300);G.n++;deadline=Date.now()+G.tot;clearTimeout(timer);timer=setTimeout(pop,G.tot);push()}
@@ -2107,28 +2237,28 @@ function after(){
   if(ended())return end();
   G.turn=nextAlive();G.pause=true;deadline=0;push();setTimeout(turn,1200);
 }
-function end(){
+function end(allCleared=false){
   clearTimeout(timer);deadline=0;G.ph='over';G.pause=false;
-  G.players.forEach(finishSurvival);const a=G.players.find(p=>p.alive);G.win=a?a.name:null;G.winnerId=a?a.id:null;push();
+  G.players.forEach(finishSurvival);const a=allCleared?null:G.players.find(p=>p.alive);G.win=a?a.name:null;G.winnerId=a?a.id:null;if(allCleared)G.msg='All questions cleared!';push();
 }
 function pop(){
-  const p=G.players[G.turn];p.lives--;p.lostLives=(p.lostLives||0)+1;G.say=null;G.pops=(G.pops||0)+1;if(G.pops>=2)G.fresh=true;else G.popped=p.id;if(p.runStats)p.runStats.streak=0;if(p.lives<=0){p.alive=false;finishSurvival(p)}
+  const p=G.players[G.turn];p.lives--;p.lostLives=(p.lostLives||0)+1;G.say=null;G.pops=(G.pops||0)+1;if(G.pops>=2)G.fresh=true;else G.popped=p.id;if(p.runStats){p.runStats.streak=0;p.runStats.pops++;p.runStats.hadBad=false}if(p.lives<=0){p.alive=false;finishSurvival(p)}
   G.msg='💥 POP! '+p.name+' lost a life'+(p.alive?'':' and is out!');after();
 }
 function answer(id,x){
   const p=G.players[G.turn];
   if(G.ph!=='play'||G.pause||!p||p.id!==id)return;
   if(p.runStats)p.runStats.submitted++;
-  const bad=m=>{if(p.runStats)p.runStats.streak=0;if(id===me)flash(m);else if(conns[id])conns[id].send({t:'bad',m});const k=(G.sk=(G.sk||0)+1);G.say={id:p.id,x:x.trim(),p:0,t:0,bad:1,m:m.indexOf('Already')===0?'already used':'not on the list',k};push();setTimeout(()=>{if(G&&G.say&&G.say.k===k){G.say=null;push()}},2000)};
+  const bad=m=>{if(p.runStats){p.runStats.streak=0;p.runStats.hadBad=true}if(id===me)flash(m);else if(conns[id])conns[id].send({t:'bad',m});const k=(G.sk=(G.sk||0)+1);G.say={id:p.id,x:x.trim(),p:0,t:0,bad:1,m:m.indexOf('Already')===0?'already used':'not on the list',k};push();setTimeout(()=>{if(G&&G.say&&G.say.k===k){G.say=null;push()}},2000)};
   const r=look(G.cat,x);
   if(!r){const q=qlTitle(G.cat).replace(/^Name an? /,'')+': '+x.trim();G.miss=G.miss||[];if(G.miss.indexOf(q)<0&&G.miss.length<40)G.miss.push(q);return bad('Not on my list. Try another!')}
   const key=G.cat+'|'+r[0];
   const sepN=t=>(t.match(/[\s\-]/g)||[]).length,tc=t=>t.split(/([\s\-]+)/).map((w,i)=>i%2?w:(i>0&&/^(of|and|the|in|on|at|to|for|a)$/.test(w))?w:/^(i{1,3}|iv|vi{0,3}|ix|x)$/.test(w)&&i>0?w.toUpperCase():w==='bbq'?'BBQ':w.replace(/^[a-z]/,c=>c.toUpperCase())).join(''),spacedCanonical=(r[2]&&/[\s-]/.test(r[2])?r[2]:r[3]&&/[\s-]/.test(r[3])?r[3]:null),dn=(qlRuntime[G.cat]&&qlRuntime[G.cat].rows&&qlRuntime[G.cat].rows[r[0]])?r[2]:(isCountryQuestion(G.cat))&&r[2]?r[2]:spacedCanonical?TC(spacedCanonical):FULLD[G.cat][r[0]]||(r[2]?TC(r[2]):(t=>{const d=r[3];if(d)return TC(d);return /[A-Z]/.test(t)?t:TC(t)})(x.trim()));
   if(G.used[key])return bad('Already used this game!');
-  G.used[key]=1;clearTimeout(timer);deadline=0;
-  const tier=rate(G.cat,r[0],r[1],G.kr),pts=PTS[tier];p.score+=pts;(p.seg=p.seg||[]).push([pts,tier]);if(p.runStats){const r=p.runStats;r.correct++;r.streak++;r.bestStreak=Math.max(r.bestStreak,r.streak);r.rarities[tier-1]++}
+  G.used[key]=1;const remaining=deadline-Date.now();clearTimeout(timer);deadline=0;
+  const tier=rate(G.cat,r[0],r[1],G.kr),pts=PTS[tier];p.score+=pts;(p.seg=p.seg||[]).push([pts,tier]);if(p.runStats){const r=p.runStats;r.correct++;r.streak++;r.bestStreak=Math.max(r.bestStreak,r.streak);r.rarities[tier-1]++;if(remaining>0&&remaining<1000)r.lastSecond=1;if(r.hadBad)r.retry=1;r.hadBad=false}
   let m=p.name+': '+dn.trim();
-  while(p.score>=p.nl){p.pv=p.nl;p.nl+=LIFE;p.seg=p.score>p.pv?[[Math.min(pts,p.score-p.pv),tier]]:[];if(p.lives<ROOM_SETTINGS.maxLives){p.lives++;if(p.runStats)p.runStats.livesEarned++;if(p.lostLives>0)p.lostLives--;m+=' +1 life!';G.lf={id:p.id,k:(G.lfk=(G.lfk||0)+1)}}}
+  while(p.score>=p.nl){p.pv=p.nl;p.nl+=LIFE;p.seg=p.score>p.pv?[[Math.min(pts,p.score-p.pv),tier]]:[];if(p.lives<ROOM_SETTINGS.maxLives){if(p.lives===1&&p.runStats)p.runStats.comeback=1;p.lives++;if(p.runStats)p.runStats.livesEarned++;if(p.lostLives>0)p.lostLives--;m+=' +1 life!';G.lf={id:p.id,k:(G.lfk=(G.lfk||0)+1)}}}
   G.say={id:p.id,x:dn.trim(),p:pts,t:tier,country:isCountryQuestion(G.cat)};G.same=(G.same||0)+1;G.msg=m;after();
 }
 function drop(id){
@@ -2163,7 +2293,7 @@ function joinRoomReserved(fixed,name){
   peer.on('open',id=>{
     me=id;net(pub?'Looking for a public room...':'Looking for room '+room+'...');conn=peer.connect('bbash-'+room,{reliable:true});
     const to=setTimeout(()=>{if(got)return;if(pub)return openIt();net('Found the server but could not reach the host. School Wi-Fi often blocks device-to-device connections. Try a phone hotspot, or ask the host to try one. The "Test my connection" button can tell you what is blocked.',1)},pub?9000:15000);
-    conn.on('open',()=>{net('Joining...');conn.send({t:'join',n:nm,skin:equippedPlayerSkin(nm)})});
+    conn.on('open',()=>{net('Joining...');conn.send({t:'join',n:nm,skin:equippedPlayerSkin(nm),title:ordinaryTitle(localEquippedTitle(nm))});sendGuestAdminTitle(conn,nm,room,me)});
     conn.on('iceStateChanged',st=>{if(st==='failed'&&!got){if(pub)return openIt();net('The connection to the host failed. This network may be blocking it. Try a phone hotspot or home Wi-Fi.',1)}});
     conn.on('error',e=>{if(pub)return openIt();net(NETERR(e),1)});
     conn.on('data',d=>{
@@ -2249,9 +2379,9 @@ function send(){
 
 /* ---------- display ---------- */
 function setHomeMenuOpen(open,restoreFocus=false){$('homeMenuPopup').classList.toggle('hid',!open);$('homeMenuToggle').setAttribute('aria-expanded',String(open));if(restoreFocus)$('homeMenuToggle').focus()}
-function show(id){if(id!=='daily')dailyFullscreen(false);['home','skinGallery','daily','publ','lobby','game','over'].forEach(x=>$(x).classList.toggle('hid',x!==id));$('homeNav').classList.toggle('hid',id!=='home');if(id!=='home')setHomeMenuOpen(false);else skinUpdateUnread()}
+function show(id){if(id!=='achievements')achievementVisitNew=[];if(id!=='daily')dailyFullscreen(false);['home','skinGallery','achievements','daily','publ','lobby','game','over'].forEach(x=>$(x).classList.toggle('hid',x!==id));$('homeNav').classList.toggle('hid',id!=='home');if(id!=='home')setHomeMenuOpen(false);else {skinUpdateUnread();achievementUpdateUnread()}}
 function pl(id,s){
-  $(id).innerHTML=s.players.map((p,i)=>`<div class="pl${s.ph==='play'&&!s.pause&&i===s.turn?' turn':''}${p.alive?'':' dead'}"><span>${esc(p.name)}${p.id===me?' (you)':''}</span><span>${s.ph==='lobby'?'':heartMarks(p,s.settings&&s.settings.maxLives)+p.score}</span></div>`).join('');
+  $(id).innerHTML=s.players.map((p,i)=>`<div class="pl${s.ph==='play'&&!s.pause&&i===s.turn?' turn':''}${p.alive?'':' dead'}"><span>${esc(p.name)}${p.id===me?' (you)':''}${titleMarkup(playerTitle(p,s.room))}</span><span>${s.ph==='lobby'?'':heartMarks(p,s.settings&&s.settings.maxLives)+p.score}</span></div>`).join('');
 }
 function flash(m){
   const e=$('err');e.textContent=m;e.classList.add('on');clearTimeout(flash.t);flash.t=setTimeout(()=>e.classList.remove('on'),2200);
@@ -2285,7 +2415,7 @@ function seats(s){
   const n=s.players.length,mi=Math.max(0,s.players.findIndex(p=>p.id===me));let h='',px=50,py=52;
   s.players.forEach((p,i)=>{
     const a=(90+((i-mi+n)%n)*360/n)*Math.PI/180,x=50+40*Math.cos(a),y=52+34*Math.sin(a),hue=(i*67+190)%360,pv=p.pv||0,gl=Date.now()-(lfAt[p.id]||0)<1000?'<span class="gain" style="animation-delay:-'+(Date.now()-lfAt[p.id])+'ms">+1 life</span>':'',xb=p.lives>=ROOM_SETTINGS.maxLives?'<u class="t6" style="width:100%"></u>':(p.seg||[]).map(g=>`<u class="t${g[1]}" style="width:${g[0]/((p.nl||LIFE0)-pv)*100}%"></u>`).join('');
-    h+=`<div class="seat${i===s.turn&&p.alive&&!s.pause?' act':''}${p.alive?'':' dead'}${(s.say&&s.say.id===p.id)||typB(s,p)?' talk':''}" style="left:${x}%;top:${y}%">${typB(s,p)||(s.say&&s.say.id===p.id?`<div class="say t${s.say.t}${s.say.bad?' bad':''}${s.say.country?' country-full':''}"><span>${esc(s.say.x)}</span>${!s.say.bad&&s.say.t>=1&&s.say.t<=6?`<b class="rarity-pop">${["","PLANKTON","TOO CLEVER","SCHOOLER","RARE","DEEP CUT","ONE IN A KRILLION"][s.say.t]}</b>`:""}</div>`:'')}${playerSkinSvg(p.skin,hue)}<div class="rock r${i%5}"></div><div class="nm">${esc(p.name)}</div>${heartMarks(p,s.settings&&s.settings.maxLives)}<div class="xpw"><div class="xp${p.lives>=ROOM_SETTINGS.maxLives?' max':''}" title="Progress to next bonus life">${xb}</div>${gl}</div></div>`;
+    h+=`<div class="seat${i===s.turn&&p.alive&&!s.pause?' act':''}${p.alive?'':' dead'}${(s.say&&s.say.id===p.id)||typB(s,p)?' talk':''}" style="left:${x}%;top:${y}%">${typB(s,p)||(s.say&&s.say.id===p.id?`<div class="say t${s.say.t}${s.say.bad?' bad':''}${s.say.country?' country-full':''}"><span>${esc(s.say.x)}</span>${!s.say.bad&&s.say.t>=1&&s.say.t<=6?`<b class="rarity-pop">${["","PLANKTON","TOO CLEVER","SCHOOLER","RARE","DEEP CUT","ONE IN A KRILLION"][s.say.t]}</b>`:""}</div>`:'')}${playerSkinSvg(p.skin,hue)}<div class="rock r${i%5}"></div><div class="nm">${esc(p.name)}</div>${titleMarkup(playerTitle(p,s.room))}${heartMarks(p,s.settings&&s.settings.maxLives)}<div class="xpw"><div class="xp${p.lives>=ROOM_SETTINGS.maxLives?' max':''}" title="Progress to next bonus life">${xb}</div>${gl}</div></div>`;
   });
   $('seats').innerHTML=h;$('puff').style.left=px+'%';$('puff').style.top=py+'%';
 }
@@ -2296,14 +2426,14 @@ function lobbyArena(s){
   s.players.forEach((p,i)=>{
     const slot=(i-mi+n)%n,a=(90+slot*360/n)*Math.PI/180,x=n===2?(slot===0?22:78):50+38*Math.cos(a),y=n===2?52:55+25*Math.sin(a),hue=(i*67+190)%360,m=latestChatByPlayer[p.id];
     const chatBubble=m?`<div class="lobby-chat-player-bubble"><b>${esc(m.name||p.name)}:</b>${esc(m.text||'')}</div>`:'';
-    h+=`<div class="seat${p.id===me?' me':''}" style="left:${x}%;top:${y}%;z-index:${1000+Math.round(100-y)}">${chatBubble}${playerSkinSvg(p.skin,hue)}<div class="rock r${i%5}"></div><div class="nm">${esc(p.name)}${p.id===me?' (you)':''}</div>${heartMarks({lives:st},s.settings&&s.settings.maxLives)}${i===0?'<small class="host">HOST</small>':''}</div>`;
+    h+=`<div class="seat${p.id===me?' me':''}" style="left:${x}%;top:${y}%;z-index:${1000+Math.round(100-y)}">${chatBubble}${playerSkinSvg(p.skin,hue)}<div class="rock r${i%5}"></div><div class="nm">${esc(p.name)}${p.id===me?' (you)':''}</div>${titleMarkup(playerTitle(p,s.room))}${heartMarks({lives:st},s.settings&&s.settings.maxLives)}${i===0?'<small class="host">HOST</small>':''}</div>`;
   });
   $('lseats').innerHTML=h;
   const ps=$('lpuffsvg');if(!ps.dataset.k){ps.dataset.k=1;ps.innerHTML=PUF}
   $('lcount').textContent=n+'/5';$('llives').textContent=st;$('lmax').textContent=(s.settings&&s.settings.maxLives)||ROOM_SETTINGS.maxLives;
 }
 function render(s){
-  S=s;recordProfileResult(s);
+  S=s;verifyRoomTitles(s);achievementObserve(s);recordProfileResult(s);
   if(s.ph==='over'&&(!resultHold||resultHold.runId!==s.runId)){resultHold=JSON.parse(JSON.stringify(s));dismissedRun=null;}
   if(s.ph==='play'){resultHold=null;dismissedRun=null;}
   const holdResults=s.ph==='lobby'&&resultHold&&dismissedRun!==resultHold.runId;
@@ -2341,7 +2471,7 @@ function render(s){
 }
 function renderResults(s){
     show('over');{const ms=s.miss||[],by={};ms.forEach(q=>{const i=q.indexOf(': ');(by[q.slice(0,i)]=by[q.slice(0,i)]||[]).push(q.slice(i+2))});$('misslist').innerHTML=Object.keys(by).map(k=>'<b>'+esc(k)+'</b>: '+by[k].map(esc).join(', ')).join('<br>');$('showmiss').classList.toggle('hid',!ms.length);$('showmiss').textContent=(missOpen?'Hide':'Show')+' rejected answers ('+ms.length+')';$('misslist').classList.toggle('hid',!missOpen||!ms.length)}pl('pl3',{...s,players:[...s.players].sort((a,b)=>b.score-a.score)});
-    $('profileResult').textContent=profileMatchStatus;$('win').textContent=s.win?'🏆 '+s.win+' wins!':'Game over';
+    $('profileResult').textContent=profileMatchStatus;$('win').textContent=s.win?'🏆 '+s.win+' wins!':s.msg==='All questions cleared!'?'All questions cleared!':'Game over';
     $('again').classList.remove('hid');$('wt2').textContent='';
 }
 const PUF='<svg viewBox="0 0 38 22" width="150" height="87" shape-rendering="crispEdges"><path d="M14 0h5v1h-5zM11 1h6v1h-6zM18 1h2v1h-2zM8 2h6v1h-6zM20 2h3v1h-3zM6 3h2v1h-2zM23 3h2v1h-2zM5 4h2v1h-2zM14 4h2v1h-2zM20 4h2v1h-2zM25 4h3v1h-3zM4 5h2v1h-2zM14 5h1v1h-1zM21 5h2v1h-2zM27 5h1v1h-1zM4 6h1v1h-1zM17 6h2v1h-2zM24 6h2v1h-2zM28 6h1v1h-1zM3 7h2v1h-2zM24 7h3v1h-3zM28 7h2v1h-2zM34 7h3v1h-3zM2 8h2v1h-2zM24 8h2v1h-2zM29 8h1v1h-1zM33 8h1v1h-1zM36 8h2v1h-2zM0 9h1v1h-1zM15 9h1v1h-1zM29 9h1v1h-1zM32 9h1v1h-1zM36 9h2v1h-2zM15 10h1v1h-1zM27 10h2v1h-2zM30 10h2v1h-2zM36 10h2v1h-2zM2 11h1v1h-1zM27 11h2v1h-2zM31 11h1v1h-1zM36 11h1v1h-1zM36 13h2v1h-2zM31 14h2v1h-2zM36 14h2v1h-2zM30 15h1v1h-1zM32 15h1v1h-1zM36 15h2v1h-2zM29 16h1v1h-1zM32 16h2v1h-2zM36 16h1v1h-1zM28 17h1v1h-1zM33 17h1v1h-1zM5 18h1v1h-1zM27 18h1v1h-1zM6 19h1v1h-1zM24 19h3v1h-3zM9 20h1v1h-1zM22 20h2v1h-2zM10 21h1v1h-1zM12 21h10v1h-10z" fill="#a4824a"/><path d="M17 1h1v1h-1zM15 2h1v1h-1zM17 2h3v1h-3zM8 3h2v1h-2zM16 3h7v1h-7zM13 4h1v1h-1zM17 4h3v1h-3zM22 4h3v1h-3zM13 5h1v1h-1zM16 5h5v1h-5zM23 5h4v1h-4zM6 6h1v1h-1zM19 6h5v1h-5zM26 6h1v1h-1zM16 7h3v1h-3zM23 7h1v1h-1zM27 7h1v1h-1zM14 8h1v1h-1zM16 8h1v1h-1zM26 8h3v1h-3zM2 9h2v1h-2zM14 9h1v1h-1zM25 9h4v1h-4zM24 10h1v1h-1zM26 10h1v1h-1zM29 10h1v1h-1zM32 10h1v1h-1zM0 11h1v1h-1zM6 11h1v1h-1zM22 11h4v1h-4zM33 11h1v1h-1zM0 12h1v1h-1zM22 12h9v1h-9zM32 12h2v1h-2zM31 13h4v1h-4zM33 14h2v1h-2zM33 15h3v1h-3z" fill="#dcb14c"/><path d="M14 2h1v1h-1zM16 2h1v1h-1zM10 3h5v1h-5zM7 4h2v1h-2zM10 4h3v1h-3zM16 4h1v1h-1zM6 5h7v1h-7zM15 5h1v1h-1zM5 6h1v1h-1zM8 6h3v1h-3zM13 6h3v1h-3zM6 7h1v1h-1zM11 7h1v1h-1zM14 7h2v1h-2zM19 7h4v1h-4zM19 8h3v1h-3zM23 8h1v1h-1zM19 9h2v1h-2zM23 9h2v1h-2zM33 9h1v1h-1zM14 10h1v1h-1zM21 10h1v1h-1zM25 10h1v1h-1zM33 10h3v1h-3zM17 11h3v1h-3zM29 13h1v1h-1zM34 16h2v1h-2z" fill="#ebc159"/><path d="M15 3h1v1h-1zM9 4h1v1h-1zM7 6h1v1h-1zM11 6h2v1h-2zM16 6h1v1h-1zM5 7h1v1h-1zM12 7h2v1h-2zM4 8h2v1h-2zM12 8h2v1h-2zM17 8h2v1h-2zM34 8h2v1h-2zM4 9h2v1h-2zM12 9h2v1h-2zM16 9h3v1h-3zM34 9h2v1h-2zM0 10h1v1h-1zM3 10h3v1h-3zM12 10h2v1h-2zM16 10h4v1h-4zM4 11h1v1h-1zM13 11h1v1h-1zM20 11h2v1h-2zM34 11h2v1h-2zM18 12h4v1h-4zM34 12h3v1h-3zM8 13h1v1h-1zM20 13h7v1h-7zM28 13h1v1h-1zM35 13h1v1h-1zM25 14h1v1h-1zM35 14h1v1h-1z" fill="#f3cc67"/><path d="M28 5h1v1h-1zM30 8h1v1h-1zM30 9h1v1h-1zM1 11h1v1h-1zM11 11h1v1h-1zM1 12h1v1h-1zM10 12h1v1h-1zM37 16h1v1h-1zM34 17h2v1h-2z" fill="#694f32"/><path d="M27 6h1v1h-1zM15 8h1v1h-1zM22 10h2v1h-2zM26 11h1v1h-1zM29 11h2v1h-2zM32 11h1v1h-1zM31 12h1v1h-1zM0 13h2v1h-2zM9 13h1v1h-1zM2 15h2v1h-2zM3 16h1v1h-1zM28 16h1v1h-1zM4 17h2v1h-2zM7 19h2v1h-2zM23 19h1v1h-1zM10 20h3v1h-3zM19 20h3v1h-3zM11 21h1v1h-1z" fill="#c3a158"/><path d="M7 7h4v1h-4zM6 8h1v1h-1zM9 8h3v1h-3zM6 9h6v1h-6zM6 10h6v1h-6zM7 11h4v1h-4zM7 12h3v1h-3z" fill="#0a0a0e"/><path d="M7 8h2v1h-2z" fill="#ebebf0"/><path d="M22 8h1v1h-1zM22 9h1v1h-1zM3 12h2v1h-2zM2 13h2v1h-2zM3 14h2v1h-2zM15 14h1v1h-1zM19 14h1v1h-1zM4 15h1v1h-1zM19 15h8v1h-8zM6 16h5v1h-5zM12 16h2v1h-2zM16 16h6v1h-6zM9 17h11v1h-11zM9 18h11v1h-11z" fill="#f7e9bd"/><path d="M1 9h1v1h-1zM30 13h1v1h-1zM2 14h1v1h-1zM24 14h1v1h-1zM26 14h1v1h-1zM28 14h3v1h-3zM27 15h1v1h-1zM4 16h1v1h-1zM26 16h2v1h-2zM6 17h2v1h-2zM21 17h7v1h-7zM6 18h2v1h-2zM21 18h6v1h-6zM9 19h14v1h-14zM13 20h6v1h-6z" fill="#dcc58c"/><path d="M21 9h1v1h-1zM1 10h2v1h-2zM20 10h1v1h-1zM3 11h1v1h-1zM5 11h1v1h-1zM12 11h1v1h-1zM14 11h3v1h-3zM6 12h1v1h-1zM17 12h1v1h-1zM19 13h1v1h-1zM27 13h1v1h-1zM20 14h4v1h-4zM27 14h1v1h-1zM28 15h2v1h-2zM5 16h1v1h-1zM22 16h4v1h-4zM8 17h1v1h-1zM20 17h1v1h-1zM8 18h1v1h-1zM20 18h1v1h-1z" fill="#efd99b"/><path d="M2 12h1v1h-1zM5 12h1v1h-1zM11 12h6v1h-6zM4 13h4v1h-4zM10 13h9v1h-9zM5 14h10v1h-10zM16 14h3v1h-3zM5 15h14v1h-14zM11 16h1v1h-1zM14 16h2v1h-2z" fill="#fef4cf"/><path class="pbrow" opacity="0" fill="#24120a" d="M12 5h3v1h-3zM10 6h4v1h-4zM8 7h4v1H8zM6 8h4v1H6z"/><path class="pbrow2" opacity="0" fill="#24120a" d="M13 6h2v1h-2zM11 7h2v1h-2zM9 8h2v1H9zM7 9h2v1H7z"/><path d="M6 7h7v6H6z" fill="#e7bd5a"/><path d="M6 10q3 2 7 0" fill="none" stroke="#3b2b20" stroke-width="1.25" stroke-linecap="square"/></svg>';
@@ -2389,9 +2519,9 @@ $('mk').onclick=()=>host();$('jn').onclick=()=>joinRoom();$('pub').onclick=openP
 $('showmiss').onclick=()=>{missOpen=!missOpen;if(S)render(S)};$('st').onclick=start;$('again').onclick=returnToLobby;$('overHome').onclick=()=>leaveRoom(true);
 $('ans').oninput=()=>{const n=Date.now();clearTimeout(sendTyp.t);if(n-typT>70){typT=n;sendTyp()}else sendTyp.t=setTimeout(sendTyp,80)};
 $('go').onclick=send;$('ans').onkeydown=e=>{if(e.key==='Enter')send()};
-if(profileData.active)$('nm').value=profileData.profiles[profileData.active].name;skinUpdateUnread();
-$('nm').addEventListener('input',skinUpdateUnread);
-$('nm').addEventListener('change',()=>{const name=$('nm').value.trim();if(name)rememberProfile(name);else skinUpdateUnread()});
+if(profileData.active)$('nm').value=profileData.profiles[profileData.active].name;skinUpdateUnread();achievementUpdateUnread();
+$('nm').addEventListener('input',()=>{skinUpdateUnread();achievementUpdateUnread()});
+$('nm').addEventListener('change',()=>{const name=$('nm').value.trim();if(name)rememberProfile(name);else {skinUpdateUnread();achievementUpdateUnread()}});
 $('homeMenuToggle').onclick=()=>setHomeMenuOpen($('homeMenuPopup').classList.contains('hid'));
 document.addEventListener('click',e=>{if(!$('homeNav').contains(e.target))setHomeMenuOpen(false)});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('homeMenuPopup').classList.contains('hid'))setHomeMenuOpen(false,true)});
@@ -2399,6 +2529,7 @@ $('openProfile').onclick=()=>{setHomeMenuOpen(false,true);openLocalProfile()};$(
 $('profileBackdrop').addEventListener('click',e=>{if(e.target===$('profileBackdrop'))closeLocalProfile()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('profileBackdrop').classList.contains('hid'))closeLocalProfile()});
 $('profileSelect').onchange=()=>{const id=$('profileSelect').value;if(hasOwn(profileData.profiles,id)){profileData.active=id;$('nm').value=profileData.profiles[id].name;persistProfiles();displayProfile()}};
+$('achOpen').onclick=openAchievementGallery;$('achBack').onclick=()=>show('home');$('achNone').onclick=()=>equipAchievement('');$('achList').onclick=e=>{const b=e.target.closest('button[data-title]');if(b&&!b.disabled)equipAchievement(b.dataset.title)};
 $('skinsOpen').onclick=openSkinGallery;$('skinsBack').onclick=()=>show('home');$('skinsGrid').onclick=e=>{const b=e.target.closest('button[data-skin]');if(b&&!b.disabled)equipGallerySkin(b.dataset.skin)};
 
 $('profileExport').onclick=()=>{$('profileBackupText').value=JSON.stringify(profileData);$('profileBackupText').focus();$('profileBackupText').select();$('profileStatus').textContent='Copy the selected backup text and keep it somewhere safe.'};
@@ -2445,7 +2576,7 @@ function skinSyncSavedProfiles(c){for(const p of Object.values(profileData.profi
 async function withReservedName(action){
  if(nicknameBusy)return;
  let name=$('nm').value.trim();if(!name||name.length>12||/[\x00-\x1f\x7f]/.test(name)){net('Enter a valid nickname of 1–12 characters.',1);return}
- nicknameBusy=true;const controls=['nm','mk','jn','pub','pubNew','skinsOpen'];const old=controls.map(id=>$(id).disabled);
+ nicknameBusy=true;const controls=['nm','mk','jn','pub','pubNew','skinsOpen','achOpen'];const old=controls.map(id=>$(id).disabled);
  controls.forEach(id=>$(id).disabled=true);net('Checking nickname…');let accepted=false;
  try{const c=await lbAuthenticatedClient();await pmSyncEvents(c);name=$('nm').value.trim();const {data,error}=await c.rpc('puffer_claim_nickname',{p_name:name});if(error)throw error;
   if(data===true){accepted=true;net('');skinSyncProfile(name,c)}else net('That nickname is unavailable, banned, or reserved on another device. Please choose another name.',1);
@@ -2507,7 +2638,7 @@ window.addEventListener('storage',e=>{if(e.key===PC_UNREAD_KEY){pcLoadSeen();pcU
 function pcText(id,value){$(id).textContent=value||''}
 function pcStatus(value){pcText('pcStatus',value);const id=pcMode==='questions'?'qlPublishStatus':pcMode==='editor'?'pcPublishStatus':null;if(id){const el=$(id);el.textContent=value||(pcMode==='questions'?'Edit questions, then publish your changes.':'Edit your content, then publish your changes.');el.dataset.kind=/^Published!/.test(value)?'success':/^(Not published:|Could not |Invalid |Duplicate |Enable only |New question needs |Unknown question|Complete |Nothing imported)/.test(value)?'error':/^Publishing/.test(value)?'busy':'';}}
 function pcErrorMessage(e){return e&&e.message?String(e.message):typeof e==='string'?e:'Connection error';}
-function pcSetAdmin(value){const wasAdmin=pcAdmin;pcAdmin=!!value;$('pcAdminMenu').classList.toggle('hid',!pcAdmin);$('pcLoginLink').textContent=pcAdmin?'Open admin panel':'Admin sign in';if(!pcAdmin){if(dailyTestProfile)closeDailyDive();++feedbackBadgeTicket;feedbackBadge(0)}else if(!wasAdmin)feedbackCheckBadge()}
+function pcSetAdmin(value){const wasAdmin=pcAdmin;pcAdmin=!!value;$('pcAdminMenu').classList.toggle('hid',!pcAdmin);$('pcLoginLink').textContent=pcAdmin?'Open admin panel':'Admin sign in';if(!pcAdmin){if(dailyTestProfile)closeDailyDive();++feedbackBadgeTicket;feedbackBadge(0)}else if(!wasAdmin)feedbackCheckBadge();if(wasAdmin!==pcAdmin){if(!$('achievements').classList.contains('hid'))renderAchievementGallery();if(!$('profileBackdrop').classList.contains('hid'))displayProfile()}}
 async function pcGetAdmin(){
  if(pcClient)return pcClient;
  if(!pcClientLoading)pcClientLoading=(async()=>{await lbGetClient();pcClient=window.supabase.createClient(LB_URL,LB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:PC_ADMIN_STORAGE}});return pcClient})().catch(e=>{pcClientLoading=null;throw e});
@@ -2531,7 +2662,7 @@ function pcRenderPublic(){
  pcText('pcAboutText',v.about);pcText('pcCreditsText',v.credits);$('pcCreditsBlock').classList.toggle('hid',!v.credits.trim());
  const announcement=String(v.announcement||'').trim();pcText('pcTabAnnouncementText',announcement);$('pcTabAnnouncementCard').classList.toggle('hid',!announcement);$('pcTabAnnouncementEmpty').classList.toggle('hid',!!announcement);
  const list=$('pcChangeList');list.replaceChildren();
- if(!v.changes.length){const p=document.createElement('p');p.className='pc-note';p.textContent='No updates published yet.';list.append(p)}
+ if(!v.changes.length){const p=document.createElement('p');p.className='pc-note';p.textContent='No recent updates.';list.append(p)}
  for(const entry of v.changes){const box=document.createElement('article');box.className='pc-entry';const h=document.createElement('h3');h.textContent=entry.title;const date=document.createElement('div');date.className='pc-note';date.textContent=entry.date;const body=document.createElement('div');body.className='pc-copy';body.textContent=entry.body;box.append(h,date,body);list.append(box)}
  if(pcMode==='changes')pcSelectUpdateTab(pcUpdateTab);
  pcUpdateUnread();
@@ -2574,7 +2705,7 @@ $('pcPublish').onclick=async()=>{
  pcApply(data);pcLoadDraft();pcStatus('Published! Players will see the new content when they refresh or open the page.');
  }catch(e){pcStatus('Not published: '+pcErrorMessage(e))}finally{$('pcPublish').textContent='Publish changes';pcLock(false)}
 };
-$('pcLogout').onclick=async()=>{if(pcBusy||adminActionPending)return;if(pcHasUnsaved()&&!await adminConfirm('Signing out will discard unpublished content edits.','Discard edits?','Sign out'))return;pcLock(true);try{const c=await pcGetAdmin();const {error}=await c.auth.signOut({scope:'local'});if(error)throw error;pcSetAdmin(false);pcDraft=null;pcSwitch('login');pcStatus('Signed out.')}catch(e){pcStatus('Sign-out failed. Try again.')}finally{pcLock(false)}};
+$('pcLogout').onclick=async()=>{if(pcBusy||adminActionPending)return;if(pcHasUnsaved()&&!await adminConfirm('Signing out will discard unpublished content edits.','Discard edits?','Sign out'))return;pcLock(true);try{const c=await pcGetAdmin();try{await c.rpc('puffer_admin_title_revoke')}catch(e){}const {error}=await c.auth.signOut({scope:'local'});if(error)throw error;pcSetAdmin(false);pcDraft=null;pcSwitch('login');pcStatus('Signed out.')}catch(e){pcStatus('Sign-out failed. Try again.')}finally{pcLock(false)}};
 $('pcAboutMenu').onclick=()=>pcOpen('about');$('pcChangesMenu').onclick=()=>pcOpen('changes');$('pcChangesTab').onclick=()=>pcSelectUpdateTab('changes');$('pcAnnouncementTab').onclick=()=>pcSelectUpdateTab('announcement');$('dailyTestOpen').onclick=dailyOpenTestPanel;$('dailyTestBack').onclick=pcOpenEditor;$('dailyTestToday').onclick=()=>{$('dailyTestDate').value=localDayKey()};$('dailyTestStart').onclick=dailyStartTest;$('dailyTestSkinOptions').onclick=e=>{const b=e.target.closest('button[data-test-skin]');if(b)dailyChooseTestSkin(b.dataset.testSkin)}; $('pcAdminMenu').onclick=pcOpenEditor;$('pcLoginLink').onclick=pcOpenEditor;$('pcClose').onclick=pcClose;$('pcBackdrop').onclick=e=>{if(e.target===$('pcBackdrop'))pcClose()};document.addEventListener('keydown',e=>{if(e.key==='Escape'&&pcMode)pcClose()});
 // Keep public text available even without an admin session. No player authentication changes.
 setTimeout(()=>{pcRefresh().catch(()=>{});try{if(localStorage.getItem(PC_ADMIN_STORAGE))pcGetAdmin().then(async c=>{const {data}=await c.auth.getSession();if(data.session)await pcIsAdmin(c)}).catch(()=>{})}catch(e){}},500);
